@@ -1,0 +1,8 @@
+﻿@use '../../_bootstrap-extended/include' as light;
+@use '../../_bootstrap-extended/include-dark' as dark;
+@import '../../_custom-variables/libs';
+@import '../../node_modules/mapbox-gl/dist/mapbox-gl';
+
+.marker-focus {
+  filter: drop-shadow(0px 0px 7px light.$primary);
+}

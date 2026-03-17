@@ -1,0 +1,171 @@
+//  ================================================================================================
+//  ? TIP:  It is recommended to use this file for overriding any pages variables from the (pages/) folder.
+//  Copy and paste variables as needed, modify their values, and remove the !default flag. 
+//  ================================================================================================
+
+@import 'support';
+
+// $calender-sidebar-width: 20rem;
+
+// ============================================================
+// MoneyManager — Views/Mm/Index.cshtml
+// ============================================================
+
+.money-manager {
+    // Quick date filter: reset default button styles για compact εμφάνιση
+    .quick-date-filter button {
+        padding: 0;
+        border: 0;
+    }
+}
+
+// ============================================================
+// MoneyManager — Views/MmStatistic/Category.cshtml
+// ============================================================
+.mm-category-statistics-page {
+  &__chart-wrap {
+    position: relative;
+    height: 360px;
+
+    @include media-breakpoint-down(md) {
+      height: 300px;
+    }
+  }
+}
+
+// ============================================================
+// MoneyManager — Views/Mm/Categories.cshtml
+// ============================================================
+.mm-categories-page {
+  // Custom styles for the Categories page
+  .category-pane {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 320px 1fr;
+    min-height: 430px;
+
+    @include media-breakpoint-down(lg) {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    &__main,
+    &__detail {
+      border: 1px solid var(--bs-border-color);
+      border-radius: 0.5rem;
+      background: var(--bs-card-bg);
+    }
+
+    &__main {
+      overflow-y: auto;
+      max-height: 80vh;
+      padding: 0.5rem;
+
+      @include media-breakpoint-down(lg) {
+        max-height: 260px;
+      }
+    }
+
+    &__detail {
+      padding: 1rem 1.25rem;
+    }
+  }
+
+  .category-main-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    border: 0;
+    // border-radius: 0.5rem;
+    //border-bottom: 1px solid var(--bs-border-color);
+    background: transparent;
+    color: inherit;
+    padding: 0.75rem;
+    text-align: left;
+    transition: background-color 0.2s ease;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    &.is-active, &:hover {
+      background: rgba(var(--bs-primary-rgb), 0.14);
+    }
+
+    &.is-active .category-main-item__name,
+    &:hover .category-main-item__name {
+      color: var(--bs-primary);
+       &::after {
+        flex-shrink: 0;
+        content: "";
+        width: $accordion-icon-width;
+        height: $accordion-icon-width;
+        background-image: $accordion-button-icon;
+        background-repeat: no-repeat;
+        margin-left: auto;
+        opacity: 0.72;
+      }
+    }
+
+    &--inactive {
+      .category-main-item__name {
+        opacity: 0.6;
+      }
+    }
+
+    &__name {
+      font-weight: 600;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+
+      &::after {
+        flex-shrink: 0;
+        content: "";
+        width: $accordion-icon-width;
+        height: $accordion-icon-width;
+        background-image: $accordion-button-icon;
+        background-repeat: no-repeat;
+        margin-left: auto;
+        opacity: 0.2;
+      }
+    }
+
+    &__meta {
+      color: var(--bs-secondary-color);
+      font-size: 0.825rem;
+    }
+
+    &__badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1em 0.45em;
+      border-radius: 0.25rem;
+      background: rgba(var(--bs-danger-rgb), 0.14);
+      color: var(--bs-danger);
+    }
+  }
+
+  .category-detail-panel {
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bs-border-color);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+  }
+
+  .category-sub-list {
+    // .list-group-item {
+    //   border-bottom-color: var(--bs-border-color-translucent);
+    // }
+
+    &__inactive {
+      opacity: 0.6;
+    }
+  }
+}

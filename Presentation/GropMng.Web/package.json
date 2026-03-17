@@ -1,0 +1,20 @@
+{
+  "name": "gropmng-scss",
+  "version": "1.0.0",
+  "description": "SCSS compilation for GropMng application",
+  "scripts": {
+    "build:css": "npm run build:core && npm run build:themes",
+    "build:core": "sass -q --load-path=wwwroot/node_modules wwwroot/scss/core.scss wwwroot/vendor/css/core.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/core-dark.scss wwwroot/vendor/css/core-dark.css",
+    "build:themes": "sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-bordered.scss wwwroot/vendor/css/theme-bordered.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-bordered-dark.scss wwwroot/vendor/css/theme-bordered-dark.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-default.scss wwwroot/vendor/css/theme-default.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-default-dark.scss wwwroot/vendor/css/theme-default-dark.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-raspberry.scss wwwroot/vendor/css/theme-raspberry.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-raspberry-dark.scss wwwroot/vendor/css/theme-raspberry-dark.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-semi-dark.scss wwwroot/vendor/css/theme-semi-dark.css && sass -q --load-path=wwwroot/node_modules wwwroot/scss/theme-semi-dark-dark.scss wwwroot/vendor/css/theme-semi-dark-dark.css",
+    "watch:css": "concurrently \"npm run watch:core\" \"npm run watch:themes\"",
+    "watch:core": "sass -q --load-path=wwwroot/node_modules --watch wwwroot/scss/core.scss:wwwroot/vendor/css/core.css wwwroot/scss/core-dark.scss:wwwroot/vendor/css/core-dark.css",
+    "watch:themes": "sass -q --load-path=wwwroot/node_modules --watch wwwroot/scss/theme-bordered.scss:wwwroot/vendor/css/theme-bordered.css wwwroot/scss/theme-bordered-dark.scss:wwwroot/vendor/css/theme-bordered-dark.css wwwroot/scss/theme-default.scss:wwwroot/vendor/css/theme-default.css wwwroot/scss/theme-default-dark.scss:wwwroot/vendor/css/theme-default-dark.css wwwroot/scss/theme-raspberry.scss:wwwroot/vendor/css/theme-raspberry.css wwwroot/scss/theme-raspberry-dark.scss:wwwroot/vendor/css/theme-raspberry-dark.css wwwroot/scss/theme-semi-dark.scss:wwwroot/vendor/css/theme-semi-dark.css wwwroot/scss/theme-semi-dark-dark.scss:wwwroot/vendor/css/theme-semi-dark-dark.css"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "sass": "^1.69.0"
+  },
+  "dependencies": {
+    "gropmng-root-scss-proxy": "file:../.."
+  }
+}

@@ -1,0 +1,56 @@
+//  ================================================================================================
+//  ? TIP:  It is recommended to use this file for overriding component variables (_components/_variables.scss).
+//  Copy and paste variables as needed, modify their values, and remove the !default flag.
+//  ================================================================================================
+
+// $menu-width: 14rem !default;
+
+// ============================================================
+// Autocomplete / Tag Input
+// Χρησιμοποιείται σε: MoneyManager/Index, (οπουδήποτε αλλού)
+// ============================================================
+
+.tag-autocomplete-list {
+    display: none;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1050;
+    width: 100%;
+    min-width: 300px;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+
+    .tag-option {
+        text-align: left;
+        color: var(--bs-body-color);
+        background-color: transparent;
+        border-color: var(--bs-border-color-translucent);
+
+        &:hover,
+        &:focus {
+            background-color: rgba(var(--bs-emphasis-color-rgb), 0.12);
+        }
+    }
+}
+
+.selected-tag-chip {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: .8125rem;
+    font-weight: 400;
+    background: rgba(57,218,138,.08) !important;
+    color: #39da8a !important;
+    --bs-btn-close-color: #39da8a;
+
+    .btn-close {
+        filter: none;
+    }
+}
+
+// btn-close icon is an SVG background image in Bootstrap; use filter for visible hover color change
+.selected-tag-chip .btn-close:hover {
+    filter: var(--bs-btn-close-white-filter) !important;
+    opacity: 1 !important;
+}

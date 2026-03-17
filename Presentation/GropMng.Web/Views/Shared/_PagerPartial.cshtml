@@ -1,0 +1,7 @@
+@using GropMng.Web.Extensions
+@model GropMng.Web.Models.Common.PaginationModel
+
+@if (Model?.TotalPages > 1)
+{
+    @Html.Pager(Model)
+}
