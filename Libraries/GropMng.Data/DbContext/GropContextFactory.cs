@@ -11,11 +11,22 @@ public class GropContextFactory : IDesignTimeDbContextFactory<GropContext>
 {
     public GropContext CreateDbContext(string[] args)
     {
+        var designTimeConfiguration = GropContextConfiguration.BuildDesignTimeConfiguration();
+        var sqlServerSettings = GropContextConfiguration.ResolveSqlServerSettings(designTimeConfiguration.Configuration);
+
+        if (!sqlServerSettings.CanConnect)
+        {
+            throw new InvalidOperationException(
+                $"Unable to resolve a SQL Server connection string for design-time operations. " +
+                $"Startup project path: '{designTimeConfiguration.StartupProjectPath}'. " +
+                $"Environment: '{designTimeConfiguration.EnvironmentName}'. " +
+                $"User secrets file: '{designTimeConfiguration.UserSecretsFilePath ?? "not found"}'. " +
+                $"Reason: {sqlServerSettings.FailureReason}");
+        }
+
         var optionsBuilder = new DbContextOptionsBuilder<GropContext>();
 
-        // Design-time fallback connection only for migration scaffolding.
-        const string designTimeConnection = "Server=localhost\\SQL2019,49707;Database=GropMng_db;Integrated Security=False;Persist Security Info=False;User ID=sa;Password=al68kias;Encrypt=True;TrustServerCertificate=True;";
-        optionsBuilder.UseSqlServer(designTimeConnection);
+        optionsBuilder.UseSqlServer(sqlServerSettings.ConnectionString!);
 
         return new GropContext(optionsBuilder.Options);
     }

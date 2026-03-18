@@ -17,7 +17,7 @@
   --bs-gray-dark: rgba(0, 0, 0, 0.45);
   --bs-gray-25: rgba(255, 255, 255, 0.015);
   --bs-gray-50: rgba(255, 255, 255, 0.03);
-  --bs-primary: #5a8dee;
+  --bs-primary: #8EC540;
   --bs-secondary: #69809a;
   --bs-success: #00ff00;
   --bs-info: #00cfdd;
@@ -26,7 +26,7 @@
   --bs-light: #434c5f;
   --bs-dark: #717784;
   --bs-gray: rgba(255, 255, 255, 0.75);
-  --bs-primary-rgb: 90, 141, 238;
+  --bs-primary-rgb: 142, 197, 64;
   --bs-secondary-rgb: 105, 128, 154;
   --bs-success-rgb: 0, 255, 0;
   --bs-info-rgb: 0, 207, 221;
@@ -35,7 +35,7 @@
   --bs-light-rgb: 67, 76, 95;
   --bs-dark-rgb: 113, 119, 132;
   --bs-gray-rgb: 255, 255, 255;
-  --bs-primary-text-emphasis: rgb(36, 56.4, 95.2);
+  --bs-primary-text-emphasis: rgb(56.8, 78.8, 25.6);
   --bs-secondary-text-emphasis: rgb(42, 51.2, 61.6);
   --bs-success-text-emphasis: #006600;
   --bs-info-text-emphasis: rgb(0, 82.8, 88.4);
@@ -43,7 +43,7 @@
   --bs-danger-text-emphasis: rgb(102, 36.4, 36.8);
   --bs-light-text-emphasis: rgba(0, 0, 0, 0.15);
   --bs-dark-text-emphasis: rgba(0, 0, 0, 0.15);
-  --bs-primary-bg-subtle: rgb(222, 232.2, 251.6);
+  --bs-primary-bg-subtle: rgb(232.4, 243.4, 216.8);
   --bs-secondary-bg-subtle: rgb(225, 229.6, 234.8);
   --bs-success-bg-subtle: #ccffcc;
   --bs-info-bg-subtle: rgb(204, 245.4, 248.2);
@@ -51,7 +51,7 @@
   --bs-danger-bg-subtle: rgb(255, 222.2, 222.4);
   --bs-light-bg-subtle: rgba(255, 255, 255, 0.875);
   --bs-dark-bg-subtle: rgba(255, 255, 255, 0.2);
-  --bs-primary-border-subtle: rgb(189, 209.4, 248.2);
+  --bs-primary-border-subtle: rgb(209.8, 231.8, 178.6);
   --bs-secondary-border-subtle: rgb(195, 204.2, 214.6);
   --bs-success-border-subtle: #99ff99;
   --bs-info-border-subtle: rgb(153, 235.8, 241.4);
@@ -84,11 +84,11 @@
   --bs-tertiary-bg: rgba(255, 255, 255, 0.75);
   --bs-tertiary-bg-rgb: 255, 255, 255;
   --bs-heading-color: rgb(216, 222, 233.5);
-  --bs-link-color: #5a8dee;
-  --bs-link-color-rgb: 90, 141, 238;
+  --bs-link-color: #8EC540;
+  --bs-link-color-rgb: 142, 197, 64;
   --bs-link-decoration: none;
-  --bs-link-hover-color: rgb(81, 126.9, 214.2);
-  --bs-link-hover-color-rgb: 81, 127, 214;
+  --bs-link-hover-color: rgb(127.8, 177.3, 57.6);
+  --bs-link-hover-color-rgb: 128, 177, 58;
   --bs-code-color: #e83e8c;
   --bs-highlight-color: rgb(161.4, 175.8, 203.4);
   --bs-highlight-bg: rgb(254.6, 238.4, 217);
@@ -1884,13 +1884,13 @@ progress {
 
 .table-primary {
   --bs-table-color: #000;
-  --bs-table-bg: rgb(222, 232.2, 251.6);
-  --bs-table-border-color: rgb(177.6, 185.76, 201.28);
-  --bs-table-striped-bg: rgb(208.68, 218.268, 236.504);
+  --bs-table-bg: rgb(232.4, 243.4, 216.8);
+  --bs-table-border-color: rgb(185.92, 194.72, 173.44);
+  --bs-table-striped-bg: rgb(218.456, 228.796, 203.792);
   --bs-table-striped-color: #000;
-  --bs-table-active-bg: rgb(204.24, 213.624, 231.472);
+  --bs-table-active-bg: rgb(213.808, 223.928, 199.456);
   --bs-table-active-color: #000;
-  --bs-table-hover-bg: rgb(204.24, 213.624, 231.472);
+  --bs-table-hover-bg: rgb(213.808, 223.928, 199.456);
   --bs-table-hover-color: #000;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
@@ -2748,7 +2748,7 @@ textarea.form-control-lg {
   --bs-btn-disabled-color: rgba(0, 0, 0, 0.1);
   --bs-btn-disabled-border-color: transparent;
   --bs-btn-box-shadow: 0 0 0 #000;
-  --bs-btn-focus-shadow-rgb: 115, 158, 241;
+  --bs-btn-focus-shadow-rgb: 159, 206, 93;
   text-decoration: none;
 }
 .btn-link:focus-visible {
@@ -2857,8 +2857,8 @@ textarea.form-control-lg {
   --bs-dropdown-link-color: rgb(161.4, 175.8, 203.4);
   --bs-dropdown-link-hover-color: rgb(161.4, 175.8, 203.4);
   --bs-dropdown-link-hover-bg: rgba(99, 123, 169, 0.08);
-  --bs-dropdown-link-active-color: #5a8dee;
-  --bs-dropdown-link-active-bg: rgba(90, 141, 238, 0.08);
+  --bs-dropdown-link-active-color: #8EC540;
+  --bs-dropdown-link-active-bg: rgba(142, 197, 64, 0.08);
   --bs-dropdown-link-disabled-color: rgb(130.2, 149.4, 186.2);
   --bs-dropdown-item-padding-x: 1rem;
   --bs-dropdown-item-padding-y: 0.5rem;
@@ -3125,8 +3125,8 @@ textarea.form-control-lg {
   --bs-dropdown-link-hover-color: #fff;
   --bs-dropdown-divider-bg: rgba(255, 255, 255, 0.09);
   --bs-dropdown-link-hover-bg: rgba(255, 255, 255, 0.15);
-  --bs-dropdown-link-active-color: #5a8dee;
-  --bs-dropdown-link-active-bg: rgba(90, 141, 238, 0.08);
+  --bs-dropdown-link-active-color: #8EC540;
+  --bs-dropdown-link-active-bg: rgba(142, 197, 64, 0.08);
   --bs-dropdown-link-disabled-color: #637ba9;
   --bs-dropdown-header-color: #637ba9;
 }
@@ -4376,7 +4376,7 @@ textarea.form-control-lg {
   --bs-progress-border-radius: 10rem;
   --bs-progress-box-shadow: var(--bs-box-shadow-inset);
   --bs-progress-bar-color: #fff;
-  --bs-progress-bar-bg: #5a8dee;
+  --bs-progress-bar-bg: #8EC540;
   --bs-progress-bar-transition: width 0.6s ease;
   display: flex;
   height: var(--bs-progress-height);
@@ -6261,8 +6261,8 @@ textarea.form-control-lg {
   text-decoration-color: RGBA(var(--bs-primary-rgb), var(--bs-link-underline-opacity, 1)) !important;
 }
 .link-primary:hover, .link-primary:focus {
-  color: RGBA(81, 127, 214, var(--bs-link-opacity, 1)) !important;
-  text-decoration-color: RGBA(81, 127, 214, var(--bs-link-underline-opacity, 1)) !important;
+  color: RGBA(128, 177, 58, var(--bs-link-opacity, 1)) !important;
+  text-decoration-color: RGBA(128, 177, 58, var(--bs-link-underline-opacity, 1)) !important;
 }
 
 .link-secondary {
@@ -11493,7 +11493,7 @@ html:not(.dark-style) .toast.bs-toast .toast-header:not([class*=bg-]) .btn-close
 }
 
 .border-primary {
-  border-color: #5a8dee !important;
+  border-color: #8EC540 !important;
 }
 
 .border-secondary {
@@ -19186,6 +19186,15 @@ html:not(.layout-footer-fixed) .content-wrapper {
     opacity: 0.5;
   }
 }
+.app-brand .app-brand-logo {
+  width: 40px;
+  height: 50px;
+}
+.app-brand .app-brand-text {
+  font-size: 1.3rem;
+  margin-top: 16px;
+}
+
 .money-manager .quick-date-filter button {
   padding: 0;
   border: 0;
@@ -20159,7 +20168,7 @@ html:not([dir=rtl]) .menu-vertical .app-brand {
 }
 .timeline .timeline-item .timeline-indicator i,
 .timeline .timeline-item .timeline-indicator-advanced i {
-  color: #5a8dee;
+  color: #8EC540;
   font-size: 0.85rem !important;
 }
 .timeline .timeline-item .timeline-point {
@@ -20171,7 +20180,7 @@ html:not([dir=rtl]) .menu-vertical .app-brand {
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 50%;
-  background-color: #5a8dee;
+  background-color: #8EC540;
 }
 .timeline .timeline-item.timeline-item-transparent .timeline-event {
   top: -1.4rem;

@@ -8,7 +8,7 @@ namespace GropMng.Data.DbContext;
 /// Defines the Entity Framework Core context represented by GropContext.
 /// Exposes mapped sets and configuration required for database interaction.
 /// </summary>
-public class GropContext : Microsoft.EntityFrameworkCore.DbContext
+public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
 {
     public GropContext(DbContextOptions<GropContext> options) : base(options)
     {
@@ -16,6 +16,8 @@ public class GropContext : Microsoft.EntityFrameworkCore.DbContext
 
     public DbSet<AppLog> AppLogs => Set<AppLog>();
     public DbSet<Setting> Settings => Set<Setting>();
+
+    partial void ConfigureGardenDomain(ModelBuilder modelBuilder);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,5 +50,7 @@ public class GropContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Value).IsRequired();
         });
+
+        ConfigureGardenDomain(modelBuilder);
     }
 }

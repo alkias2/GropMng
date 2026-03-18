@@ -9,15 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+var sqlServerSettings = GropContextConfiguration.ResolveSqlServerSettings(builder.Configuration);
 
-var enableSqlServer = builder.Configuration.GetValue<bool>("Database:EnableSqlServer");
-var sqlServerConnection = builder.Configuration.GetConnectionString("DefaultConnection");
-
-
-if (enableSqlServer && !string.IsNullOrWhiteSpace(sqlServerConnection))
+if (sqlServerSettings.CanConnect)
 {
     builder.Services.AddDbContext<GropContext>(options =>
-        options.UseSqlServer(sqlServerConnection));
+        options.UseSqlServer(sqlServerSettings.ConnectionString));
 
     builder.Services.AddScoped<IAppLogService, AppLogService>();
 }
@@ -25,7 +22,13 @@ if (enableSqlServer && !string.IsNullOrWhiteSpace(sqlServerConnection))
 
 var app = builder.Build();
 
-if (enableSqlServer && !string.IsNullOrWhiteSpace(sqlServerConnection))
+if (sqlServerSettings.IsEnabled && !sqlServerSettings.CanConnect)
+{
+    var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    startupLogger.LogWarning("SQL Server is enabled but no usable connection string was resolved. Reason: {Reason}", sqlServerSettings.FailureReason);
+}
+
+if (sqlServerSettings.CanConnect)
 {
     try
     {

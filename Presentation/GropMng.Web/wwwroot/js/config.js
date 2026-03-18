@@ -1,7 +1,7 @@
 'use strict'
 let config = {
     colors: {
-      primary: '#5a8dee',
+  primary: '#045424',
       secondary: '#69809a',
       success: '#39da8a',
       info: '#00cfdd',
@@ -18,7 +18,7 @@ let config = {
       borderColor: '#e9ecee'
     },
     colors_label: {
-      primary: '#5a8dee29',
+      primary: '#04542429',
       secondary: '#69809a29',
       success: '#39da8a29',
       info: '#00cfdd29',
@@ -39,15 +39,17 @@ let config = {
   assetsPath = document.documentElement.getAttribute('data-assets-path'),
   templateName = document.documentElement.getAttribute('data-template'),
   rtlSupport = !1
+
 'undefined' != typeof TemplateCustomizer &&
   (window.templateCustomizer = new TemplateCustomizer({
     cssPath: assetsPath + 'vendor/css/',
     themesPath: assetsPath + 'vendor/css/',
+    availableThemes: [{ name: 'theme-grop-mng', title: 'GropMng' }],
     displayCustomizer: !0,
     lang:
       localStorage.getItem('templateCustomizer-' + templateName + '--Lang') ||
       'en',
-    defaultTheme: 0,
+    defaultTheme: 'theme-grop-mng',
     defaultStyle: 'dark',
-    controls: ['style']
+    controls: ['style', 'themes']
   }))
