@@ -1,4 +1,5 @@
 'use strict'
+// IMPORTANT: Clear template customizer localStorage keys after theme config changes.
 let config = {
     colors: {
   primary: '#045424',
