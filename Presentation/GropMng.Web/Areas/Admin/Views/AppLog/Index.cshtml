@@ -1,0 +1,204 @@
+@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
+@{
+    ViewData["Title"] = "Application Logs";
+    ViewData["ActiveMenu"] = "AppLogs";
+}
+
+<!-- Page header -->
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between py-3 mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Application Logs</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="@Url.Action("Index","Home", new { area = "" })">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active">App Logs</li>
+                    </ol>
+                </nav>
+            </div>
+            <form asp-area="Admin" asp-controller="AppLog" asp-action="DeleteAll" method="post"
+                  onsubmit="return confirm('δiaggrafe olous tous katagrafeis?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    <i class="bx bx-trash me-1"></i> Delete All
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filter card -->
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">Filters</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> Apply
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> Clear
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4 col-sm-6">
+                <label class="form-label" for="levelFilter">Log Level</label>
+                <select id="levelFilter" class="form-select">
+                    <option value="">All Levels</option>
+                    <option value="Trace">Trace</option>
+                    <option value="Debug">Debug</option>
+                    <option value="Information">Information</option>
+                    <option value="Warning">Warning</option>
+                    <option value="Error">Error</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <label class="form-label" for="fromDateFilter">From Date</label>
+                <input id="fromDateFilter" type="text" class="form-control flatpickr-date"
+                       placeholder="YYYY-MM-DD" autocomplete="off" />
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <label class="form-label" for="toDateFilter">To Date</label>
+                <input id="toDateFilter" type="text" class="form-control flatpickr-date"
+                       placeholder="YYYY-MM-DD" autocomplete="off" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTable card -->
+<div class="card">
+    <div class="card-datatable table-responsive">
+        <table id="appLogsTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Level</th>
+                    <th>Category</th>
+                    <th>Message</th>
+                    <th>Timestamp</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.css" />
+}
+
+@section Scripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/flatpickr/flatpickr.js"></script>
+
+    <script>
+        'use strict';
+
+        // ── Date pickers ─────────────────────────────────────────────────────
+        flatpickr('#fromDateFilter', { dateFormat: 'Y-m-d', allowInput: true });
+        flatpickr('#toDateFilter',   { dateFormat: 'Y-m-d', allowInput: true });
+
+        // ── Level badge colours ───────────────────────────────────────────────
+        const levelBadge = {
+            Trace:       'secondary',
+            Debug:       'info',
+            Information: 'primary',
+            Warning:     'warning',
+            Error:       'danger',
+            Critical:    'danger'
+        };
+
+        function renderLevel(level) {
+            const colour = levelBadge[level] ?? 'secondary';
+            return `<span class="badge bg-label-${colour}">${level ?? ''}</span>`;
+        }
+
+        // ── DataTable ─────────────────────────────────────────────────────────
+        const listUrl  = '@Url.Action("List",    "AppLog", new { area = "Admin" })';
+        const detailUrl= '@Url.Action("Details", "AppLog", new { area = "Admin" })';
+        const deleteUrl= '@Url.Action("Delete",  "AppLog", new { area = "Admin" })';
+        const token    = $('input[name="__RequestVerificationToken"]').val();
+
+        const table = $('#appLogsTable').DataTable({
+            processing : true,
+            serverSide : true,
+            responsive : true,
+            ajax: {
+                url : listUrl,
+                type: 'POST',
+                data: function (d) {
+                    d.level    = $('#levelFilter').val();
+                    d.fromDate = $('#fromDateFilter').val();
+                    d.toDate   = $('#toDateFilter').val();
+                }
+            },
+            columns: [
+                { data: 'id',        width: '60px' },
+                {
+                    data: 'level',
+                    width: '110px',
+                    render: function (data) { return renderLevel(data); }
+                },
+                { data: 'category',  className: 'text-truncate', width: '200px' },
+                { data: 'message',   className: 'text-truncate', width: '300px' },
+                {
+                    data: 'timestamp',
+                    width: '160px',
+                    render: function (data) {
+                        return data ? new Date(data).toLocaleString() : '';
+                    }
+                },
+                {
+                    data      : 'id',
+                    orderable : false,
+                    width     : '120px',
+                    className : 'text-center',
+                    render    : function (id) {
+                        return `<a class="btn btn-sm btn-icon btn-outline-primary me-1"
+                                   href="${detailUrl}/${id}" title="Details">
+                                    <i class="bx bx-show"></i>
+                                </a>
+                                <button class="btn btn-sm btn-icon btn-outline-danger btn-delete"
+                                        data-id="${id}" title="Delete">
+                                    <i class="bx bx-trash"></i>
+                                </button>`;
+                    }
+                }
+            ],
+            order: [[4, 'desc']],
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>'
+            }
+        });
+
+        // ── Filter buttons ────────────────────────────────────────────────────
+        $('#btnApplyFilters').on('click', function () { table.ajax.reload(); });
+
+        $('#btnClearFilters').on('click', function () {
+            document.getElementById('levelFilter').value = '';
+            flatpickr('#fromDateFilter').clear();
+            flatpickr('#toDateFilter').clear();
+            table.ajax.reload();
+        });
+
+        // ── Row delete ────────────────────────────────────────────────────────
+        $('#appLogsTable').on('click', '.btn-delete', function () {
+            const id = $(this).data('id');
+            if (!confirm('Delete this log entry?')) return;
+
+            $.ajax({
+                url   : deleteUrl,
+                type  : 'POST',
+                data  : { id: id, __RequestVerificationToken: token },
+                success: function () { table.ajax.reload(null, false); },
+                error  : function () { alert('Failed to delete the log entry.'); }
+            });
+        });
+    </script>
+}

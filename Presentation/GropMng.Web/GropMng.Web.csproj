@@ -401,6 +401,7 @@
     <ProjectReference Include="..\..\Libraries\GropMng.Core\GropMng.Core.csproj" />
     <ProjectReference Include="..\..\Libraries\GropMng.Data\GropMng.Data.csproj" />
     <ProjectReference Include="..\..\Libraries\GropMng.Services\GropMng.Services.csproj" />
+    <ProjectReference Include="..\GropMng.Web.Framework\GropMng.Web.Framework.csproj" />
   </ItemGroup>
 
 </Project>

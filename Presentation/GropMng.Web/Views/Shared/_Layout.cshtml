@@ -41,6 +41,9 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
     <script src="~/vendor/js/template-customizer.js"></script>
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/js/config.js" asp-append-version="true"></script>
+
+    <!-- Per-page vendor CSS (optional, injected by views that declare a Vendors section) -->
+    @await RenderSectionAsync("Vendors", required: false)
 </head>
 <body>
 
@@ -71,7 +74,7 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a class="menu-link" asp-area="" asp-controller="AppLog" asp-action="Index">
+                        <a class="menu-link" asp-area="Admin" asp-controller="AppLog" asp-action="Index">
                             <i class="menu-icon tf-icons bx bx-detail"></i>
                             <div>App Logs</div>
                         </a>

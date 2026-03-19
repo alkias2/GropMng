@@ -17,6 +17,7 @@ using GropMng.Services.Services.Garden.Locations;
 using GropMng.Services.Services.Garden.Plants;
 using GropMng.Services.Services.Garden.Preferences;
 using GropMng.Services.Services.Logging;
+using GropMng.Web.Factories.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,9 @@ if (sqlServerSettings.CanConnect)
     
     // User domain services
     builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
+
+    // Web factories
+    builder.Services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
 }
 
 
@@ -102,6 +106,10 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

@@ -1,10 +1,10 @@
 namespace GropMng.Core;
 
-[Serializable]
 /// <summary>
 /// Represents a concrete paged list implementation backed by an in-memory list.
 /// Provides paging metadata together with the current page item collection.
 /// </summary>
+[Serializable]
 public class PagedList<T> : List<T>, IPagedList<T>
 {
 	/// <summary>
