@@ -1,10 +1,10 @@
 ﻿using GropMng.Core;
 using GropMng.Core.Domain.Logging;
-using GropMng.Core.Interfaces.Services;
+using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 
-namespace GropMng.Services.Services;
+namespace GropMng.Services.Services.Logging;
 
 /// <summary>
 /// Represents the AppLogService component.

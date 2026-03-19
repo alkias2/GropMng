@@ -1,6 +1,6 @@
 using GropMng.Core.Domain.Logging;
 
-namespace GropMng.Core.Interfaces.Services;
+namespace GropMng.Core.Interfaces.Services.Logging;
 
 public interface IAppLogService
 {

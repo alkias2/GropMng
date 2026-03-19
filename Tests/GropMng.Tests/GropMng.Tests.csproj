@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\GropMng.Core\GropMng.Core.csproj" />
+    <ProjectReference Include="..\..\Libraries\GropMng.Services\GropMng.Services.csproj" />
     <ProjectReference Include="..\..\Presentation\GropMng.Web\GropMng.Web.csproj" />
   </ItemGroup>
 

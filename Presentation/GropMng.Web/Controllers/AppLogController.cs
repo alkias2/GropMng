@@ -1,6 +1,6 @@
 ﻿using GropMng.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using GropMng.Core.Interfaces.Services;
+using GropMng.Core.Interfaces.Services.Logging;
 
 namespace GropMng.Web.Controllers;
 
