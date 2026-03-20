@@ -1,0 +1,48 @@
+@model string
+@{
+    var fieldName = ViewData.TemplateInfo.GetFullHtmlFieldName(string.Empty);
+    var fieldId = Html.IdForModel().ToString();
+    var quillId = $"quill_{fieldId}";
+    var initializedFlag = $"quill_init_{fieldId}";
+    var initialValue = Model ?? string.Empty;
+}
+
+<link rel="stylesheet" href="~/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="~/vendor/libs/quill/editor.css" />
+<link rel="stylesheet" href="~/vendor/libs/quill/typography.css" />
+
+<div id="@quillId" class="border rounded" style="min-height:220px;">@Html.Raw(initialValue)</div>
+<input type="hidden" id="@fieldId" name="@fieldName" value="@initialValue" />
+
+<script src="~/vendor/libs/quill/katex.js"></script>
+<script src="~/vendor/libs/quill/quill.js"></script>
+
+<script>
+(function () {
+    if (window['@initializedFlag']) return;
+    window['@initializedFlag'] = true;
+
+    const container = document.getElementById('@quillId');
+    const hiddenInput = document.getElementById('@fieldId');
+    if (!container || !hiddenInput) return;
+
+    const quill = new Quill(container, {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ color: [] }, { background: [] }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ align: [] }],
+                ['link', 'blockquote', 'code-block'],
+                ['clean']
+            ]
+        }
+    });
+
+    quill.on('text-change', function () {
+        hiddenInput.value = quill.root.innerHTML;
+    });
+})();
+</script>

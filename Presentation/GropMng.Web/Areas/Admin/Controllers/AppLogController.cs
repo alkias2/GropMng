@@ -1,3 +1,4 @@
+using FluentValidation;
 using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Web.Areas.Admin.Models.Logging;
 using GropMng.Web.Factories.Logging;
@@ -16,11 +17,16 @@ public class AppLogController : Controller
 {
     private readonly IAppLogModelFactory _factory;
     private readonly IAppLogService _appLogService;
+    private readonly IValidator<AppLogSearchModel> _searchValidator;
 
-    public AppLogController(IAppLogModelFactory factory, IAppLogService appLogService)
+    public AppLogController(
+        IAppLogModelFactory factory,
+        IAppLogService appLogService,
+        IValidator<AppLogSearchModel> searchValidator)
     {
         _factory = factory;
         _appLogService = appLogService;
+        _searchValidator = searchValidator;
     }
 
     /// <summary>Renders the AppLog index page, passing an initialised search model to the view.</summary>
@@ -39,6 +45,18 @@ public class AppLogController : Controller
     [HttpPost]
     public async Task<IActionResult> List([FromForm] AppLogSearchModel searchModel)
     {
+        var validationResult = await _searchValidator.ValidateAsync(searchModel);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
         var listModel = await _factory.PrepareListModelAsync(searchModel);
         return Json(listModel);
     }

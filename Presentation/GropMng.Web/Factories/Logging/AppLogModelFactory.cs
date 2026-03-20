@@ -1,3 +1,4 @@
+using AutoMapper;
 using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Web.Areas.Admin.Models.Logging;
 using GropMng.Web.Framework.Models.Extensions;
@@ -12,10 +13,12 @@ namespace GropMng.Web.Factories.Logging;
 public class AppLogModelFactory : IAppLogModelFactory
 {
     private readonly IAppLogService _appLogService;
+    private readonly IMapper _mapper;
 
-    public AppLogModelFactory(IAppLogService appLogService)
+    public AppLogModelFactory(IAppLogService appLogService, IMapper mapper)
     {
         _appLogService = appLogService;
+        _mapper = mapper;
     }
 
     /// <inheritdoc />
@@ -43,13 +46,6 @@ public class AppLogModelFactory : IAppLogModelFactory
 
         var listModel = new AppLogListModel();
         return listModel.PrepareToGrid(searchModel, logs, () =>
-            logs.Select(x => new AppLogRowModel
-            {
-                Id = x.Id,
-                Level = x.Level,
-                Category = x.Category,
-                Message = x.Message,
-                Timestamp = x.Timestamp
-            }));
+            logs.Select(x => _mapper.Map<AppLogRowModel>(x)));
     }
 }

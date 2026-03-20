@@ -1,7 +1,9 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using GropMng.Core.Domain.Logging;
 using GropMng.Data.DbContext;
 using GropMng.Core.Interfaces.Repositories;
+using GropMng.Core.Interfaces.Services.Configuration;
 using GropMng.Core.Interfaces.Services.Garden.AI;
 using GropMng.Core.Interfaces.Services.Garden.Care;
 using GropMng.Core.Interfaces.Services.Garden.Health;
@@ -16,13 +18,19 @@ using GropMng.Services.Services.Garden.Health;
 using GropMng.Services.Services.Garden.Locations;
 using GropMng.Services.Services.Garden.Plants;
 using GropMng.Services.Services.Garden.Preferences;
+using GropMng.Services.Services.Configuration;
 using GropMng.Services.Services.Logging;
+using GropMng.Web.Areas.Admin.Validators.Logging;
 using GropMng.Web.Factories.Logging;
+using GropMng.Web.Factories.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssemblyContaining<AppLogSearchModelValidator>();
 
 var sqlServerSettings = GropContextConfiguration.ResolveSqlServerSettings(builder.Configuration);
 
@@ -51,8 +59,12 @@ if (sqlServerSettings.CanConnect)
     // User domain services
     builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
 
+    // Configuration settings service (global scope, no store overrides)
+    builder.Services.AddScoped<ISettingService, SettingService>();
+
     // Web factories
     builder.Services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
+    builder.Services.AddScoped<ISettingModelFactory, SettingModelFactory>();
 }
 
 
