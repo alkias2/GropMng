@@ -1,0 +1,54 @@
+@model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
+@{
+    ViewData["Title"] = "Edit Plant";
+    ViewData["ActiveMenu"] = "Plants";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = $"Edit Plant: {Model.CommonName}",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Plants", Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
+            new() { Text = "Edit" }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Plant" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4 border-danger">
+    <div class="card-header">
+        <h5 class="card-title text-danger mb-0">Danger Zone</h5>
+    </div>
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <p class="mb-0">Delete this plant permanently. This action cannot be undone.</p>
+        <form asp-area="Admin"
+              asp-controller="Plant"
+              asp-action="Delete"
+              method="post"
+              data-grop-delete="true"
+              data-confirm-icon="warning"
+              data-confirm-title="Delete plant"
+              data-confirm-text="This plant will be permanently deleted."
+              data-confirm-button-text="Delete"
+              data-cancel-button-text="Cancel">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bx bx-trash me-1"></i> Delete Plant
+            </button>
+        </form>
+    </div>
+</div>

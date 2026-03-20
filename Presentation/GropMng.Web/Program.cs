@@ -22,6 +22,7 @@ using GropMng.Services.Services.Configuration;
 using GropMng.Services.Services.Logging;
 using GropMng.Web.Areas.Admin.Validators.Logging;
 using GropMng.Web.Factories.Logging;
+using GropMng.Web.Factories.Plant;
 using GropMng.Web.Factories.Settings;
 using GropMng.Web.Infrastructure.Navigation;
 
@@ -66,6 +67,7 @@ if (sqlServerSettings.CanConnect)
 
     // Web factories
     builder.Services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
+    builder.Services.AddScoped<IPlantModelFactory, PlantModelFactory>();
     builder.Services.AddScoped<ISettingModelFactory, SettingModelFactory>();
 }
 

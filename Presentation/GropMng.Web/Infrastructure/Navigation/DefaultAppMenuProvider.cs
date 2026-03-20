@@ -44,6 +44,15 @@ public class DefaultAppMenuProvider : IAppMenuProvider
                 {
                     new()
                     {
+                        Key = "admin-plants",
+                        Title = "Plants",
+                        Area = "Admin",
+                        Controller = "Plant",
+                        Action = "Index",
+                        ItemType = AppMenuItemType.Link
+                    },
+                    new()
+                    {
                         Key = "admin-applogs",
                         Title = "App Logs",
                         Area = "Admin",

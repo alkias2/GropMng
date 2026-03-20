@@ -1,0 +1,181 @@
+@using GropMng.Core.Domain.Garden.Enums
+@model GropMng.Web.Areas.Admin.Models.Plant.PlantSearchModel
+@{
+    ViewData["Title"] = "Plants";
+    ViewData["ActiveMenu"] = "Plants";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = "Plants",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Plants" }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="d-flex justify-content-end mb-4">
+    <a class="btn btn-primary" asp-area="Admin" asp-controller="Plant" asp-action="Create">
+        <i class="bx bx-plus me-1"></i> Add Plant
+    </a>
+</div>
+
+<!-- Filter card -->
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">Filters</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> Apply
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> Clear
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label" for="searchTermFilter">Search</label>
+                <input id="searchTermFilter" class="form-control" type="text" placeholder="Common name, scientific name, family" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="categoryFilter">Category</label>
+                <select id="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    @foreach (var category in Enum.GetValues<PlantCategory>())
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTable card -->
+<div class="card">
+    <div class="card-datatable table-responsive">
+        <table id="plantsTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Common Name</th>
+                    <th>Scientific Name</th>
+                    <th>Family</th>
+                    <th>Category</th>
+                    <th>Flags</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<form id="antiForgeryForm" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+}
+
+@section Scripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script>
+        'use strict';
+
+        const listUrl = '@Url.Action("List", "Plant", new { area = "Admin" })';
+        const editUrl = '@Url.Action("Edit", "Plant", new { area = "Admin" })';
+        const deleteUrl = '@Url.Action("Delete", "Plant", new { area = "Admin" })';
+        const token = $('#antiForgeryForm input[name="__RequestVerificationToken"]').val();
+
+        function renderFlags(row) {
+            const flags = [];
+            if (row.isEdible) flags.push('<span class="badge bg-label-success me-1">Edible</span>');
+            if (row.isMedicinal) flags.push('<span class="badge bg-label-info me-1">Medicinal</span>');
+            if (row.isToxic) flags.push('<span class="badge bg-label-danger me-1">Toxic</span>');
+            return flags.length ? flags.join('') : '<span class="text-muted">-</span>';
+        }
+
+        const table = $('#plantsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: listUrl,
+                type: 'POST',
+                data: function (d) {
+                    d.searchTerm = $('#searchTermFilter').val();
+                    d.category = $('#categoryFilter').val();
+                }
+            },
+            columns: [
+                { data: 'id', width: '60px' },
+                { data: 'commonName' },
+                { data: 'scientificName' },
+                {
+                    data: 'family',
+                    render: function (data) {
+                        return data || '<span class="text-muted">-</span>';
+                    }
+                },
+                {
+                    data: 'category',
+                    render: function (data) {
+                        return `<span class="badge bg-label-primary">${data || ''}</span>`;
+                    }
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return renderFlags(row);
+                    }
+                },
+                {
+                    data: 'id',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center',
+                    width: '180px',
+                    render: function (id) {
+                        return `<a class="btn btn-sm btn-outline-primary me-1" href="${editUrl}/${id}"><i class="bx bx-edit-alt"></i></a>
+                                <form class="d-inline js-delete-form"
+                                      action="${deleteUrl}"
+                                      method="post"
+                                      data-grop-delete="true"
+                                      data-confirm-icon="warning"
+                                      data-confirm-title="Delete plant"
+                                      data-confirm-text="This plant will be permanently deleted."
+                                      data-confirm-button-text="Delete"
+                                      data-cancel-button-text="Cancel">
+                                    <input type="hidden" name="__RequestVerificationToken" value="${token}" />
+                                    <input type="hidden" name="id" value="${id}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>
+                                </form>`;
+                    }
+                }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        table.on('draw', function () {
+            window.GropSwal?.bindConfirmForms("form[data-grop-confirm='true'], form[data-grop-delete='true']");
+        });
+
+        $('#btnApplyFilters').on('click', function () {
+            table.ajax.reload();
+        });
+
+        $('#btnClearFilters').on('click', function () {
+            $('#searchTermFilter').val('');
+            $('#categoryFilter').val('');
+            table.ajax.reload();
+        });
+    </script>
+}

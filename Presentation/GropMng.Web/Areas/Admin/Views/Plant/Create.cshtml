@@ -1,0 +1,28 @@
+@model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
+@{
+    ViewData["Title"] = "Create Plant";
+    ViewData["ActiveMenu"] = "Plants";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = "Create Plant",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Plants", Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
+            new() { Text = "Create" }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Plant" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>

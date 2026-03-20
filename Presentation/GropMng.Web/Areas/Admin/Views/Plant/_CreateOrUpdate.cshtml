@@ -1,0 +1,107 @@
+@model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<ul class="nav nav-pills flex-column flex-md-row mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> General</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> Growth & Environment</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> Related</a>
+    </li>
+</ul>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <grop-label asp-for="CommonName" />
+        <grop-editor asp-for="CommonName" asp-required="true" />
+        <span class="text-danger" asp-validation-for="CommonName"></span>
+    </div>
+
+    <div class="col-md-6">
+        <grop-label asp-for="ScientificName" />
+        <grop-editor asp-for="ScientificName" asp-required="true" />
+        <span class="text-danger" asp-validation-for="ScientificName"></span>
+    </div>
+
+    <div class="col-md-6">
+        <grop-label asp-for="Family" />
+        <grop-editor asp-for="Family" />
+        <span class="text-danger" asp-validation-for="Family"></span>
+    </div>
+
+    <div class="col-md-6">
+        <grop-label asp-for="Category" />
+        <grop-select asp-for="Category" asp-items="Model.AvailableCategories" asp-required="true" />
+        <span class="text-danger" asp-validation-for="Category"></span>
+    </div>
+
+    <div class="col-md-4">
+        <grop-label asp-for="GrowthType" />
+        <grop-select asp-for="GrowthType" asp-items="Model.AvailableGrowthTypes" />
+        <span class="text-danger" asp-validation-for="GrowthType"></span>
+    </div>
+
+    <div class="col-md-4">
+        <grop-label asp-for="SunRequirement" />
+        <grop-select asp-for="SunRequirement" asp-items="Model.AvailableSunRequirements" />
+        <span class="text-danger" asp-validation-for="SunRequirement"></span>
+    </div>
+
+    <div class="col-md-4">
+        <grop-label asp-for="WaterRequirement" />
+        <grop-select asp-for="WaterRequirement" asp-items="Model.AvailableWaterRequirements" />
+        <span class="text-danger" asp-validation-for="WaterRequirement"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="MinTempCelsius" />
+        <grop-editor asp-for="MinTempCelsius" asp-template="Decimal" html-attributes='new { step = "0.1", placeholder = "e.g. 5.0" }' />
+        <span class="text-danger" asp-validation-for="MinTempCelsius"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="MaxTempCelsius" />
+        <grop-editor asp-for="MaxTempCelsius" asp-template="Decimal" html-attributes='new { step = "0.1", placeholder = "e.g. 35.0" }' />
+        <span class="text-danger" asp-validation-for="MaxTempCelsius"></span>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check form-switch mt-4">
+            <input class="form-check-input" asp-for="IsEdible" />
+            <label class="form-check-label" asp-for="IsEdible"></label>
+        </div>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check form-switch mt-4">
+            <input class="form-check-input" asp-for="IsMedicinal" />
+            <label class="form-check-label" asp-for="IsMedicinal"></label>
+        </div>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check form-switch mt-4">
+            <input class="form-check-input" asp-for="IsToxic" />
+            <label class="form-check-label" asp-for="IsToxic"></label>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <grop-label asp-for="GeneralNotes" />
+        <grop-editor asp-for="GeneralNotes" asp-template="RichEditor" />
+        <span class="text-danger" asp-validation-for="GeneralNotes"></span>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+        <i class="bx bx-save me-1"></i> Save
+    </button>
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Plant" asp-action="Index">
+        Cancel
+    </a>
+</div>
