@@ -23,6 +23,7 @@ using GropMng.Services.Services.Logging;
 using GropMng.Web.Areas.Admin.Validators.Logging;
 using GropMng.Web.Factories.Logging;
 using GropMng.Web.Factories.Settings;
+using GropMng.Web.Infrastructure.Navigation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 builder.Services.AddValidatorsFromAssemblyContaining<AppLogSearchModelValidator>();
+builder.Services.AddScoped<IAppMenuProvider, DefaultAppMenuProvider>();
 
 var sqlServerSettings = GropContextConfiguration.ResolveSqlServerSettings(builder.Configuration);
 

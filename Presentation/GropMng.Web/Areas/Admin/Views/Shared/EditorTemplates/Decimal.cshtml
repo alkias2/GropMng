@@ -1,0 +1,20 @@
+@using System.Globalization
+@model decimal
+@{
+    var attributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"] ?? new { });
+
+    if (!attributes.ContainsKey("class"))
+        attributes["class"] = "form-control";
+    else
+        attributes["class"] = attributes["class"] + " form-control";
+
+    if (!attributes.ContainsKey("type"))
+        attributes["type"] = "number";
+
+    if (!attributes.ContainsKey("step"))
+        attributes["step"] = "0.01";
+
+    var value = Model.ToString(CultureInfo.InvariantCulture);
+}
+
+@Html.TextBox(string.Empty, value, attributes)

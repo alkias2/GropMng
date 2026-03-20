@@ -1,83 +1,26 @@
 @model GropMng.Web.Areas.Admin.Models.Settings.GropAdminAreaSettingsModel
 @{
     ViewData["Title"] = "Admin Settings";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = "Admin Settings",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Admin Settings" }
+        }
+    };
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex align-items-center justify-content-between py-3 mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">Admin Settings</h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1 mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="@Url.Action("Index", "Home", new { area = "" })">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item active">Admin Settings</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-    </div>
-</div>
-
-@if (TempData["SuccessMessage"] is string message)
-{
-    <div class="alert alert-success" role="alert">@message</div>
-}
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
 
 <div class="card">
     <div class="card-body">
         <form asp-area="Admin" asp-controller="Setting" asp-action="AdminArea" method="post">
             @Html.AntiForgeryToken()
-
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <grop-label asp-for="DefaultGridPageSize" />
-                    <grop-editor asp-for="DefaultGridPageSize" html-attributes='new { type = "number", min = "1", max = "200" }' />
-                    <span class="text-danger" asp-validation-for="DefaultGridPageSize"></span>
-                </div>
-
-                <div class="col-md-8">
-                    <grop-label asp-for="GridPageSizes" />
-                    <grop-editor asp-for="GridPageSizes" html-attributes='new { placeholder = "10,20,50" }' />
-                    <span class="text-danger" asp-validation-for="GridPageSizes"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <grop-label asp-for="RichEditorProvider" />
-                    <grop-editor asp-for="RichEditorProvider" />
-                    <span class="text-danger" asp-validation-for="RichEditorProvider"></span>
-                    <div class="form-text">Expected value for current UI template: Quill</div>
-                </div>
-
-                <div class="col-12">
-                    <grop-label asp-for="AdminDashboardWelcomeHtml" />
-                    <grop-editor asp-for="AdminDashboardWelcomeHtml" asp-template="RichEditor" />
-                    <span class="text-danger" asp-validation-for="AdminDashboardWelcomeHtml"></span>
-                    <div class="form-text">This HTML block is edited with Quill and can be displayed on Admin dashboard pages.</div>
-                </div>
-
-                <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check form-switch mt-4">
-                        <input class="form-check-input" asp-for="RichEditorAllowHtml" />
-                        <label class="form-check-label" asp-for="RichEditorAllowHtml"></label>
-                    </div>
-                </div>
-
-                <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check form-switch mt-4">
-                        <input class="form-check-input" asp-for="UseIsoDateFormatInJsonResult" />
-                        <label class="form-check-label" asp-for="UseIsoDateFormatInJsonResult"></label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bx bx-save me-1"></i> Save Settings
-                </button>
-            </div>
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
         </form>
     </div>
 </div>

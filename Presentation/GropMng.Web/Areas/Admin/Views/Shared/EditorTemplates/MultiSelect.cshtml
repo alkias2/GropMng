@@ -1,0 +1,15 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model IEnumerable<string>
+@{
+    var items = ViewData["SelectList"] as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var attributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"] ?? new { });
+
+    if (!attributes.ContainsKey("class"))
+        attributes["class"] = "form-select";
+    else
+        attributes["class"] = attributes["class"] + " form-select";
+
+    attributes["multiple"] = "multiple";
+}
+
+@Html.ListBox(string.Empty, items, attributes)

@@ -81,6 +81,20 @@ public class AppLogController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    /// <summary>
+    /// Deletes selected log entries and returns a JSON response for AJAX callers.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSelected([FromForm] int[] selectedIds)
+    {
+        if (selectedIds == null || selectedIds.Length == 0)
+            return BadRequest(new { success = false, message = "No log entries were selected." });
+
+        await _appLogService.DeleteLogsAsync(selectedIds);
+        return Json(new { success = true, deletedCount = selectedIds.Length });
+    }
+
     /// <summary>Deletes all log entries and redirects back to the index.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]

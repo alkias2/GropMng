@@ -1,0 +1,50 @@
+@model GropMng.Web.Models.Navigation.AppMenuItemModel
+@{
+    if (Model.ItemType == GropMng.Web.Models.Navigation.AppMenuItemType.Header)
+    {
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">@Model.Title</span>
+        </li>
+        return;
+    }
+
+    var itemClasses = "menu-item";
+    if (Model.IsActive)
+        itemClasses += " active";
+
+    if (Model.IsOpen)
+        itemClasses += " open";
+
+    var hasChildren = Model.Children.Any();
+}
+
+<li class="@itemClasses">
+    @if (hasChildren)
+    {
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            @if (!string.IsNullOrWhiteSpace(Model.IconClass))
+            {
+                <i class="menu-icon tf-icons @Model.IconClass"></i>
+            }
+            <div>@Model.Title</div>
+        </a>
+
+        <ul class="menu-sub">
+            @foreach (var child in Model.Children)
+            {
+                @await Html.PartialAsync("~/Views/Shared/Components/AppMenu/_MenuItem.cshtml", child)
+            }
+        </ul>
+    }
+    else
+    {
+        var href = Url.Action(Model.Action, Model.Controller, new { area = Model.Area });
+        <a href="@href" class="menu-link">
+            @if (!string.IsNullOrWhiteSpace(Model.IconClass))
+            {
+                <i class="menu-icon tf-icons @Model.IconClass"></i>
+            }
+            <div>@Model.Title</div>
+        </a>
+    }
+</li>

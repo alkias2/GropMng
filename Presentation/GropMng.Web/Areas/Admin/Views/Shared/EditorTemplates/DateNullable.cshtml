@@ -1,0 +1,18 @@
+@model DateTime?
+@{
+    var value = Model.HasValue ? Model.Value.ToString("yyyy-MM-dd") : string.Empty;
+    var attributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"] ?? new { });
+
+    if (!attributes.ContainsKey("class"))
+        attributes["class"] = "form-control flatpickr-date";
+    else
+        attributes["class"] = attributes["class"] + " form-control flatpickr-date";
+
+    if (!attributes.ContainsKey("placeholder"))
+        attributes["placeholder"] = "YYYY-MM-DD";
+
+    if (!attributes.ContainsKey("autocomplete"))
+        attributes["autocomplete"] = "off";
+}
+
+@Html.TextBox(string.Empty, value, attributes)

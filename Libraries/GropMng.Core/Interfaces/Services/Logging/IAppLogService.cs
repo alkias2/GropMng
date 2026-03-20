@@ -9,5 +9,6 @@ public interface IAppLogService
     Task<int> GetLogsCountAsync(string? level = null, DateTime? fromUtc = null, DateTime? toUtc = null);
     Task<AppLog?> GetLogByIdAsync(int id);
     Task DeleteLogAsync(int id);
+    Task DeleteLogsAsync(IEnumerable<int> ids);
     Task ClearAllLogsAsync();
 }

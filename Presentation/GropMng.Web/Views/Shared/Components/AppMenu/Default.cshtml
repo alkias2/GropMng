@@ -1,0 +1,8 @@
+@model IList<GropMng.Web.Models.Navigation.AppMenuItemModel>
+
+<ul class="menu-inner py-1">
+@foreach (var item in Model)
+{
+    @await Html.PartialAsync("~/Views/Shared/Components/AppMenu/_MenuItem.cshtml", item)
+}
+</ul>

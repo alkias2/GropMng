@@ -2,32 +2,37 @@
 @{
     ViewData["Title"] = "Application Logs";
     ViewData["ActiveMenu"] = "AppLogs";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = "Application Logs",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "App Logs" }
+        }
+    };
 }
 
-<!-- Page header -->
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex align-items-center justify-content-between py-3 mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">Application Logs</h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-style1 mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="@Url.Action("Index","Home", new { area = "" })">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item active">App Logs</li>
-                    </ol>
-                </nav>
-            </div>
-            <form asp-area="Admin" asp-controller="AppLog" asp-action="DeleteAll" method="post"
-                  onsubmit="return confirm('δiaggrafe olous tous katagrafeis?');">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger">
-                    <i class="bx bx-trash me-1"></i> Delete All
-                </button>
-            </form>
-        </div>
-    </div>
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+
+<div class="d-flex justify-content-end gap-2 mb-4">
+    <button id="btnDeleteSelected" type="button" class="btn btn-outline-danger" disabled>
+        <i class="bx bx-trash me-1"></i> Delete Selected (<span id="selectedCount">0</span>)
+    </button>
+
+    <form asp-area="Admin" asp-controller="AppLog" asp-action="DeleteAll" method="post"
+          data-grop-delete="true"
+          data-confirm-icon="warning"
+          data-confirm-title="Delete all log entries"
+          data-confirm-text="This action will permanently delete all log entries."
+          data-confirm-button-text="Delete all"
+          data-cancel-button-text="Cancel">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">
+            <i class="bx bx-trash me-1"></i> Delete All
+        </button>
+    </form>
 </div>
 
 <!-- Filter card -->
@@ -75,6 +80,9 @@
         <table id="appLogsTable" class="table table-hover">
             <thead>
                 <tr>
+                    <th class="text-center" style="width:44px;">
+                        <input id="selectAllVisible" type="checkbox" class="form-check-input" title="Select all visible" />
+                    </th>
                     <th>ID</th>
                     <th>Level</th>
                     <th>Category</th>
@@ -123,7 +131,39 @@
         const listUrl  = '@Url.Action("List",    "AppLog", new { area = "Admin" })';
         const detailUrl= '@Url.Action("Details", "AppLog", new { area = "Admin" })';
         const deleteUrl= '@Url.Action("Delete",  "AppLog", new { area = "Admin" })';
+        const deleteSelectedUrl = '@Url.Action("DeleteSelected", "AppLog", new { area = "Admin" })';
         const token    = $('input[name="__RequestVerificationToken"]').val();
+        const selectedIds = new Set();
+
+        function updateSelectionUi() {
+            $('#selectedCount').text(selectedIds.size);
+            $('#btnDeleteSelected').prop('disabled', selectedIds.size === 0);
+            updateSelectAllVisibleState();
+        }
+
+        function updateSelectAllVisibleState() {
+            const visibleCheckboxes = $('#appLogsTable tbody .row-selector');
+            const totalVisible = visibleCheckboxes.length;
+
+            if (totalVisible === 0) {
+                $('#selectAllVisible').prop('checked', false).prop('indeterminate', false);
+                return;
+            }
+
+            const checkedVisible = visibleCheckboxes.filter(':checked').length;
+            $('#selectAllVisible')
+                .prop('checked', checkedVisible === totalVisible)
+                .prop('indeterminate', checkedVisible > 0 && checkedVisible < totalVisible);
+        }
+
+        function reapplyRowSelections() {
+            $('#appLogsTable tbody .row-selector').each(function () {
+                const id = Number($(this).data('id'));
+                $(this).prop('checked', selectedIds.has(id));
+            });
+
+            updateSelectionUi();
+        }
 
         const table = $('#appLogsTable').DataTable({
             processing : true,
@@ -139,6 +179,16 @@
                 }
             },
             columns: [
+                {
+                    data      : 'id',
+                    orderable : false,
+                    searchable: false,
+                    width     : '44px',
+                    className : 'text-center',
+                    render    : function (id) {
+                        return `<input type="checkbox" class="form-check-input row-selector" data-id="${id}" />`;
+                    }
+                },
                 { data: 'id',        width: '60px' },
                 {
                     data: 'level',
@@ -171,10 +221,14 @@
                     }
                 }
             ],
-            order: [[4, 'desc']],
+            order: [[5, 'desc']],
             language: {
                 processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>'
             }
+        });
+
+        table.on('draw', function () {
+            reapplyRowSelections();
         });
 
         // ── Filter buttons ────────────────────────────────────────────────────
@@ -187,18 +241,95 @@
             table.ajax.reload();
         });
 
+        // ── Row selection and bulk actions ───────────────────────────────────
+        $('#appLogsTable').on('change', '.row-selector', function () {
+            const id = Number($(this).data('id'));
+            if ($(this).is(':checked'))
+                selectedIds.add(id);
+            else
+                selectedIds.delete(id);
+
+            updateSelectionUi();
+        });
+
+        $('#selectAllVisible').on('change', function () {
+            const shouldCheck = $(this).is(':checked');
+
+            $('#appLogsTable tbody .row-selector').each(function () {
+                const id = Number($(this).data('id'));
+                $(this).prop('checked', shouldCheck);
+
+                if (shouldCheck)
+                    selectedIds.add(id);
+                else
+                    selectedIds.delete(id);
+            });
+
+            updateSelectionUi();
+        });
+
+        $('#btnDeleteSelected').on('click', async function () {
+            if (selectedIds.size === 0) return;
+
+            const selectedArray = Array.from(selectedIds);
+            const confirmationText = `This action will permanently delete ${selectedArray.length} selected log entr${selectedArray.length === 1 ? 'y' : 'ies'}.`;
+            const confirmed = await window.GropSwal.confirm({
+                icon: 'warning',
+                title: 'Delete selected logs',
+                text: confirmationText,
+                confirmButtonText: 'Delete selected',
+                cancelButtonText: 'Cancel'
+            });
+            if (!confirmed) return;
+
+            $.ajax({
+                url: deleteSelectedUrl,
+                type: 'POST',
+                traditional: true,
+                data: {
+                    selectedIds: selectedArray,
+                    __RequestVerificationToken: token
+                },
+                success: function () {
+                    selectedIds.clear();
+                    $('#selectAllVisible').prop('checked', false).prop('indeterminate', false);
+                    table.ajax.reload(null, false);
+                    window.GropSwal.notify({ icon: 'success', title: 'Selected log entries were deleted.' });
+                },
+                error: function (xhr) {
+                    const msg = xhr?.responseJSON?.message ?? 'Failed to delete selected log entries.';
+                    window.GropSwal.alert({ icon: 'error', title: 'Delete failed', text: msg });
+                }
+            });
+        });
+
         // ── Row delete ────────────────────────────────────────────────────────
-        $('#appLogsTable').on('click', '.btn-delete', function () {
+        $('#appLogsTable').on('click', '.btn-delete', async function () {
             const id = $(this).data('id');
-            if (!confirm('Delete this log entry?')) return;
+            const confirmed = await window.GropSwal.confirm({
+                icon: 'warning',
+                title: 'Delete log entry',
+                text: 'This log entry will be permanently deleted.',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel'
+            });
+            if (!confirmed) return;
 
             $.ajax({
                 url   : deleteUrl,
                 type  : 'POST',
                 data  : { id: id, __RequestVerificationToken: token },
-                success: function () { table.ajax.reload(null, false); },
-                error  : function () { alert('Failed to delete the log entry.'); }
+                success: function () {
+                    selectedIds.delete(Number(id));
+                    table.ajax.reload(null, false);
+                    window.GropSwal.notify({ icon: 'success', title: 'Log entry deleted.' });
+                },
+                error  : function () {
+                    window.GropSwal.alert({ icon: 'error', title: 'Delete failed', text: 'Failed to delete the log entry.' });
+                }
             });
         });
+
+        updateSelectionUi();
     </script>
 }

@@ -1,0 +1,8 @@
+@{
+    var selector = ViewData["DeleteSelector"]?.ToString() ?? "form[data-grop-delete='true']";
+}
+
+@{
+    ViewData["ConfirmSelector"] = selector;
+}
+@await Html.PartialAsync("Confirm")

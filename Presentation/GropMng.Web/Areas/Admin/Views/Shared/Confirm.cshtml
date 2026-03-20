@@ -1,0 +1,7 @@
+@{
+    var selector = ViewData["ConfirmSelector"]?.ToString() ?? "form[data-grop-confirm='true']";
+}
+
+<script>
+    window.GropSwal?.bindConfirmForms('@selector');
+</script>

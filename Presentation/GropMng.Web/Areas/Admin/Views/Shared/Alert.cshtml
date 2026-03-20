@@ -1,0 +1,16 @@
+@{
+    var icon = ViewData["AlertIcon"]?.ToString() ?? "info";
+    var title = ViewData["AlertTitle"]?.ToString() ?? "Notification";
+    var text = ViewData["AlertText"]?.ToString() ?? string.Empty;
+}
+
+@if (!string.IsNullOrWhiteSpace(text) || !string.IsNullOrWhiteSpace(title))
+{
+    <script>
+        window.GropSwal?.alert({
+            icon: '@icon',
+            title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(title)),
+            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(text))
+        });
+    </script>
+}

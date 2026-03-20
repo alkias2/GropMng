@@ -67,6 +67,25 @@ public class AppLogService : IAppLogService
         await _sqlServerContext.SaveChangesAsync();
     }
 
+    public async Task DeleteLogsAsync(IEnumerable<int> ids)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        var idList = ids.Distinct().ToList();
+        if (!idList.Any())
+            return;
+
+        var entities = await _sqlServerContext.AppLogs
+            .Where(x => idList.Contains(x.Id))
+            .ToListAsync();
+
+        if (!entities.Any())
+            return;
+
+        _sqlServerContext.AppLogs.RemoveRange(entities);
+        await _sqlServerContext.SaveChangesAsync();
+    }
+
     public async Task ClearAllLogsAsync()
     {
         await _sqlServerContext.Database.ExecuteSqlRawAsync("DELETE FROM [AppLog]");

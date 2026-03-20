@@ -33,6 +33,7 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
 
      <!-- Helpers -->
     <script src="~/vendor/js/helpers.js"></script>
@@ -66,26 +67,7 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
                 </div>
                 <div class="menu-divider mt-0"></div>
                 <div class="menu-inner-shadow"></div>
-                <ul class="menu-inner py-1">
-                    <li class="menu-item">
-                        <a class="menu-link" asp-area="" asp-controller="Home" asp-action="Index">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div>Dashboard</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a class="menu-link" asp-area="Admin" asp-controller="AppLog" asp-action="Index">
-                            <i class="menu-icon tf-icons bx bx-detail"></i>
-                            <div>App Logs</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a class="menu-link" asp-area="Admin" asp-controller="Setting" asp-action="AdminArea">
-                            <i class="menu-icon tf-icons bx bx-cog"></i>
-                            <div>Admin Settings</div>
-                        </a>
-                    </li>
-                </ul>
+                @await Component.InvokeAsync("AppMenu")
             </aside>
             <!-- / Menu -->
 
@@ -185,9 +167,15 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
     <script src="~/vendor/libs/hammer/hammer.js"></script>
 
     <script src="~/vendor/js/menu.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/js/admin/grop-swal.js" asp-append-version="true"></script>
 
     <!-- Main JS -->
     <script src="~/js/main.js" asp-append-version="true"></script>
+
+    <script>
+        window.GropSwal?.bindConfirmForms("form[data-grop-confirm='true'], form[data-grop-delete='true']");
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

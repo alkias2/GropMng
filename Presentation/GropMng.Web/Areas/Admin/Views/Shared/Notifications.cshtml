@@ -1,0 +1,34 @@
+@{
+    var success = TempData["SuccessMessage"]?.ToString();
+    var error = TempData["ErrorMessage"]?.ToString();
+    var warning = TempData["WarningMessage"]?.ToString();
+    var info = TempData["InfoMessage"]?.ToString();
+}
+
+@if (!string.IsNullOrWhiteSpace(success))
+{
+    <script>
+        window.GropSwal?.notify({ icon: 'success', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(success)) });
+    </script>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <script>
+        window.GropSwal?.alert({ icon: 'error', title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error)) });
+    </script>
+}
+
+@if (!string.IsNullOrWhiteSpace(warning))
+{
+    <script>
+        window.GropSwal?.alert({ icon: 'warning', title: 'Warning', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(warning)) });
+    </script>
+}
+
+@if (!string.IsNullOrWhiteSpace(info))
+{
+    <script>
+        window.GropSwal?.notify({ icon: 'info', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(info)) });
+    </script>
+}
