@@ -105,7 +105,58 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
                             </li>
                             </ul>
                         </div>
+                        <!-- Language Switcher Dropdown -->
+                        <div class="nav-item dropdown-language-switcher dropdown me-2 me-xl-0">
+                            @{ 
+                                var currentCultureCode = GetCurrentCultureCode();
+                                var isGreekSelected = !string.IsNullOrWhiteSpace(currentCultureCode) && currentCultureCode.StartsWith("el", StringComparison.OrdinalIgnoreCase);
+                                var isEnglishSelected = !string.IsNullOrWhiteSpace(currentCultureCode) && currentCultureCode.StartsWith("en", StringComparison.OrdinalIgnoreCase);
+                            }
+                            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <i class="bx bx-globe bx-sm"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-start dropdown-languages">
+                                <li>
+                                    <form method="post" action="@Url.Action("SetLanguage", "Common", new { area = "" })" class="d-inline" style="width: 100%;">
+                                        <input type="hidden" name="culture" value="el-GR" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="dropdown-item btn-link @(isGreekSelected ? "active" : "")" style="border: none; background: none; cursor: pointer; padding: 0.5rem 1rem; width: 100%; text-align: left;">
+                                            <span class="align-middle">
+                                                @if (isGreekSelected)
+                                                {
+                                                    <i class="bx bx-check me-2"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bx bx-flag me-2"></i>
+                                                }
+                                                Ελληνικά
+                                            </span>
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form method="post" action="@Url.Action("SetLanguage", "Common", new { area = "" })" class="d-inline" style="width: 100%;">
+                                        <input type="hidden" name="culture" value="en-US" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="dropdown-item btn-link @(isEnglishSelected ? "active" : "")" style="border: none; background: none; cursor: pointer; padding: 0.5rem 1rem; width: 100%; text-align: left;">
+                                            <span class="align-middle">
+                                                @if (isEnglishSelected)
+                                                {
+                                                    <i class="bx bx-check me-2"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bx bx-flag me-2"></i>
+                                                }
+                                                English
+                                            </span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
+                        <!-- / Language Switcher Dropdown -->
                     </div>
                     </div>
                 </nav>

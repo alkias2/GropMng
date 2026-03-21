@@ -11,11 +11,11 @@ public interface IUserPreferenceService
     /// <summary>
     /// Gets user preferences for a specific user by user ID.
     /// </summary>
-    /// <param name="userId">The unique user identifier (string)</param>
+    /// <param name="userId">The unique user identifier (Guid)</param>
     /// <param name="cancellationToken">Cancellation token for the async operation</param>
     /// <returns>User preference entity for the specified user</returns>
     /// <exception cref="DomainException">Thrown when user preferences not found</exception>
-    Task<UserPreference> GetUserPreferenceAsync(string userId, CancellationToken cancellationToken = default);
+    Task<UserPreference> GetUserPreferenceAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets user preference by preference record ID.
@@ -51,3 +51,4 @@ public interface IUserPreferenceService
     /// <exception cref="DomainException">Thrown when preference not found</exception>
     Task DeletePreferenceAsync(int preferenceId, CancellationToken cancellationToken = default);
 }
+

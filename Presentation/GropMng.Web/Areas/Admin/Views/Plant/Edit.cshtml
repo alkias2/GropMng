@@ -1,16 +1,27 @@
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 @{
-    ViewData["Title"] = "Edit Plant";
+    var editText = T("common.edit");
+    var titleText = T("admin.plant.edit");
+    var plantsText = T("admin.plant.title");
+    var dashboardText = T("common.dashboard");
+    var dangerZoneText = T("common.dangerzone");
+    var deletePlantText = T("admin.plant.delete");
+    var deleteConfirmText = T("admin.plant.delete.confirm");
+    var cannotUndoText = T("common.delete.cannotundo");
+    var cancelText = T("common.cancel");
+    var deleteText = T("common.delete");
+
+    ViewData["Title"] = titleText;
     ViewData["ActiveMenu"] = "Plants";
 
     var headerModel = new AdminPageHeaderModel
     {
-        Title = $"Edit Plant: {Model.CommonName}",
+        Title = $"{editText}: {Model.CommonName}",
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Plants", Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
-            new() { Text = "Edit" }
+            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = plantsText, Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
+            new() { Text = editText }
         }
     };
 }
@@ -30,25 +41,26 @@
 
 <div class="card mt-4 border-danger">
     <div class="card-header">
-        <h5 class="card-title text-danger mb-0">Danger Zone</h5>
+        <h5 class="card-title text-danger mb-0">@dangerZoneText</h5>
     </div>
     <div class="card-body d-flex justify-content-between align-items-center">
-        <p class="mb-0">Delete this plant permanently. This action cannot be undone.</p>
+        <p class="mb-0">@deleteConfirmText @cannotUndoText</p>
         <form asp-area="Admin"
               asp-controller="Plant"
               asp-action="Delete"
               method="post"
               data-grop-delete="true"
               data-confirm-icon="warning"
-              data-confirm-title="Delete plant"
-              data-confirm-text="This plant will be permanently deleted."
-              data-confirm-button-text="Delete"
-              data-cancel-button-text="Cancel">
+              data-confirm-title="@deletePlantText"
+              data-confirm-text="@deleteConfirmText"
+              data-confirm-button-text="@deleteText"
+              data-cancel-button-text="@cancelText">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-danger">
-                <i class="bx bx-trash me-1"></i> Delete Plant
+                <i class="bx bx-trash me-1"></i> @deletePlantText
             </button>
         </form>
     </div>
 </div>
+

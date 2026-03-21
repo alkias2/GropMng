@@ -1,0 +1,33 @@
+@model GropMng.Web.Areas.Admin.Models.Localization.LanguageModel
+@{
+    ViewData["Title"] = T("admin.localization.language.create");
+    ViewData["ActiveMenu"] = "Localization";
+
+    var titleText = (string)ViewData["Title"]!;
+    var dashboardText = T("common.dashboard");
+    var languagesText = T("admin.localization.languages.title");
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = titleText,
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
+            new() { Text = titleText }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Localization" asp-action="CreateLanguage" method="post">
+            @Html.AntiForgeryToken()
+            <partial name="_LanguageForm" model="Model" />
+        </form>
+    </div>
+</div>
+

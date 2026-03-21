@@ -1,16 +1,21 @@
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 @{
-    ViewData["Title"] = "Create Plant";
+    var titleText = T("admin.plant.create");
+    var plantsText = T("admin.plant.title");
+    var dashboardText = T("common.dashboard");
+    var createText = T("common.create");
+
+    ViewData["Title"] = titleText;
     ViewData["ActiveMenu"] = "Plants";
 
     var headerModel = new AdminPageHeaderModel
     {
-        Title = "Create Plant",
+        Title = titleText,
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Plants", Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
-            new() { Text = "Create" }
+            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = plantsText, Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
+            new() { Text = createText }
         }
     };
 }
@@ -26,3 +31,4 @@
         </form>
     </div>
 </div>
+

@@ -37,7 +37,7 @@ public class LocationService : ILocationService
     #region Public
 
     /// <inheritdoc />
-    public Task<IPagedList<Location>> GetLocationsAsync(string ownerId, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default)
+    public Task<IPagedList<Location>> GetLocationsAsync(Guid ownerId, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
@@ -52,7 +52,7 @@ public class LocationService : ILocationService
     }
 
     /// <inheritdoc />
-    public async Task<Location?> GetLocationByIdAsync(int locationId, string ownerId, bool includeGardenSpots = false, CancellationToken cancellationToken = default)
+    public async Task<Location?> GetLocationByIdAsync(int locationId, Guid ownerId, bool includeGardenSpots = false, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
@@ -107,14 +107,14 @@ public class LocationService : ILocationService
     }
 
     /// <inheritdoc />
-    public async Task DeleteLocationAsync(int locationId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteLocationAsync(int locationId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         var location = await EnsureLocationOwnedAsync(locationId, ownerId, cancellationToken);
         await _locationRepository.DeleteAsync(location, cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<GardenSpot>> GetGardenSpotsAsync(int locationId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<GardenSpot>> GetGardenSpotsAsync(int locationId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsureLocationOwnedAsync(locationId, ownerId, cancellationToken);
 
@@ -167,7 +167,7 @@ public class LocationService : ILocationService
     }
 
     /// <inheritdoc />
-    public async Task DeleteGardenSpotAsync(int locationId, int gardenSpotId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteGardenSpotAsync(int locationId, int gardenSpotId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsureLocationOwnedAsync(locationId, ownerId, cancellationToken);
         var gardenSpot = await EnsureGardenSpotOwnedAsync(locationId, gardenSpotId, ownerId, cancellationToken);
@@ -178,7 +178,7 @@ public class LocationService : ILocationService
 
     #region Privates
 
-    private async Task<Location> EnsureLocationOwnedAsync(int locationId, string ownerId, CancellationToken cancellationToken)
+    private async Task<Location> EnsureLocationOwnedAsync(int locationId, Guid ownerId, CancellationToken cancellationToken)
     {
         ValidateOwnerId(ownerId);
 
@@ -189,7 +189,7 @@ public class LocationService : ILocationService
         return location ?? throw new DomainException($"Location with id '{locationId}' was not found for owner '{ownerId}'.");
     }
 
-    private async Task<GardenSpot> EnsureGardenSpotOwnedAsync(int locationId, int gardenSpotId, string ownerId, CancellationToken cancellationToken)
+    private async Task<GardenSpot> EnsureGardenSpotOwnedAsync(int locationId, int gardenSpotId, Guid ownerId, CancellationToken cancellationToken)
     {
         var gardenSpot = await _gardenSpotRepository.FirstOrDefaultAsync(
             entity => entity.Id == gardenSpotId && entity.LocationId == locationId && entity.OwnerId == ownerId,
@@ -211,9 +211,9 @@ public class LocationService : ILocationService
             throw new DomainException($"A garden spot with the name '{name}' already exists in location '{locationId}'.");
     }
 
-    private static void ValidateOwnerId(string ownerId)
+    private static void ValidateOwnerId(Guid ownerId)
     {
-        if (string.IsNullOrWhiteSpace(ownerId))
+        if (ownerId == Guid.Empty)
             throw new DomainException("OwnerId is required.");
     }
 
@@ -239,3 +239,5 @@ public class LocationService : ILocationService
 
     #endregion
 }
+
+

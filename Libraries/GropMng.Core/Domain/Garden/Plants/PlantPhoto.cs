@@ -2,7 +2,7 @@ namespace GropMng.Core.Domain.Garden.Plants;
 
 public partial class PlantPhoto : AuditableEntity
 {
-    public required string OwnerId { get; set; }
+    public Guid OwnerId { get; set; }
 
     public int PlantInstanceId { get; set; }
 

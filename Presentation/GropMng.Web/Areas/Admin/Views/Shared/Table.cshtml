@@ -1,0 +1,16 @@
+@model GropMng.Web.Areas.Admin.Models.Common.AdminDataTableModel
+
+<div class="card">
+    <div class="@Model.WrapperCssClass">
+        <table id="@Model.TableId" class="@Model.TableCssClass">
+            <thead>
+                <tr>
+                    @foreach (var column in Model.Columns)
+                    {
+                        <th class="@column.CssClass" style="@column.Style">@Html.Raw(column.Title)</th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>

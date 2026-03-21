@@ -1,0 +1,26 @@
+@model GropMng.Web.Areas.Admin.Models.Localization.LocaleResourceModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <grop-label asp-for="ResourceName" />
+        <input asp-for="ResourceName" class="form-control" />
+        <span asp-validation-for="ResourceName" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <grop-label asp-for="ResourceValue" />
+        <textarea asp-for="ResourceValue" class="form-control" rows="8"></textarea>
+        <span asp-validation-for="ResourceValue" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+        <i class="bx bx-save me-1"></i> @T("common.save")
+    </button>
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Localization" asp-action="Resources" asp-route-languageId="@Model.LanguageId">
+        @T("common.cancel")
+    </a>
+</div>
+

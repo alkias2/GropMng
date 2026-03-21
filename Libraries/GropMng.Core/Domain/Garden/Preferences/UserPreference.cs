@@ -4,7 +4,7 @@ namespace GropMng.Core.Domain.Garden.Preferences;
 
 public partial class UserPreference : AuditableEntity
 {
-    public required string OwnerId { get; set; }
+    public Guid OwnerId { get; set; }
 
     public LengthUnitType LengthUnit { get; set; } = LengthUnitType.Centimetre;
 

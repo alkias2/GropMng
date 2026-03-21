@@ -4,7 +4,7 @@ namespace GropMng.Core.Domain.Garden.Locations;
 
 public partial class Location : AuditableEntity
 {
-    public required string OwnerId { get; set; }
+    public Guid OwnerId { get; set; }
 
     public required string Name { get; set; }
 
