@@ -1,47 +1,15 @@
-@using GropMng.Core.Domain.Garden.Enums
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantSearchModel
 @{
-    var titleText = T("admin.plant.title");
-    var dashboardText = T("common.dashboard");
-    var addPlantText = T("admin.plant.create");
-    var filtersText = T("common.filters");
-    var applyText = T("common.apply");
-    var clearText = T("common.clear");
-    var searchText = T("common.search");
-    var categoryText = T("admin.plant.fields.category");
-    var allCategoriesText = T("admin.plant.category.all");
-    var actionsText = T("common.actions");
-    var idText = T("admin.plant.grid.id");
-    var commonNameText = T("admin.plant.fields.commonname");
-    var scientificNameText = T("admin.plant.fields.scientificname");
-    var familyText = T("admin.plant.fields.family");
-    var flagsText = T("admin.plant.grid.flags");
-
-    var tableModel = new AdminDataTableModel
-    {
-        TableId = "plantsTable",
-        Columns = new List<AdminDataTableColumnModel>
-        {
-            new() { Title = idText },
-            new() { Title = commonNameText },
-            new() { Title = scientificNameText },
-            new() { Title = familyText },
-            new() { Title = categoryText },
-            new() { Title = flagsText },
-            new() { Title = actionsText, CssClass = "text-center" }
-        }
-    };
-
-    ViewData["Title"] = titleText;
+    ViewData["Title"] = T("admin.plant.title");
     ViewData["ActiveMenu"] = "Plants";
 
     var headerModel = new AdminPageHeaderModel
     {
-        Title = titleText,
+        Title = T("admin.plant.title"),
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
-            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = titleText }
+            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = T("admin.plant.title") }
         }
     };
 }
@@ -51,34 +19,33 @@
 
 <div class="d-flex justify-content-end mb-4">
     <a class="btn btn-primary" asp-area="Admin" asp-controller="Plant" asp-action="Create">
-        <i class="bx bx-plus me-1"></i> @addPlantText
+        <i class="bx bx-plus me-1"></i> @T("admin.plant.create")
     </a>
 </div>
 
 <!-- Filter card -->
 <div class="card mb-4">
     <div class="card-header d-flex align-items-center">
-        <h5 class="card-title mb-0 me-auto">@filtersText</h5>
+        <h5 class="card-title mb-0 me-auto">@T("common.filters")</h5>
         <button id="btnApplyFilters" class="btn btn-primary btn-sm">
-            <i class="bx bx-filter-alt me-1"></i> @applyText
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
         </button>
         <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
-            <i class="bx bx-x me-1"></i> @clearText
+            <i class="bx bx-x me-1"></i> @T("common.clear")
         </button>
     </div>
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-8">
-                <label class="form-label" for="searchTermFilter">@searchText</label>
+                <label class="form-label" for="searchTermFilter">@T("common.search")</label>
                 <input id="searchTermFilter" class="form-control" type="text" placeholder="@T("admin.plant.search.placeholder")" />
             </div>
             <div class="col-md-4">
-                <label class="form-label" for="categoryFilter">@categoryText</label>
+                <label class="form-label" for="categoryFilter">@T("admin.plant.fields.category")</label>
                 <select id="categoryFilter" class="form-select">
-                    <option value="">@allCategoriesText</option>
-                    @foreach (var category in Enum.GetValues<PlantCategory>())
+                    @foreach (var item in Model.AvailableCategories)
                     {
-                        <option value="@category">@T($"admin.plant.category.{category.ToString().ToLowerInvariant()}")</option>
+                        <option value="@item.Value">@item.Text</option>
                     }
                 </select>
             </div>
@@ -86,7 +53,7 @@
     </div>
 </div>
 
-@await Html.PartialAsync("Table", tableModel)
+<partial name="Table" model="Model.GridModel" />
 
 <form id="antiForgeryForm" method="post">
     @Html.AntiForgeryToken()
@@ -99,126 +66,47 @@
 
 @section Scripts {
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-    <script src="~/js/admin.table.js" asp-append-version="true"></script>
+    <script src="~/js-custom/admin.table.js" asp-append-version="true"></script>
+    <script src="~/js-custom/admin.grids/grid-plant.js" asp-append-version="true"></script>
     <script>
         'use strict';
 
-        const listUrl = '@Url.Action("List", "Plant", new { area = "Admin" })';
-        const editUrl = '@Url.Action("Edit", "Plant", new { area = "Admin" })';
-        const deleteUrl = '@Url.Action("Delete", "Plant", new { area = "Admin" })';
-        const token = $('#antiForgeryForm input[name="__RequestVerificationToken"]').val();
-        const edibleText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.edible")));
-        const medicinalText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.medicinal")));
-        const toxicText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.toxic")));
-        const noneText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.none")));
-        const deleteTitleText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.delete.title")));
-        const deleteConfirmText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.delete.confirm")));
-        const deleteText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.delete")));
-        const cancelText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel")));
-        const dataTableTexts = {
-            processing: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.processing"))),
-            lengthMenu: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.lengthmenu"))),
-            zeroRecords: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.zerorecords"))),
-            emptyTable: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.emptytable"))),
-            info: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.info"))),
-            infoEmpty: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infoempty"))),
-            infoFiltered: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infofiltered"))),
-            search: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.search"))),
-            first: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.first"))),
-            last: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.last"))),
-            next: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.next"))),
-            previous: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.previous")))
-        };
-        const categoryTexts = {
-            Shrub: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.shrub"))),
-            Tree: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.tree"))),
-            Climber: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.climber"))),
-            Ornamental: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.ornamental"))),
-            Edible: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.edible"))),
-            Aromatic: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.aromatic"))),
-            Succulent: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.succulent"))),
-            Grass: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.grass"))),
-            Fern: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.fern"))),
-            Other: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.other")))
-        };
-
-        function renderFlags(row) {
-            const flags = [];
-            if (row.isEdible) flags.push(`<span class="badge bg-label-success me-1">${edibleText}</span>`);
-            if (row.isMedicinal) flags.push(`<span class="badge bg-label-info me-1">${medicinalText}</span>`);
-            if (row.isToxic) flags.push(`<span class="badge bg-label-danger me-1">${toxicText}</span>`);
-            return flags.length ? flags.join('') : `<span class="text-muted">${noneText}</span>`;
-        }
-
-        const table = window.GropAdminTable.createDataTable('#plantsTable', {
-            localizedTexts: dataTableTexts,
-            ajax: {
-                url: listUrl,
-                type: 'POST',
-                data: function (d) {
-                    d.searchTerm = $('#searchTermFilter').val();
-                    d.category = $('#categoryFilter').val();
-                }
-            },
-            columns: [
-                { data: 'id', width: '60px' },
-                { data: 'commonName' },
-                { data: 'scientificName' },
-                {
-                    data: 'family',
-                    render: function (data) {
-                        return data || '<span class="text-muted">-</span>';
-                    }
-                },
-                {
-                    data: 'category',
-                    render: function (data) {
-                        const localizedCategory = window.GropAdminTable.localizeByMap(data, categoryTexts, '');
-                        return `<span class="badge bg-label-primary">${localizedCategory}</span>`;
-                    }
-                },
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        return renderFlags(row);
-                    }
-                },
-                {
-                    data: 'id',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center',
-                    width: '180px',
-                    render: function (id) {
-                        return `<a class="btn btn-sm btn-outline-primary me-1" href="${editUrl}/${id}"><i class="bx bx-edit-alt"></i></a>
-                                <form class="d-inline js-delete-form"
-                                      action="${deleteUrl}"
-                                      method="post"
-                                      data-grop-delete="true"
-                                      data-confirm-icon="warning"
-                                                                            data-confirm-title="${deleteTitleText}"
-                                                                            data-confirm-text="${deleteConfirmText}"
-                                                                            data-confirm-button-text="${deleteText}"
-                                                                            data-cancel-button-text="${cancelText}">
-                                    <input type="hidden" name="__RequestVerificationToken" value="${token}" />
-                                    <input type="hidden" name="id" value="${id}" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>
-                                </form>`;
-                    }
-                }
-            ],
-            order: [[1, 'asc']]
-        });
-
-        window.GropAdminTable.bindFilterButtons(table, {
-            applyButtonSelector: '#btnApplyFilters',
-            clearButtonSelector: '#btnClearFilters',
-            clearCallback: function () {
-                $('#searchTermFilter').val('');
-                $('#categoryFilter').val('');
+        window.gropPlantGridConfig = {
+            editUrl: '@Url.Action("Edit", "Plant", new { area = "Admin" })',
+            deleteUrl: '@Url.Action("Delete", "Plant", new { area = "Admin" })',
+            token: $('#antiForgeryForm input[name="__RequestVerificationToken"]').val(),
+            edibleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.edible"))),
+            medicinalText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.medicinal"))),
+            toxicText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.flags.toxic"))),
+            noneText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.none"))),
+            deleteTitleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.delete.title"))),
+            deleteConfirmText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.delete.confirm"))),
+            deleteText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.delete"))),
+            cancelText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel"))),
+            categoryTexts: {
+                Shrub: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.shrub"))),
+                Tree: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.tree"))),
+                Climber: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.climber"))),
+                Ornamental: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.ornamental"))),
+                Edible: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.edible"))),
+                Aromatic: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.aromatic"))),
+                Succulent: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.succulent"))),
+                Grass: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.grass"))),
+                Fern: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.fern"))),
+                Other: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.plant.category.other")))
             }
+        };
+
+        $(document).ready(function () {
+            const table = $('#plantsTable').DataTable();
+            window.GropAdminTable.bindFilterButtons(table, {
+                applyButtonSelector: '#btnApplyFilters',
+                clearButtonSelector: '#btnClearFilters',
+                clearCallback: function () {
+                    $('#searchTermFilter').val('');
+                    $('#categoryFilter').val('');
+                }
+            });
         });
     </script>
 }

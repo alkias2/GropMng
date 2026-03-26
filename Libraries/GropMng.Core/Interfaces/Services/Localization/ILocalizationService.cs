@@ -71,4 +71,16 @@ public interface ILocalizationService
     /// <param name="updateExistingResources">A value indicating whether existing resources should be updated.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     Task ImportResourcesFromXmlAsync(Language language, StreamReader xmlStreamReader, bool updateExistingResources = true, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get localized value of enum
+    /// </summary>
+    /// <typeparam name="TEnum">Enum type</typeparam>
+    /// <param name="enumValue">Enum value</param>
+    /// <param name="languageId">Language identifier; pass null to use the current working language</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation
+    /// The task result contains the localized value
+    /// </returns>
+    Task<string> GetLocalizedEnumAsync<TEnum>(TEnum enumValue, int? languageId = null) where TEnum : struct;
 }

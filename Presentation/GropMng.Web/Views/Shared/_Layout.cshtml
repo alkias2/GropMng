@@ -228,6 +228,23 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
         window.GropSwal?.bindConfirmForms("form[data-grop-confirm='true'], form[data-grop-delete='true']");
     </script>
 
+    <script>
+        window.gropDataTableTexts = {
+            processing: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.processing"))),
+            lengthMenu: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.lengthmenu"))),
+            zeroRecords: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.zerorecords"))),
+            emptyTable: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.emptytable"))),
+            info: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.info"))),
+            infoEmpty: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infoempty"))),
+            infoFiltered: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infofiltered"))),
+            search: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.search"))),
+            first: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.first"))),
+            last: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.last"))),
+            next: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.next"))),
+            previous: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.previous")))
+        };
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

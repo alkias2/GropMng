@@ -31,9 +31,9 @@ public class AppLogController : Controller
 
     /// <summary>Renders the AppLog index page, passing an initialised search model to the view.</summary>
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var searchModel = _factory.PrepareSearchModel();
+        var searchModel = await _factory.PrepareSearchModelAsync(cancellationToken: cancellationToken);
         return View(searchModel);
     }
 

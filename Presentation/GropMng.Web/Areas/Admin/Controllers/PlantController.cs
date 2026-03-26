@@ -45,9 +45,9 @@ public class PlantController : Controller
     /// Renders the Plant index page.
     /// </summary>
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var searchModel = _plantModelFactory.PrepareSearchModel();
+        var searchModel = await _plantModelFactory.PrepareSearchModelAsync(cancellationToken: cancellationToken);
         return View(searchModel);
     }
 

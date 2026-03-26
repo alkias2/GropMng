@@ -1,0 +1,194 @@
+@using System.Text
+@model GropMng.Web.Framework.Models.DataTables.GropDataTablesModel
+
+@{
+    // Helper method to generate render JavaScript
+    string GetRenderFunction(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        if (render == null) return "";
+        
+        var renderType = render.GetType().Name;
+        return renderType switch
+        {
+            "RenderCheckBox" => ",\n                render: function(data, type, row) { return '<input type=\"checkbox\" value=\"' + window.GropAdminTable.escapeHtml(data) + '\" class=\"dt-checkbox\">'; }",
+            "RenderButtonEdit" => ",\n                render: function(data, type, row) { return '<a href=\"#\" class=\"btn btn-sm btn-primary\" title=\"Edit\"><i class=\"bx bx-pencil\"></i></a>'; }",
+            "RenderButtonRemove" => ",\n                render: function(data, type, row) { return '<a href=\"#\" class=\"btn btn-sm btn-danger\" title=\"Delete\"><i class=\"bx bx-trash\"></i></a>'; }",
+            "RenderButtonView" => ",\n                render: function(data, type, row) { return '<a href=\"#\" class=\"btn btn-sm btn-info\" title=\"View\"><i class=\"bx bx-eye\"></i></a>'; }",
+            "RenderLink" => ",\n                render: function(data, type, row) { return '<a href=\"#\">' + window.GropAdminTable.escapeHtml(data) + '</a>'; }",
+            "RenderBoolean" => BuildBooleanRender(render),
+            "RenderDate" => BuildDateRender(render),
+            "RenderPicture" => BuildPictureRender(render),
+            "RenderCustom" => BuildCustomRender(render),
+            "RenderBadge" => BuildBadgeRender(render),
+            _ => ""
+        };
+    }
+
+    string BuildBooleanRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var boolRender = render as GropMng.Web.Framework.Models.DataTables.RenderBoolean;
+        return $",\n                render: function(data, type, row) {{ return data ? '{boolRender.TrueValue}' : '{boolRender.FalseValue}'; }}";
+    }
+
+    string BuildDateRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var dateRender = render as GropMng.Web.Framework.Models.DataTables.RenderDate;
+        var format = !string.IsNullOrWhiteSpace(dateRender.Format) ? dateRender.Format : "toLocaleDateString";
+        return $",\n                render: function(data, type, row) {{ if (!data) return ''; var d = new Date(data); return d.{format}(); }}";
+    }
+
+    string BuildPictureRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var picRender = render as GropMng.Web.Framework.Models.DataTables.RenderPicture;
+        var style = picRender?.MaxWidth.HasValue == true ? $"max-width: {picRender.MaxWidth}px;" : "";
+        return $",\n                render: function(data, type, row) {{ return '<img src=\"' + window.GropAdminTable.escapeHtml(data) + '\" alt=\"\" class=\"{picRender?.ImageClass ?? ""}\" style=\"{style}\">'; }}";
+    }
+
+    string BuildCustomRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var customRender = render as GropMng.Web.Framework.Models.DataTables.RenderCustom;
+        return $",\n                render: {customRender?.FunctionName ?? "function() {{ return ''; }}"}";
+    }
+
+    string BuildBadgeRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var badgeRender = render as GropMng.Web.Framework.Models.DataTables.RenderBadge;
+        return $",\n                render: function(data, type, row) {{ return '<span class=\"{badgeRender.DefaultClass}\">' + window.GropAdminTable.escapeHtml(data) + '</span>'; }}";
+    }
+
+    string BuildAjaxFilterData()
+    {
+        if (Model.Filters == null || Model.Filters.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var filter in Model.Filters)
+        {
+            if (string.IsNullOrWhiteSpace(filter?.Name) || string.IsNullOrWhiteSpace(filter.ElementId))
+            {
+                continue;
+            }
+
+            sb.Append($"d.{filter.Name} = $('#{filter.ElementId}').val();\n                        ");
+        }
+
+        return sb.ToString();
+    }
+
+    // Build column definitions JSON
+    var columnDefsSb = new StringBuilder();
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var col = Model.ColumnCollection[i];
+        if (i > 0) columnDefsSb.Append(",\n");
+        columnDefsSb.Append($@"            {{
+                targets: {i},
+                orderable: {col.Sortable.ToString().ToLower()},
+                searchable: {col.Searchable.ToString().ToLower()},
+                visible: {col.Visible.ToString().ToLower()},
+                className: '{col.ClassName ?? ""}'
+            }}");
+    }
+    string columnDefsJs = columnDefsSb.ToString();
+
+    // Build columns configuration JSON
+    var columnsSb = new StringBuilder();
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var col = Model.ColumnCollection[i];
+        if (i > 0) columnsSb.Append(",\n");
+        string renderFunc = GetRenderFunction(col.Render);
+        columnsSb.Append($@"            {{
+                data: '{col.Data}'{renderFunc}
+            }}");
+    }
+    string columnsJs = columnsSb.ToString();
+    var ajaxFilterDataJs = BuildAjaxFilterData();
+}
+
+<script type="text/javascript">
+    (function (window) {
+        'use strict';
+
+        var maxRetries = 50;
+        var retryDelayMs = 100;
+
+        function tryInitialize(retry) {
+            var $ = window.jQuery;
+
+            if (!window || !$ || !window.GropAdminTable) {
+                if (retry < maxRetries) {
+                    window.setTimeout(function () {
+                        tryInitialize(retry + 1);
+                    }, retryDelayMs);
+                }
+                else {
+                    console.warn('DataTables initialization skipped: jQuery or GropAdminTable is unavailable.');
+                }
+
+                return;
+            }
+
+            $(function () {
+                var tableElement = '#@Model.Name';
+                var $tableElement = $(tableElement);
+
+                if ($tableElement.length === 0) {
+                    console.error('DataTables element not found: ' + tableElement);
+                    return;
+                }
+
+                // Prevent double-initialization when retry races with document readiness.
+                if ($.fn.DataTable && $.fn.DataTable.isDataTable(tableElement)) {
+                    return;
+                }
+
+                // Initialize DataTables with declarative configuration
+                var dtConfig = {
+                    localizedTexts: window.gropDataTableTexts || null,
+                    ajax: {
+                        url: '@Url.Action(Model.UrlRead.ActionName, Model.UrlRead.ControllerName)',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: function (d) {
+                            @Html.Raw(ajaxFilterDataJs)
+                        }
+                    },
+                    processing: true,
+                    serverSide: @Model.ServerSideProcessing.ToString().ToLower(),
+                    paging: true,
+                    pageLength: @Model.Length,
+                    lengthMenu: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LengthMenu)),
+                    lengthChange: @Model.ShowLengthMenu.ToString().ToLower(),
+                    searching: @Model.ShowSearch.ToString().ToLower(),
+                    ordering: true,
+                    info: @Model.ShowInfo.ToString().ToLower(),
+                    responsive: true,
+                    columnDefs: [
+@Html.Raw(columnDefsJs)
+                    ],
+                    columns: [
+@Html.Raw(columnsJs)
+                    ]
+                };
+
+                // Create the DataTable
+                var table = window.GropAdminTable.createDataTable(tableElement, dtConfig);
+
+                // Bind filter button if configured
+                @if (!string.IsNullOrWhiteSpace(Model.SearchButtonId))
+                {
+                    <text>
+                    window.GropAdminTable.bindFilterButtons(table, {
+                        applyButtonSelector: '#@Model.SearchButtonId'
+                    });
+                    </text>
+                }
+            });
+        }
+
+        tryInitialize(0);
+    })(window);
+</script>

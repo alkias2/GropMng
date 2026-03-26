@@ -1,16 +1,20 @@
-@model GropMng.Web.Areas.Admin.Models.Common.AdminDataTableModel
+@model GropMng.Web.Framework.Models.DataTables.GropDataTablesModel
 
 <div class="card">
-    <div class="@Model.WrapperCssClass">
-        <table id="@Model.TableId" class="@Model.TableCssClass">
+    <div class="card-datatable table-responsive pt-0">
+        <table id="@Model.Name" class="table table-bordered">
             <thead>
                 <tr>
-                    @foreach (var column in Model.Columns)
+                    @foreach (var column in Model.ColumnCollection)
                     {
-                        <th class="@column.CssClass" style="@column.Style">@Html.Raw(column.Title)</th>
+                        <th class="@column.ClassName" style="@(!string.IsNullOrWhiteSpace(column.Width) ? $"width: {column.Width};" : "")@column.Style">
+                            @Html.Raw(column.Title)
+                        </th>
                     }
                 </tr>
             </thead>
         </table>
     </div>
 </div>
+
+<partial name="_Table.Definition" model="Model" />

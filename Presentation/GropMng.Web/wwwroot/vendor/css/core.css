@@ -19348,6 +19348,10 @@ html:not(.layout-footer-fixed) .content-wrapper {
   opacity: 0.6;
 }
 
+#appLogsTable_processing.dataTables_processing {
+  display: none;
+}
+
 .app-brand {
   display: flex;
   flex-grow: 0;

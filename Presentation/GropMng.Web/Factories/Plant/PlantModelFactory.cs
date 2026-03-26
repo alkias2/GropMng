@@ -2,7 +2,9 @@ using AutoMapper;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Areas.Admin.Models.Plant;
+using GropMng.Web.Extensions;
 using GropMng.Web.Framework.Models.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using DomainPlant = GropMng.Core.Domain.Garden.Plants.Plant;
@@ -18,15 +20,17 @@ public class PlantModelFactory : IPlantModelFactory
 
     private readonly IPlantService _plantService;
     private readonly IMapper _mapper;
+    private readonly ILocalizationService _localizationService;
 
     #endregion
 
     #region Ctor
 
-    public PlantModelFactory(IPlantService plantService, IMapper mapper)
+    public PlantModelFactory(IPlantService plantService, IMapper mapper, ILocalizationService localizationService)
     {
         _plantService = plantService;
         _mapper = mapper;
+        _localizationService = localizationService;
     }
 
     #endregion
@@ -34,10 +38,27 @@ public class PlantModelFactory : IPlantModelFactory
     #region Public
 
     /// <inheritdoc />
-    public PlantSearchModel PrepareSearchModel(PlantSearchModel? searchModel = null)
+    public async Task<PlantSearchModel> PrepareSearchModelAsync(PlantSearchModel? searchModel = null, CancellationToken cancellationToken = default)
     {
         searchModel ??= new PlantSearchModel();
         searchModel.SetGridPageSize();
+
+        var titles = new PlantGridColumnTitles
+        {
+            Id             = await _localizationService.GetResourceAsync("admin.plant.grid.id"),
+            CommonName     = await _localizationService.GetResourceAsync("admin.plant.fields.commonname"),
+            ScientificName = await _localizationService.GetResourceAsync("admin.plant.fields.scientificname"),
+            Family         = await _localizationService.GetResourceAsync("admin.plant.fields.family"),
+            Category       = await _localizationService.GetResourceAsync("admin.plant.fields.category"),
+            Flags          = await _localizationService.GetResourceAsync("admin.plant.grid.flags"),
+            Actions        = await _localizationService.GetResourceAsync("common.actions"),
+        };
+
+        searchModel.GridModel = PlantGridDefinition.Build(searchModel, titles);
+        searchModel.AvailableCategories = await _localizationService.GetLocalizedEnumSelectListAsync<PlantCategory>(
+            "admin.plant.category",
+            "admin.plant.category.all");
+
         return searchModel;
     }
 

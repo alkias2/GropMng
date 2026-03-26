@@ -29,4 +29,5 @@ public interface ILanguageService
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>The default published language.</returns>
     Task<Language> GetDefaultLanguageAsync(CancellationToken cancellationToken = default);
+   
 }

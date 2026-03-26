@@ -29,10 +29,11 @@ public class AppLogService : IAppLogService
         int pageIndex,
         int pageSize,
         string? level = null,
+        string? message = null,
         DateTime? fromUtc = null,
         DateTime? toUtc = null)
     {
-        var query = BuildFilteredQuery(level, fromUtc, toUtc)
+        var query = BuildFilteredQuery(level, message, fromUtc, toUtc)
             .OrderByDescending(x => x.Timestamp)
             .ThenByDescending(x => x.Id);
 
@@ -45,9 +46,9 @@ public class AppLogService : IAppLogService
         return new PagedList<AppLog>(items, pageIndex, pageSize, totalCount);
     }
 
-    public Task<int> GetLogsCountAsync(string? level = null, DateTime? fromUtc = null, DateTime? toUtc = null)
+    public Task<int> GetLogsCountAsync(string? level = null, string? message = null, DateTime? fromUtc = null, DateTime? toUtc = null)
     {
-        return BuildFilteredQuery(level, fromUtc, toUtc).CountAsync();
+        return BuildFilteredQuery(level, message, fromUtc, toUtc).CountAsync();
     }
 
     public Task<AppLog?> GetLogByIdAsync(int id)
@@ -91,12 +92,18 @@ public class AppLogService : IAppLogService
         await _sqlServerContext.Database.ExecuteSqlRawAsync("DELETE FROM [AppLog]");
     }
 
-    private IQueryable<AppLog> BuildFilteredQuery(string? level, DateTime? fromUtc, DateTime? toUtc)
+    private IQueryable<AppLog> BuildFilteredQuery(string? level, string? message, DateTime? fromUtc, DateTime? toUtc)
     {
         var query = _sqlServerContext.AppLogs.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(level))
             query = query.Where(x => x.Level == level);
+
+        if (!string.IsNullOrWhiteSpace(message))
+        {
+            var normalizedMessage = message.Trim();
+            query = query.Where(x => x.Message.Contains(normalizedMessage));
+        }
 
         if (fromUtc.HasValue)
             query = query.Where(x => x.Timestamp >= fromUtc.Value);

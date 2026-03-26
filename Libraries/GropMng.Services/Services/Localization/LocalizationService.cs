@@ -5,6 +5,7 @@ using GropMng.Core.Interfaces.Services.Localization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System.Xml.Linq;
+using GropMng.Core;
 
 namespace GropMng.Services.Services.Localization;
 
@@ -223,6 +224,33 @@ public class LocalizationService : ILocalizationService
         InvalidateLanguageCache(language.Id);
     }
 
+    /// <summary>
+    /// Get localized value of enum
+    /// </summary>
+    /// <typeparam name="TEnum">Enum type</typeparam>
+    /// <param name="enumValue">Enum value</param>
+    /// <param name="languageId">Language identifier; pass null to use the current working language</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation
+    /// The task result contains the localized value
+    /// </returns>
+    public virtual async Task<string> GetLocalizedEnumAsync<TEnum>(TEnum enumValue, int? languageId = null) where TEnum : struct
+    {
+        if (!typeof(TEnum).IsEnum)
+            throw new ArgumentException("T must be an enumerated type");
+
+        //localized value
+        var workingLanguage = await _languageService.GetLanguageByIdAsync(languageId ?? 1);
+        var resourceName = $"Enums.{typeof(TEnum)}.{enumValue}";
+        var result = await GetResourceAsync(resourceName, languageId ?? 1, false, string.Empty, true);
+
+        //set default value if required
+        if (string.IsNullOrEmpty(result))
+            result = CommonHelper.ConvertEnum(enumValue.ToString());
+
+        return result;
+    }
+
     private static string NormalizeKey(string resourceKey)
     {
         return resourceKey.Trim().ToLowerInvariant();
@@ -258,4 +286,6 @@ public class LocalizationService : ILocalizationService
     {
         _memoryCache.Remove(BuildCacheKey(languageId));
     }
+
+
 }

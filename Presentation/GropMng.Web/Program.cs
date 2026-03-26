@@ -98,6 +98,7 @@ if (sqlServerSettings.CanConnect)
     // Localization services
     builder.Services.AddScoped<ILanguageService, LanguageService>();
     builder.Services.AddScoped<ILocalizationService, LocalizationService>();
+    builder.Services.AddScoped<IEnumLocalizationHelper, EnumLocalizationHelper>();
 
     // Configuration settings service (global scope, no store overrides)
     builder.Services.AddScoped<ISettingService, SettingService>();
