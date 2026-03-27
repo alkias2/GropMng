@@ -18,6 +18,7 @@ public class LocalizationService : ILocalizationService
 
     private readonly IRepository<LocaleStringResource> _resourceRepository;
     private readonly ILanguageService _languageService;
+    private readonly ICurrentLanguageContext _currentLanguageContext;
     private readonly IMemoryCache _memoryCache;
     private readonly ILogger<LocalizationService> _logger;
 
@@ -27,11 +28,13 @@ public class LocalizationService : ILocalizationService
     public LocalizationService(
         IRepository<LocaleStringResource> resourceRepository,
         ILanguageService languageService,
+        ICurrentLanguageContext currentLanguageContext,
         IMemoryCache memoryCache,
         ILogger<LocalizationService> logger)
     {
         _resourceRepository = resourceRepository ?? throw new ArgumentNullException(nameof(resourceRepository));
         _languageService = languageService ?? throw new ArgumentNullException(nameof(languageService));
+        _currentLanguageContext = currentLanguageContext ?? throw new ArgumentNullException(nameof(currentLanguageContext));
         _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -239,10 +242,11 @@ public class LocalizationService : ILocalizationService
         if (!typeof(TEnum).IsEnum)
             throw new ArgumentException("T must be an enumerated type");
 
-        //localized value
-        var workingLanguage = await _languageService.GetLanguageByIdAsync(languageId ?? 1);
+        var resolvedLanguageId = languageId
+            ?? (await _currentLanguageContext.GetCurrentLanguageAsync()).Id;
+
         var resourceName = $"Enums.{typeof(TEnum)}.{enumValue}";
-        var result = await GetResourceAsync(resourceName, languageId ?? 1, false, string.Empty, true);
+        var result = await GetResourceAsync(resourceName, resolvedLanguageId, false, string.Empty, true);
 
         //set default value if required
         if (string.IsNullOrEmpty(result))

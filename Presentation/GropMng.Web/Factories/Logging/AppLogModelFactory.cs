@@ -4,7 +4,9 @@ using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Web.Areas.Admin.Models.Logging;
 using GropMng.Web.Framework.Models.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Globalization;
+using AppLogLevel = GropMng.Core.Domain.Logging.LogLevel;
 
 namespace GropMng.Web.Factories.Logging;
 
@@ -15,16 +17,6 @@ namespace GropMng.Web.Factories.Logging;
 /// </summary>
 public class AppLogModelFactory : IAppLogModelFactory
 {
-    private static readonly string[] SupportedLogLevels =
-    [
-        "Trace",
-        "Debug",
-        "Information",
-        "Warning",
-        "Error",
-        "Critical"
-    ];
-
     private readonly IAppLogService _appLogService;
     private readonly IMapper _mapper;
     private readonly ILocalizationService _localizationService;
@@ -61,24 +53,19 @@ public class AppLogModelFactory : IAppLogModelFactory
             {
                 Value = string.Empty,
                 Text = allLevelsText,
-                Selected = string.IsNullOrWhiteSpace(searchModel.Level)
+                Selected = !searchModel.Level.HasValue
             }
         };
 
-        foreach (var level in SupportedLogLevels)
+        foreach (var level in Enum.GetValues<AppLogLevel>())
         {
-            var levelKey = $"admin.applog.level.{level.ToLowerInvariant()}";
-            var localizedLevel = await _localizationService.GetResourceAsync(
-                levelKey,
-                languageId,
-                logIfNotFound: false,
-                defaultValue: level);
+            var localizedLevel = await _localizationService.GetLocalizedEnumAsync(level, languageId);
 
             availableLogLevels.Add(new SelectListItem
             {
-                Value = level,
+                Value = ((int)level).ToString(CultureInfo.InvariantCulture),
                 Text = localizedLevel,
-                Selected = string.Equals(searchModel.Level, level, StringComparison.OrdinalIgnoreCase)
+                Selected = searchModel.Level == level
             });
         }
 
@@ -107,12 +94,16 @@ public class AppLogModelFactory : IAppLogModelFactory
 
         foreach (var row in mappedRows)
         {
-            var levelKey = $"admin.applog.level.{row.Level.ToLowerInvariant()}";
-            row.LevelLocalized = await _localizationService.GetResourceAsync(
-                levelKey,
-                languageId,
-                logIfNotFound: false,
-                defaultValue: row.Level);
+            if (TryParseLogLevel(row.Level, out var parsedLevel))
+            {
+                row.Level = parsedLevel.ToString();
+                row.LevelLocalized = await _localizationService.GetLocalizedEnumAsync(parsedLevel, languageId);
+            }
+            else
+            {
+                row.LevelLocalized = row.Level;
+            }
+
             row.TimestampLocalized = row.Timestamp.ToLocalTime().ToString("g", CultureInfo.CurrentUICulture);
         }
 
@@ -139,5 +130,25 @@ public class AppLogModelFactory : IAppLogModelFactory
 
         var defaultLanguage = await _languageService.GetDefaultLanguageAsync(cancellationToken);
         return defaultLanguage.Id;
+    }
+
+    private static bool TryParseLogLevel(string? value, out AppLogLevel logLevel)
+    {
+        logLevel = default;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var normalized = value.Trim();
+        if (Enum.TryParse<AppLogLevel>(normalized, true, out logLevel))
+            return true;
+
+        if (int.TryParse(normalized, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericLevel) &&
+            Enum.IsDefined(typeof(AppLogLevel), numericLevel))
+        {
+            logLevel = (AppLogLevel)numericLevel;
+            return true;
+        }
+
+        return false;
     }
 }

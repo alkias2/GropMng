@@ -5,8 +5,10 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using GropMng.Core.Domain.Garden.Owners;
+using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Localization;
 using GropMng.Core.Domain.Logging;
+using GropMng.Core;
 using GropMng.Data.DbContext;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Configuration;
@@ -35,6 +37,7 @@ using GropMng.Web.Factories.Logging;
 using GropMng.Web.Factories.Plant;
 using GropMng.Web.Factories.Settings;
 using GropMng.Web.Infrastructure.Navigation;
+using AppLogLevel = GropMng.Core.Domain.Logging.LogLevel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +100,7 @@ if (sqlServerSettings.CanConnect)
 
     // Localization services
     builder.Services.AddScoped<ILanguageService, LanguageService>();
+    builder.Services.AddScoped<ICurrentLanguageContext, CurrentLanguageContext>();
     builder.Services.AddScoped<ILocalizationService, LocalizationService>();
     builder.Services.AddScoped<IEnumLocalizationHelper, EnumLocalizationHelper>();
 
@@ -236,6 +240,26 @@ static async Task SeedInitialOwnerAndLocalizationAsync(GropContext dbContext)
 
     await dbContext.SaveChangesAsync();
 
+    await RemoveLocaleResourcesAsync(dbContext, greekLanguage.Id,
+    [
+        "admin.applog.level.trace",
+        "admin.applog.level.debug",
+        "admin.applog.level.information",
+        "admin.applog.level.warning",
+        "admin.applog.level.error",
+        "admin.applog.level.critical"
+    ]);
+
+    await RemoveLocaleResourcesAsync(dbContext, englishLanguage.Id,
+    [
+        "admin.applog.level.trace",
+        "admin.applog.level.debug",
+        "admin.applog.level.information",
+        "admin.applog.level.warning",
+        "admin.applog.level.error",
+        "admin.applog.level.critical"
+    ]);
+
     await SeedLocaleResourcesAsync(dbContext, greekLanguage.Id, new Dictionary<string, string>
     {
         ["common.save"] = "Αποθήκευση",
@@ -346,12 +370,6 @@ static async Task SeedInitialOwnerAndLocalizationAsync(GropContext dbContext)
         ["admin.applog.delete.single.confirm"] = "Η καταγραφή θα διαγραφεί οριστικά.",
         ["admin.applog.delete.single.success"] = "Η καταγραφή διαγράφηκε.",
         ["admin.applog.delete.single.error"] = "Αποτυχία διαγραφής καταγραφής.",
-        ["admin.applog.level.trace"] = "Ανίχνευση",
-        ["admin.applog.level.debug"] = "Αποσφαλμάτωση",
-        ["admin.applog.level.information"] = "Πληροφορία",
-        ["admin.applog.level.warning"] = "Προειδοποίηση",
-        ["admin.applog.level.error"] = "Σφάλμα",
-        ["admin.applog.level.critical"] = "Κρίσιμο",
         ["admin.localization.languages.title"] = "Γλώσσες",
         ["admin.localization.language.create"] = "Νέα Γλώσσα",
         ["admin.localization.language.edit"] = "Επεξεργασία Γλώσσας",
@@ -495,12 +513,6 @@ static async Task SeedInitialOwnerAndLocalizationAsync(GropContext dbContext)
         ["admin.applog.delete.single.confirm"] = "This log entry will be permanently deleted.",
         ["admin.applog.delete.single.success"] = "Log entry deleted.",
         ["admin.applog.delete.single.error"] = "Failed to delete the log entry.",
-        ["admin.applog.level.trace"] = "Trace",
-        ["admin.applog.level.debug"] = "Debug",
-        ["admin.applog.level.information"] = "Information",
-        ["admin.applog.level.warning"] = "Warning",
-        ["admin.applog.level.error"] = "Error",
-        ["admin.applog.level.critical"] = "Critical",
         ["admin.localization.languages.title"] = "Languages",
         ["admin.localization.language.create"] = "Create Language",
         ["admin.localization.language.edit"] = "Edit Language",
@@ -533,6 +545,9 @@ static async Task SeedInitialOwnerAndLocalizationAsync(GropContext dbContext)
         ["admin.localization.resource.fields.name"] = "Key",
         ["admin.localization.resource.fields.value"] = "Value"
     });
+
+    await SeedLocaleResourcesAsync(dbContext, greekLanguage.Id, BuildEnumLocalizationResources("el"));
+    await SeedLocaleResourcesAsync(dbContext, englishLanguage.Id, BuildEnumLocalizationResources("en"));
 }
 
 static async Task SeedLocaleResourcesAsync(GropContext dbContext, int languageId, IReadOnlyDictionary<string, string> resources)
@@ -564,6 +579,110 @@ static async Task SeedLocaleResourcesAsync(GropContext dbContext, int languageId
     }
 
     await dbContext.SaveChangesAsync();
+}
+
+static async Task RemoveLocaleResourcesAsync(GropContext dbContext, int languageId, IReadOnlyCollection<string> resourceKeys)
+{
+    if (resourceKeys.Count == 0)
+        return;
+
+    var normalizedKeys = resourceKeys
+        .Select(key => key.Trim().ToLowerInvariant())
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    var resourcesToDelete = await dbContext.LocaleStringResources
+        .Where(entity => entity.LanguageId == languageId)
+        .Where(entity => normalizedKeys.Contains(entity.ResourceName.ToLower()))
+        .ToListAsync();
+
+    if (resourcesToDelete.Count == 0)
+        return;
+
+    dbContext.LocaleStringResources.RemoveRange(resourcesToDelete);
+    await dbContext.SaveChangesAsync();
+}
+
+static IReadOnlyDictionary<string, string> BuildEnumLocalizationResources(string languageSeoCode)
+{
+    var resources = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    var greekTranslations = string.Equals(languageSeoCode, "el", StringComparison.OrdinalIgnoreCase)
+        ? GetGreekEnumTranslations()
+        : null;
+
+    var gardenEnumTypes = typeof(GardenSeason).Assembly
+        .GetTypes()
+        .Where(type => type.IsEnum && string.Equals(type.Namespace, "GropMng.Core.Domain.Garden.Enums", StringComparison.Ordinal));
+
+    foreach (var enumType in gardenEnumTypes)
+    {
+        foreach (var enumMemberName in Enum.GetNames(enumType))
+        {
+            var key = $"Enums.{enumType}.{enumMemberName}";
+            resources[key] = ResolveEnumTranslation(languageSeoCode, key, enumMemberName, greekTranslations);
+        }
+    }
+
+    foreach (var enumMemberName in Enum.GetNames(typeof(AppLogLevel)))
+    {
+        var key = $"Enums.{typeof(AppLogLevel)}.{enumMemberName}";
+        resources[key] = ResolveEnumTranslation(languageSeoCode, key, enumMemberName, greekTranslations);
+    }
+
+    return resources;
+}
+
+static string ResolveEnumTranslation(
+    string languageSeoCode,
+    string enumResourceKey,
+    string enumMemberName,
+    IReadOnlyDictionary<string, string>? greekTranslations)
+{
+    var defaultValue = CommonHelper.ConvertEnum(enumMemberName);
+
+    if (!string.Equals(languageSeoCode, "el", StringComparison.OrdinalIgnoreCase))
+        return defaultValue;
+
+    if (greekTranslations is not null && greekTranslations.TryGetValue(enumResourceKey, out var translatedValue))
+        return translatedValue;
+
+    return defaultValue;
+}
+
+static IReadOnlyDictionary<string, string> GetGreekEnumTranslations()
+{
+    return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Shrub"] = "Θάμνος",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Tree"] = "Δέντρο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Climber"] = "Αναρριχώμενο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Ornamental"] = "Καλλωπιστικό",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Edible"] = "Βρώσιμο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Aromatic"] = "Αρωματικό",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Succulent"] = "Παχύφυτο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Grass"] = "Χόρτο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Fern"] = "Φτέρη",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantCategory.Other"] = "Άλλο",
+
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantGrowthType.Annual"] = "Ετήσιο",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantGrowthType.Biennial"] = "Διετές",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantGrowthType.Perennial"] = "Πολυετές",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantGrowthType.Bulb"] = "Βολβός",
+
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantSunRequirement.FullSun"] = "Πλήρης Ήλιος",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantSunRequirement.PartialShade"] = "Ημισκιά",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantSunRequirement.FullShade"] = "Πλήρης Σκιά",
+
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantWaterRequirement.Low"] = "Χαμηλή",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantWaterRequirement.Moderate"] = "Μέτρια",
+        ["Enums.GropMng.Core.Domain.Garden.Enums.PlantWaterRequirement.High"] = "Υψηλή",
+
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Trace"] = "Ανίχνευση",
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Debug"] = "Αποσφαλμάτωση",
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Information"] = "Πληροφορία",
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Warning"] = "Προειδοποίηση",
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Error"] = "Σφάλμα",
+        ["Enums.GropMng.Core.Domain.Logging.LogLevel.Critical"] = "Κρίσιμο"
+    };
 }
 
 static string ComputeSha256(string raw)

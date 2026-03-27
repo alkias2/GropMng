@@ -1,5 +1,6 @@
 using GropMng.Web.Framework.Models;
 using GropMng.Web.Framework.Models.DataTables;
+using AppLogLevel = GropMng.Core.Domain.Logging.LogLevel;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GropMng.Web.Areas.Admin.Models.Logging;
@@ -20,8 +21,8 @@ public class AppLogSearchModel : BaseSearchModel
     /// </summary>
     public GropDataTablesModel GridModel { get; set; } = new();
 
-    /// <summary>Optional log level filter (e.g. "Information", "Warning", "Error", "Critical").</summary>
-    public string? Level { get; set; }
+    /// <summary>Optional log level filter.</summary>
+    public AppLogLevel? Level { get; set; }
 
     /// <summary>Optional free-text message filter.</summary>
     public string Message { get; set; } = string.Empty;

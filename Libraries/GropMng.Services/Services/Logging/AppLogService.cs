@@ -3,6 +3,7 @@ using GropMng.Core.Domain.Logging;
 using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace GropMng.Services.Services.Logging;
 
@@ -28,7 +29,7 @@ public class AppLogService : IAppLogService
     public async Task<IPagedList<AppLog>> GetAllLogsAsync(
         int pageIndex,
         int pageSize,
-        string? level = null,
+        LogLevel? level = null,
         string? message = null,
         DateTime? fromUtc = null,
         DateTime? toUtc = null)
@@ -46,7 +47,7 @@ public class AppLogService : IAppLogService
         return new PagedList<AppLog>(items, pageIndex, pageSize, totalCount);
     }
 
-    public Task<int> GetLogsCountAsync(string? level = null, string? message = null, DateTime? fromUtc = null, DateTime? toUtc = null)
+    public Task<int> GetLogsCountAsync(LogLevel? level = null, string? message = null, DateTime? fromUtc = null, DateTime? toUtc = null)
     {
         return BuildFilteredQuery(level, message, fromUtc, toUtc).CountAsync();
     }
@@ -92,12 +93,17 @@ public class AppLogService : IAppLogService
         await _sqlServerContext.Database.ExecuteSqlRawAsync("DELETE FROM [AppLog]");
     }
 
-    private IQueryable<AppLog> BuildFilteredQuery(string? level, string? message, DateTime? fromUtc, DateTime? toUtc)
+    private IQueryable<AppLog> BuildFilteredQuery(LogLevel? level, string? message, DateTime? fromUtc, DateTime? toUtc)
     {
         var query = _sqlServerContext.AppLogs.AsNoTracking().AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(level))
-            query = query.Where(x => x.Level == level);
+        if (level.HasValue)
+        {
+            var levelName = level.Value.ToString();
+            var levelNumeric = ((int)level.Value).ToString(CultureInfo.InvariantCulture);
+
+            query = query.Where(x => x.Level == levelName || x.Level == levelNumeric);
+        }
 
         if (!string.IsNullOrWhiteSpace(message))
         {
