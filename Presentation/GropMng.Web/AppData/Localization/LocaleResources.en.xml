@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Language Name="English">
+  <LocaleResource>
+    <Name>common.save</Name>
+    <Value>Save</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.create</Name>
+    <Value>Create</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.edit</Name>
+    <Value>Edit</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.delete</Name>
+    <Value>Delete</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.apply</Name>
+    <Value>Apply</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.clear</Name>
+    <Value>Clear</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.cancel</Name>
+    <Value>Cancel</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.search</Name>
+    <Value>Search</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.filters</Name>
+    <Value>Filters</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.actions</Name>
+    <Value>Actions</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.details</Name>
+    <Value>Details</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.dashboard</Name>
+    <Value>Dashboard</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.general</Name>
+    <Value>General</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.related</Name>
+    <Value>Related</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.none</Name>
+    <Value>None</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.yes</Name>
+    <Value>Yes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.no</Name>
+    <Value>No</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.loading</Name>
+    <Value>Loading...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.fromdate</Name>
+    <Value>From Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.todate</Name>
+    <Value>To Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.dangerzone</Name>
+    <Value>Danger Zone</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.delete.cannotundo</Name>
+    <Value>This action cannot be undone.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.lengthmenu</Name>
+    <Value>Show _MENU_ entries</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.info</Name>
+    <Value>Showing _START_ to _END_ of _TOTAL_ entries</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.infoempty</Name>
+    <Value>Showing 0 to 0 of 0 entries</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.infofiltered</Name>
+    <Value>(filtered from _MAX_ total entries)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.emptytable</Name>
+    <Value>No data available in table</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.zerorecords</Name>
+    <Value>No matching records found</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.search</Name>
+    <Value>Search:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.processing</Name>
+    <Value>Loading...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.first</Name>
+    <Value>First</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.last</Name>
+    <Value>Last</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.next</Name>
+    <Value>Next</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.previous</Name>
+    <Value>Previous</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.title</Name>
+    <Value>Plants</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.create</Name>
+    <Value>Create Plant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.edit</Name>
+    <Value>Edit Plant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete</Name>
+    <Value>Delete Plant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete.title</Name>
+    <Value>Delete plant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete.confirm</Name>
+    <Value>This plant will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.create.success</Name>
+    <Value>Plant was created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.edit.success</Name>
+    <Value>Plant was updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.delete.success</Name>
+    <Value>Plant was deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.search.placeholder</Name>
+    <Value>Common name, scientific name, family</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.commonname</Name>
+    <Value>Common Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.scientificname</Name>
+    <Value>Scientific Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.family</Name>
+    <Value>Family</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.category</Name>
+    <Value>Category</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.growthtype</Name>
+    <Value>Growth Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.sunrequirement</Name>
+    <Value>Sun Requirement</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.waterrequirement</Name>
+    <Value>Water Requirement</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.mintempcelsius</Name>
+    <Value>Min Temperature (°C)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.maxtempcelsius</Name>
+    <Value>Max Temperature (°C)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.isedible</Name>
+    <Value>Edible</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.ismedicinal</Name>
+    <Value>Medicinal</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.istoxic</Name>
+    <Value>Toxic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.generalnotes</Name>
+    <Value>General Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.all</Name>
+    <Value>All Categories</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.grid.flags</Name>
+    <Value>Flags</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.shrub</Name>
+    <Value>Shrub</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.tree</Name>
+    <Value>Tree</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.climber</Name>
+    <Value>Climber</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.ornamental</Name>
+    <Value>Ornamental</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.edible</Name>
+    <Value>Edible</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.aromatic</Name>
+    <Value>Aromatic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.succulent</Name>
+    <Value>Succulent</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.grass</Name>
+    <Value>Grass</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.fern</Name>
+    <Value>Fern</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.other</Name>
+    <Value>Other</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.annual</Name>
+    <Value>Annual</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.biennial</Name>
+    <Value>Biennial</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.perennial</Name>
+    <Value>Perennial</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.bulb</Name>
+    <Value>Bulb</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.fullsun</Name>
+    <Value>Full Sun</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.partialshade</Name>
+    <Value>Partial Shade</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.fullshade</Name>
+    <Value>Full Shade</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.low</Name>
+    <Value>Low</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.moderate</Name>
+    <Value>Moderate</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.high</Name>
+    <Value>High</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.edible</Name>
+    <Value>Edible</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.medicinal</Name>
+    <Value>Medicinal</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.toxic</Name>
+    <Value>Toxic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growth.environment</Name>
+    <Value>Growth and Environment</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.title</Name>
+    <Value>Application Logs</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.breadcrumb</Name>
+    <Value>App Logs</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected</Name>
+    <Value>Delete Selected</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all</Name>
+    <Value>Delete All</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.title</Name>
+    <Value>Delete all log entries</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.confirm</Name>
+    <Value>This action will permanently delete all log entries.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.confirmbutton</Name>
+    <Value>Delete all</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.filters.alllevels</Name>
+    <Value>All Levels</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.grid.selectallvisible</Name>
+    <Value>Select all visible</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.level</Name>
+    <Value>Level</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.category</Name>
+    <Value>Category</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.message</Name>
+    <Value>Message</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.timestamp</Name>
+    <Value>Timestamp</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.title</Name>
+    <Value>Delete selected logs</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirm</Name>
+    <Value>This action will permanently delete {0} selected log entries.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirm.single</Name>
+    <Value>This action will permanently delete 1 selected log entry.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirmbutton</Name>
+    <Value>Delete selected</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.success</Name>
+    <Value>Selected log entries were deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.error</Name>
+    <Value>Failed to delete selected log entries.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.title</Name>
+    <Value>Delete log entry</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.confirm</Name>
+    <Value>This log entry will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.success</Name>
+    <Value>Log entry deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.error</Name>
+    <Value>Failed to delete the log entry.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.languages.title</Name>
+    <Value>Languages</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.create</Name>
+    <Value>Create Language</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.edit</Name>
+    <Value>Edit Language</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete</Name>
+    <Value>Delete Language</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.confirm</Name>
+    <Value>This language will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.create.success</Name>
+    <Value>Language created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.edit.success</Name>
+    <Value>Language updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.success</Name>
+    <Value>Language deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.hasresources</Name>
+    <Value>Language cannot be deleted while it has resources.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.name</Name>
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.culture</Name>
+    <Value>Culture</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.seocode</Name>
+    <Value>SEO Code</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.flag</Name>
+    <Value>Flag File Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.rtl</Name>
+    <Value>RTL</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.published</Name>
+    <Value>Published</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.displayorder</Name>
+    <Value>Display Order</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resources.title</Name>
+    <Value>Locale Resources</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.create</Name>
+    <Value>Create Resource</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.edit</Name>
+    <Value>Edit Resource</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete</Name>
+    <Value>Delete Resource</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.confirm</Name>
+    <Value>This resource will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.create.success</Name>
+    <Value>Resource created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.edit.success</Name>
+    <Value>Resource updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.success</Name>
+    <Value>Resource deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.export</Name>
+    <Value>Export XML</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import</Name>
+    <Value>Import XML</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.success</Name>
+    <Value>Resources imported successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.empty</Name>
+    <Value>Please select a valid XML file.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.updateexisting</Name>
+    <Value>Update existing resources</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.fields.name</Name>
+    <Value>Key</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.fields.value</Name>
+    <Value>Value</Value>
+  </LocaleResource>
+</Language>

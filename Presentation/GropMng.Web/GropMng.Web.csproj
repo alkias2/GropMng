@@ -392,10 +392,18 @@
 
   <ItemGroup>
     <None Remove="AppData\Index.htm" />
+    <None Remove="AppData\Localization\LocaleResources.el.xml" />
+    <None Remove="AppData\Localization\LocaleResources.en.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="AppData\Index.htm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppData\Localization\LocaleResources.el.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppData\Localization\LocaleResources.en.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

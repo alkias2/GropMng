@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Language Name="Greek">
+  <LocaleResource>
+    <Name>common.save</Name>
+    <Value>Αποθήκευση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.create</Name>
+    <Value>Δημιουργία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.edit</Name>
+    <Value>Επεξεργασία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.delete</Name>
+    <Value>Διαγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.apply</Name>
+    <Value>Εφαρμογή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.clear</Name>
+    <Value>Καθαρισμός</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.cancel</Name>
+    <Value>Ακύρωση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.search</Name>
+    <Value>Αναζήτηση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.filters</Name>
+    <Value>Φίλτρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.actions</Name>
+    <Value>Ενέργειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.details</Name>
+    <Value>Λεπτομέρειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.dashboard</Name>
+    <Value>Πίνακας Ελέγχου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.general</Name>
+    <Value>Γενικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.related</Name>
+    <Value>Σχετικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.none</Name>
+    <Value>Κανένα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.yes</Name>
+    <Value>Ναι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.no</Name>
+    <Value>Όχι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.loading</Name>
+    <Value>Φόρτωση...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.fromdate</Name>
+    <Value>Από Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.todate</Name>
+    <Value>Έως Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.dangerzone</Name>
+    <Value>Επικίνδυνη Ζώνη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.delete.cannotundo</Name>
+    <Value>Αυτή η ενέργεια δεν αναιρείται.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.lengthmenu</Name>
+    <Value>Εμφάνιση _MENU_ εγγραφών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.info</Name>
+    <Value>Εμφάνιση _START_ έως _END_ από _TOTAL_ εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.infoempty</Name>
+    <Value>Εμφάνιση 0 έως 0 από 0 εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.infofiltered</Name>
+    <Value>(φιλτραρισμένες από _MAX_ συνολικές εγγραφές)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.emptytable</Name>
+    <Value>Δεν υπάρχουν διαθέσιμα δεδομένα στον πίνακα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.zerorecords</Name>
+    <Value>Δεν βρέθηκαν εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.search</Name>
+    <Value>Αναζήτηση:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.processing</Name>
+    <Value>Φόρτωση...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.first</Name>
+    <Value>Πρώτη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.last</Name>
+    <Value>Τελευταία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.next</Name>
+    <Value>Επόμενη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.datatable.paginate.previous</Name>
+    <Value>Προηγούμενη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.title</Name>
+    <Value>Φυτά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.create</Name>
+    <Value>Νέο Φυτό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.edit</Name>
+    <Value>Επεξεργασία Φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete</Name>
+    <Value>Διαγραφή Φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete.title</Name>
+    <Value>Διαγραφή φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.delete.confirm</Name>
+    <Value>Το φυτό θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.create.success</Name>
+    <Value>Το φυτό δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.edit.success</Name>
+    <Value>Το φυτό ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.notifications.delete.success</Name>
+    <Value>Το φυτό διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.search.placeholder</Name>
+    <Value>Κοινή ονομασία, επιστημονική ονομασία, οικογένεια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.commonname</Name>
+    <Value>Κοινή Ονομασία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.scientificname</Name>
+    <Value>Επιστημονική Ονομασία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.family</Name>
+    <Value>Οικογένεια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.category</Name>
+    <Value>Κατηγορία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.growthtype</Name>
+    <Value>Τύπος Ανάπτυξης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.sunrequirement</Name>
+    <Value>Ανάγκη Ήλιου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.waterrequirement</Name>
+    <Value>Ανάγκη Νερού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.mintempcelsius</Name>
+    <Value>Ελάχιστη Θερμοκρασία (°C)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.maxtempcelsius</Name>
+    <Value>Μέγιστη Θερμοκρασία (°C)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.isedible</Name>
+    <Value>Βρώσιμο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.ismedicinal</Name>
+    <Value>Φαρμακευτικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.istoxic</Name>
+    <Value>Τοξικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.generalnotes</Name>
+    <Value>Γενικές Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.all</Name>
+    <Value>Όλες οι κατηγορίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.grid.flags</Name>
+    <Value>Χαρακτηριστικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.shrub</Name>
+    <Value>Θάμνος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.tree</Name>
+    <Value>Δέντρο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.climber</Name>
+    <Value>Αναρριχώμενο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.ornamental</Name>
+    <Value>Καλλωπιστικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.edible</Name>
+    <Value>Βρώσιμο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.aromatic</Name>
+    <Value>Αρωματικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.succulent</Name>
+    <Value>Παχύφυτο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.grass</Name>
+    <Value>Χόρτο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.fern</Name>
+    <Value>Φτέρη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.category.other</Name>
+    <Value>Άλλο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.annual</Name>
+    <Value>Ετήσιο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.biennial</Name>
+    <Value>Διετές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.perennial</Name>
+    <Value>Πολυετές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growthtype.bulb</Name>
+    <Value>Βολβός</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.fullsun</Name>
+    <Value>Πλήρης Ήλιος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.partialshade</Name>
+    <Value>Ημισκιά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.sunrequirement.fullshade</Name>
+    <Value>Πλήρης Σκιά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.low</Name>
+    <Value>Χαμηλή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.moderate</Name>
+    <Value>Μέτρια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.waterrequirement.high</Name>
+    <Value>Υψηλή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.edible</Name>
+    <Value>Βρώσιμο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.medicinal</Name>
+    <Value>Φαρμακευτικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.flags.toxic</Name>
+    <Value>Τοξικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.growth.environment</Name>
+    <Value>Ανάπτυξη και Περιβάλλον</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.title</Name>
+    <Value>Καταγραφές Εφαρμογής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.breadcrumb</Name>
+    <Value>Καταγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected</Name>
+    <Value>Διαγραφή Επιλεγμένων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all</Name>
+    <Value>Διαγραφή Όλων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.title</Name>
+    <Value>Διαγραφή όλων των καταγραφών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.confirm</Name>
+    <Value>Αυτή η ενέργεια θα διαγράψει οριστικά όλες τις καταγραφές.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.all.confirmbutton</Name>
+    <Value>Διαγραφή όλων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.filters.alllevels</Name>
+    <Value>Όλα τα Επίπεδα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.grid.selectallvisible</Name>
+    <Value>Επιλογή όλων των ορατών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.level</Name>
+    <Value>Επίπεδο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.category</Name>
+    <Value>Κατηγορία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.message</Name>
+    <Value>Μήνυμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.fields.timestamp</Name>
+    <Value>Χρονική Σήμανση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.title</Name>
+    <Value>Διαγραφή επιλεγμένων καταγραφών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirm</Name>
+    <Value>Αυτή η ενέργεια θα διαγράψει οριστικά {0} επιλεγμένες καταγραφές.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirm.single</Name>
+    <Value>Αυτή η ενέργεια θα διαγράψει οριστικά 1 επιλεγμένη καταγραφή.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.confirmbutton</Name>
+    <Value>Διαγραφή επιλεγμένων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.success</Name>
+    <Value>Οι επιλεγμένες καταγραφές διαγράφηκαν.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.selected.error</Name>
+    <Value>Αποτυχία διαγραφής επιλεγμένων καταγραφών.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.title</Name>
+    <Value>Διαγραφή καταγραφής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.confirm</Name>
+    <Value>Η καταγραφή θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.success</Name>
+    <Value>Η καταγραφή διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.applog.delete.single.error</Name>
+    <Value>Αποτυχία διαγραφής καταγραφής.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.languages.title</Name>
+    <Value>Γλώσσες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.create</Name>
+    <Value>Νέα Γλώσσα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.edit</Name>
+    <Value>Επεξεργασία Γλώσσας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete</Name>
+    <Value>Διαγραφή Γλώσσας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.confirm</Name>
+    <Value>Η γλώσσα θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.create.success</Name>
+    <Value>Η γλώσσα δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.edit.success</Name>
+    <Value>Η γλώσσα ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.success</Name>
+    <Value>Η γλώσσα διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.delete.hasresources</Name>
+    <Value>Η γλώσσα δεν μπορεί να διαγραφεί όσο υπάρχουν πόροι.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.name</Name>
+    <Value>Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.culture</Name>
+    <Value>Culture</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.seocode</Name>
+    <Value>SEO Code</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.flag</Name>
+    <Value>Αρχείο Σημαίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.rtl</Name>
+    <Value>RTL</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.published</Name>
+    <Value>Δημοσιευμένη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.fields.displayorder</Name>
+    <Value>Σειρά Εμφάνισης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resources.title</Name>
+    <Value>Πόροι Μετάφρασης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.create</Name>
+    <Value>Νέος Πόρος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.edit</Name>
+    <Value>Επεξεργασία Πόρου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete</Name>
+    <Value>Διαγραφή Πόρου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.confirm</Name>
+    <Value>Ο πόρος θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.create.success</Name>
+    <Value>Ο πόρος δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.edit.success</Name>
+    <Value>Ο πόρος ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.success</Name>
+    <Value>Ο πόρος διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.export</Name>
+    <Value>Εξαγωγή XML</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import</Name>
+    <Value>Εισαγωγή XML</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.success</Name>
+    <Value>Οι πόροι εισήχθησαν με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.empty</Name>
+    <Value>Παρακαλώ επίλεξε έγκυρο XML αρχείο.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.import.updateexisting</Name>
+    <Value>Ενημέρωση υπαρχόντων πόρων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.fields.name</Name>
+    <Value>Κλειδί</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.fields.value</Name>
+    <Value>Τιμή</Value>
+  </LocaleResource>
+</Language>
