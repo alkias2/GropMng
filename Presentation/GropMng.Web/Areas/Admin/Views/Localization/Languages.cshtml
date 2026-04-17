@@ -66,12 +66,7 @@
                                 <i class="bx bx-list-ul"></i>
                             </a>
                             <form class="d-inline" asp-area="Admin" asp-controller="Localization" asp-action="DeleteLanguage" method="post"
-                                  data-grop-delete="true"
-                                  data-confirm-icon="warning"
-                                  data-confirm-title="@T("admin.localization.language.delete")"
-                                  data-confirm-text="@T("admin.localization.language.delete.confirm")"
-                                  data-confirm-button-text="@T("common.delete")"
-                                  data-cancel-button-text="@T("common.cancel")">
+                                  data-grop-delete="true">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@language.Id" />
                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>

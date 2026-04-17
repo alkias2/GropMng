@@ -40,13 +40,16 @@ public class GropDeleteConfirmationTagHelper : TagHelper
     public string ButtonText { get; set; } = "Delete";
 
     [HtmlAttributeName("confirm-title")]
-    public string ConfirmTitle { get; set; } = "Confirm deletion";
+    public string ConfirmTitle { get; set; } = "Are you sure?";
 
     [HtmlAttributeName("confirm-text")]
-    public string ConfirmText { get; set; } = "Are you sure you want to delete this item?";
+    public string ConfirmText { get; set; } = "Are you sure you want to perform this action?";
 
     [HtmlAttributeName("confirm-button-text")]
-    public string ConfirmButtonText { get; set; } = "Delete";
+    public string ConfirmButtonText { get; set; } = "Yes";
+
+    [HtmlAttributeName("cancel-button-text")]
+    public string CancelButtonText { get; set; } = "No, cancel";
 
     [HtmlAttributeNotBound]
     [ViewContext]
@@ -87,7 +90,7 @@ public class GropDeleteConfirmationTagHelper : TagHelper
         html.Append($"<p class='mb-0'>{ConfirmText}</p>");
         html.Append("</div>");
         html.Append("<div class='modal-footer'>");
-        html.Append("<button type='button' class='btn btn-outline-secondary' data-bs-dismiss='modal'>Cancel</button>");
+        html.Append($"<button type='button' class='btn btn-outline-secondary' data-bs-dismiss='modal'>{CancelButtonText}</button>");
         html.Append($"<form method='post' action='{postUrl}'>");
         html.Append($"<input type='hidden' name='__RequestVerificationToken' value='{antiForgeryToken}' />");
         if (!string.IsNullOrWhiteSpace(RouteId))

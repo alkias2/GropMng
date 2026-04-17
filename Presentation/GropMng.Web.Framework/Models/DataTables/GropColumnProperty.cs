@@ -14,6 +14,9 @@ public class GropColumnProperty
     public GropColumnProperty(string data)
     {
         Data = data;
+        Visible = true;
+        Encode = true;
+        Orderable = true;
     }
 
     #endregion
@@ -47,10 +50,30 @@ public class GropColumnProperty
     public string Style { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this column is sortable.
+    /// Gets or sets a value indicating whether automatic column width calculation is enabled.
+    /// Defaults to false. Set to true if you are not providing a fixed <see cref="Width"/>.
+    /// </summary>
+    public bool AutoWidth { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this is the master select-all checkbox column.
+    /// When true, the <see cref="_Table.Definition.cshtml"/> automatically wires the
+    /// select-all header checkbox synchronization logic.
+    /// </summary>
+    public bool IsMasterCheckBox { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this column is orderable (sortable).
     /// Defaults to true.
     /// </summary>
-    public bool Sortable { get; set; } = true;
+    public bool Orderable { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the cell value should be HTML-escaped
+    /// when no <see cref="Render"/> strategy is assigned.
+    /// Defaults to true (safe output). Set to false only for pre-rendered trusted HTML.
+    /// </summary>
+    public bool Encode { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether this column is searchable.

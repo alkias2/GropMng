@@ -220,30 +220,14 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
     <script src="~/vendor/js/menu.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="~/js/admin/grop-swal.js" asp-append-version="true"></script>
+    <script src="~/js-custom/admin.common.js" asp-append-version="true"></script>
+    <script src="~/js-custom/admin.table.js" asp-append-version="true"></script>
 
     <!-- Main JS -->
     <script src="~/js/main.js" asp-append-version="true"></script>
 
-    <script>
-        window.GropSwal?.bindConfirmForms("form[data-grop-confirm='true'], form[data-grop-delete='true']");
-    </script>
-
-    <script>
-        window.gropDataTableTexts = {
-            processing: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.processing"))),
-            lengthMenu: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.lengthmenu"))),
-            zeroRecords: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.zerorecords"))),
-            emptyTable: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.emptytable"))),
-            info: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.info"))),
-            infoEmpty: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infoempty"))),
-            infoFiltered: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.infofiltered"))),
-            search: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.search"))),
-            first: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.first"))),
-            last: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.last"))),
-            next: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.next"))),
-            previous: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.datatable.paginate.previous")))
-        };
-    </script>
+    @* TODO: Μεταφορά στο _AdminLayout όταν δημιουργηθεί για multi-user — Areas/Admin/Views/Shared/_AdminLayout.cshtml *@
+    @await Html.PartialAsync("~/Areas/Admin/Views/Shared/Confirm.cshtml")
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

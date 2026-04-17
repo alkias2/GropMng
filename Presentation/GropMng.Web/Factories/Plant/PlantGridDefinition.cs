@@ -1,5 +1,6 @@
 using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Framework.Models.DataTables;
+using Microsoft.AspNetCore.Routing;
 
 namespace GropMng.Web.Factories.Plant;
 
@@ -24,7 +25,7 @@ public static class PlantGridDefinition
         return new GropDataTablesModel
         {
             Name = "plantsTable",
-            UrlRead = new GropDataUrl("List", "Plant"),
+            UrlRead = new GropDataUrl("List", "Plant", new RouteValueDictionary(new { area = "Admin" })),
             Length = searchModel.PageSize,
             LengthMenu = [10, 25, 50, 100],
             ShowSearch = false,
@@ -67,7 +68,7 @@ public static class PlantGridDefinition
                 new GropColumnProperty("id")
                 {
                     Title = titles.Flags,
-                    Sortable = false,
+                    Orderable = false,
                     Searchable = false,
                     Render = new RenderCustom("window.GropPlantGridRenderers.renderFlags"),
                 },
@@ -76,7 +77,7 @@ public static class PlantGridDefinition
                     Title = titles.Actions,
                     Width = "180px",
                     ClassName = "text-center",
-                    Sortable = false,
+                    Orderable = false,
                     Searchable = false,
                     Render = new RenderCustom("window.GropPlantGridRenderers.renderActions"),
                 },

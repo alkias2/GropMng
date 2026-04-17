@@ -1,6 +1,7 @@
-@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
+﻿@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
 @using GropMng.Web.Areas.Admin.Models.Logging
 @using GropMng.Web.Framework.Models.DataTables
+@using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = T("admin.applog.title");
     ViewData["ActiveMenu"] = "AppLogs";
@@ -18,23 +19,18 @@
 
 @await Html.PartialAsync("_AdminPageHeader", headerModel)
 
-<div class="d-flex justify-content-end gap-2 mb-4">
-    <button id="btnDeleteSelected" type="button" class="btn btn-outline-danger" disabled>
-        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.selected") (<span id="selectedCount">0</span>)
-    </button>
+@Html.AntiForgeryToken()
 
-    <form asp-area="Admin" asp-controller="AppLog" asp-action="DeleteAll" method="post"
-          data-grop-delete="true"
-          data-confirm-icon="warning"
-          data-confirm-title="@T("admin.applog.delete.all.title")"
-          data-confirm-text="@T("admin.applog.delete.all.confirm")"
-          data-confirm-button-text="@T("admin.applog.delete.all.confirmbutton")"
-          data-cancel-button-text="@T("common.cancel")">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-danger">
-            <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.all")
-        </button>
-    </form>
+<div class="d-flex justify-content-end gap-2 mb-4">
+    <button id="delete-selected" name="delete-selected" type="button" class="btn btn-danger">
+        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.selected")
+    </button>
+    <grop-action-confirmation asp-button-id="delete-selected" />
+
+    <button id="clearall" name="clearall" type="button" class="btn btn-danger">
+        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.all")
+    </button>
+    <grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
 </div>
 
 <div class="card mb-4">
@@ -55,11 +51,11 @@
             </div>
             <div class="col-md-4 col-sm-6">
                 <grop-label asp-for="FromDate" />
-                <input asp-for="FromDate" type="text" class="form-control flatpickr-date" placeholder="YYYY-MM-DD" autocomplete="off" />
+                <grop-editor asp-for="FromDate" />
             </div>
             <div class="col-md-4 col-sm-6">
                 <grop-label asp-for="ToDate" />
-                <input asp-for="ToDate" type="text" class="form-control flatpickr-date" placeholder="YYYY-MM-DD" autocomplete="off" />
+                <grop-editor asp-for="ToDate" />
             </div>
             <div class="col-md-12">
                 <grop-label asp-for="Message" />
@@ -72,27 +68,29 @@
 @await Html.PartialAsync("Table", new GropDataTablesModel
 {
     Name = "appLogsTable",
-    UrlRead = new GropDataUrl("List", "AppLog"),
+    UrlRead = new GropDataUrl("List", "AppLog", new RouteValueDictionary(new { area = "Admin" })),
     SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
     Length = Model.PageSize,
     LengthMenu = [10, 25, 50, 100],
     Filters =
     [
-        new GropFilterParameter(nameof(AppLogSearchModel.Level)) { ElementId = nameof(AppLogSearchModel.Level) },
-        new GropFilterParameter(nameof(AppLogSearchModel.FromDate)) { ElementId = nameof(AppLogSearchModel.FromDate) },
-        new GropFilterParameter(nameof(AppLogSearchModel.ToDate)) { ElementId = nameof(AppLogSearchModel.ToDate) },
-        new GropFilterParameter(nameof(AppLogSearchModel.Message)) { ElementId = nameof(AppLogSearchModel.Message) }
+        new GropFilterParameter(nameof(AppLogSearchModel.Level)),
+        new GropFilterParameter(nameof(AppLogSearchModel.FromDate)),
+        new GropFilterParameter(nameof(AppLogSearchModel.ToDate)),
+        new GropFilterParameter(nameof(AppLogSearchModel.Message))
     ],
     ColumnCollection =
     [
         new GropColumnProperty("id")
         {
-            Title = "<input id=\"selectAllVisible\" type=\"checkbox\" class=\"form-check-input\" />",
+            Title = "<input type=\"checkbox\" class=\"form-check-input mastercheckbox\" />",
             Width = "44px",
             ClassName = GropColumnClassDefaults.CenterAll,
-            Sortable = false,
+            Orderable = false,
             Searchable = false,
-            Render = new RenderCheckBox(),
+            IsMasterCheckBox = true,
+            Render = new RenderCheckBox("checkboxGroups", "id"),
         },
         new GropColumnProperty("id")
         {
@@ -103,7 +101,6 @@
         {
             Title = T("admin.applog.fields.level"),
             Width = "120px",
-            Render = new RenderCustom("renderLogLevelBadge"),
         },
         new GropColumnProperty("category")
         {
@@ -124,19 +121,18 @@
         },
         new GropColumnProperty("id")
         {
-            Title = T("common.actions"),
-            Width = "120px",
+            Title = T("common.details"),
+            Width = "90px",
             ClassName = GropColumnClassDefaults.Button,
-            Sortable = false,
+            Orderable = false,
             Searchable = false,
-            Render = new RenderCustom("renderLogActions"),
+            Render = new RenderButtonView(new GropDataUrl("Details", "AppLog", new RouteValueDictionary(new { area = "Admin" }))),
         }
     ]
 })
 
-<form id="antiForgeryForm" method="post">
-    @Html.AntiForgeryToken()
-</form>
+<grop-alert asp-alert-id="deleteSelectedFailed" />
+<grop-alert asp-alert-id="nothingSelectedAlert" />
 
 @section Vendors {
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
@@ -147,201 +143,41 @@
 @section Scripts {
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
     <script src="~/vendor/libs/flatpickr/flatpickr.js"></script>
-    <script src="~/js-custom/admin.table.js" asp-append-version="true"></script>
     <script>
-        'use strict';
-
-        var deleteSingleTitleText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.single.title")));
-        var deleteSingleConfirmText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.single.confirm")));
-        var deleteSingleConfirmButtonText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("common.delete")));
-
-        var deleteSelectedTitleText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.selected.title")));
-        var deleteSelectedConfirmTemplate = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.selected.confirm")));
-        var deleteSelectedConfirmSingleText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.selected.confirm.single")));
-        var deleteSelectedConfirmButtonText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("admin.applog.delete.selected.confirmbutton")));
-        var cancelButtonText = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)T("common.cancel")));
-
-        window.gropAppLogDatePickers = {
-            from: flatpickr('#FromDate', { dateFormat: 'Y-m-d', allowInput: true }),
-            to: flatpickr('#ToDate', { dateFormat: 'Y-m-d', allowInput: true })
-        };
-
-        function renderLogLevelBadge(data, type, row) {
-            var level = (row && row.level ? row.level : '').toLowerCase();
-            var badgeClass = 'bg-label-secondary';
-
-            if (level === 'debug') badgeClass = 'bg-label-info';
-            if (level === 'information') badgeClass = 'bg-label-primary';
-            if (level === 'warning') badgeClass = 'bg-label-warning';
-            if (level === 'error' || level === 'critical') badgeClass = 'bg-label-danger';
-
-            return '<span class="badge ' + badgeClass + '">' + window.GropAdminTable.escapeHtml(data || '') + '</span>';
-        }
-
-        function renderLogActions(data) {
-            var id = window.GropAdminTable.escapeHtml(data);
-            var detailsUrl = '@Url.Action("Details", "AppLog", new { area = "Admin" })';
-
-            return '<a class="btn btn-sm btn-icon btn-outline-primary me-1" href="' + detailsUrl + '/' + id + '" title="@T("common.details")"><i class="bx bx-show"></i></a>' +
-                '<button class="btn btn-sm btn-icon btn-outline-danger btn-delete" data-id="' + id + '" title="@T("common.delete")"><i class="bx bx-trash"></i></button>';
-        }
-
         $(function () {
-            var tableSelector = '#appLogsTable';
-            var selectedIds = new Set();
-
-            function updateSelectedUi() {
-                $('#selectedCount').text(selectedIds.size);
-                $('#btnDeleteSelected').prop('disabled', selectedIds.size === 0);
-            }
-
-            function bindGridEvents(retry) {
-                var table = $(tableSelector).data('gropTable');
-                if (!table) {
-                    if (retry < 50) {
-                        window.setTimeout(function () { bindGridEvents(retry + 1); }, 100);
-                    }
-                    return;
+            $(document).on('click', '#delete-selected-action-confirmation-submit-button', function () {
+                if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+                    showAlert('nothingSelectedAlert', 'Please select at least one record.');
+                    return false;
                 }
 
-                function syncSelectionToState() {
-                    window.GropAdminTable.setSelectedIds(tableSelector, Array.from(selectedIds));
-                }
+                var postData = {
+                    selectedIds: selectedIds
+                };
 
-                function restoreSelection() {
-                    $(tableSelector + ' tbody .dt-checkbox').each(function () {
-                        var rowId = Number($(this).val());
-                        $(this).prop('checked', selectedIds.has(rowId));
-                    });
+                addAntiForgeryToken(postData);
 
-                    var allVisible = $(tableSelector + ' tbody .dt-checkbox').length;
-                    var checkedVisible = $(tableSelector + ' tbody .dt-checkbox:checked').length;
-                    $('#selectAllVisible')
-                        .prop('checked', allVisible > 0 && allVisible === checkedVisible)
-                        .prop('indeterminate', checkedVisible > 0 && checkedVisible < allVisible);
-
-                    updateSelectedUi();
-                }
-
-                table.on('draw', function () {
-                    restoreSelection();
-                });
-
-                $(tableSelector).on('change', '.dt-checkbox', function () {
-                    var rowId = Number($(this).val());
-                    if ($(this).is(':checked')) {
-                        selectedIds.add(rowId);
-                    } else {
-                        selectedIds.delete(rowId);
-                    }
-
-                    syncSelectionToState();
-                    restoreSelection();
-                });
-
-                $('#selectAllVisible').on('change', function () {
-                    var shouldSelect = $(this).is(':checked');
-
-                    $(tableSelector + ' tbody .dt-checkbox').each(function () {
-                        var rowId = Number($(this).val());
-                        $(this).prop('checked', shouldSelect);
-                        if (shouldSelect) {
-                            selectedIds.add(rowId);
-                        } else {
-                            selectedIds.delete(rowId);
+                $.ajax({
+                    cache: false,
+                    type: 'POST',
+                    url: '@Url.Action("DeleteSelected", "AppLog", new { area = "Admin" })',
+                    data: postData,
+                    traditional: true,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        showAlert('deleteSelectedFailed', errorThrown);
+                    },
+                    complete: function (jqXHR) {
+                        if (jqXHR.status === 204) {
+                            showAlert('nothingSelectedAlert', 'Please select at least one record.');
+                            return;
                         }
-                    });
 
-                    syncSelectionToState();
-                    restoreSelection();
-                });
-
-                $(tableSelector).on('click', '.btn-delete', async function () {
-                    var id = Number($(this).data('id'));
-                    var canDelete = await window.GropSwal.confirm({
-                        icon: 'warning',
-                        title: deleteSingleTitleText,
-                        text: deleteSingleConfirmText,
-                        confirmButtonText: deleteSingleConfirmButtonText,
-                        cancelButtonText: cancelButtonText
-                    });
-
-                    if (!canDelete) {
-                        return;
+                        updateTable('#appLogsTable', true);
                     }
-
-                    $.ajax({
-                        cache: false,
-                        type: 'POST',
-                        url: '@Url.Action("Delete", "AppLog", new { area = "Admin" })',
-                        data: {
-                            id: id,
-                            __RequestVerificationToken: $('#antiForgeryForm input[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function () {
-                            selectedIds.delete(id);
-                            syncSelectionToState();
-                            window.GropAdminTable.refreshTable(tableSelector, false);
-                        }
-                    });
                 });
 
-                $('#btnDeleteSelected').on('click', async function () {
-                    var ids = Array.from(selectedIds);
-                    if (ids.length === 0) {
-                        return;
-                    }
-
-                    var confirmText = ids.length === 1
-                        ? deleteSelectedConfirmSingleText
-                        : window.GropAdminTable.formatString(deleteSelectedConfirmTemplate, ids.length);
-
-                    var canDelete = await window.GropSwal.confirm({
-                        icon: 'warning',
-                        title: deleteSelectedTitleText,
-                        text: confirmText,
-                        confirmButtonText: deleteSelectedConfirmButtonText,
-                        cancelButtonText: cancelButtonText
-                    });
-
-                    if (!canDelete) {
-                        return;
-                    }
-
-                    $.ajax({
-                        cache: false,
-                        type: 'POST',
-                        url: '@Url.Action("DeleteSelected", "AppLog", new { area = "Admin" })',
-                        data: {
-                            selectedIds: ids,
-                            __RequestVerificationToken: $('#antiForgeryForm input[name="__RequestVerificationToken"]').val()
-                        },
-                        traditional: true,
-                        complete: function (jqXHR) {
-                            if (jqXHR.status === 204) {
-                                return;
-                            }
-
-                            selectedIds.clear();
-                            syncSelectionToState();
-                            window.GropAdminTable.refreshTable(tableSelector, false);
-                        }
-                    });
-                });
-
-                $('#btnClearFilters').on('click', function () {
-                    $('#Level').val('');
-                    $('#Message').val('');
-                    window.gropAppLogDatePickers.from.clear();
-                    window.gropAppLogDatePickers.to.clear();
-                    window.GropAdminTable.refreshTable(tableSelector, true);
-                });
-
-                restoreSelection();
-            }
-
-            bindGridEvents(0);
+                return false;
+            });
         });
     </script>
 }
-

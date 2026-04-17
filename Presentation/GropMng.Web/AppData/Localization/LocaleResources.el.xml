@@ -556,4 +556,80 @@
     <Name>admin.localization.resource.fields.value</Name>
     <Value>Τιμή</Value>
   </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.emptytable</Name>
+    <Value>Δεν υπάρχουν διαθέσιμα δεδομένα στον πίνακα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.info</Name>
+    <Value>Εμφάνιση _START_ έως _END_ από _TOTAL_ εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.infoempty</Name>
+    <Value>Εμφάνιση 0 έως 0 από 0 εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.infofiltered</Name>
+    <Value>(φιλτραρισμένες από _MAX_ συνολικές εγγραφές)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.thousands</Name>
+    <Value>.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.lengthmenu</Name>
+    <Value>Εμφάνιση _MENU_ εγγραφών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.loadingrecords</Name>
+    <Value>Φόρτωση...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.loadericon</Name>
+    <Value>Επεξεργασία...</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.search</Name>
+    <Value>Αναζήτηση:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.zerorecords</Name>
+    <Value>Δεν βρέθηκαν εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.paginate.first</Name>
+    <Value>Πρώτη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.paginate.last</Name>
+    <Value>Τελευταία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.paginate.next</Name>
+    <Value>Επόμενη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.paginate.previous</Name>
+    <Value>Προηγούμενη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.aria.sortascending</Name>
+    <Value>: ενεργοποίηση για αύξουσα ταξινόμηση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.dt.aria.sortdescending</Name>
+    <Value>: ενεργοποίηση για φθίνουσα ταξινόμηση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.confirm.delete.title</Name>
+    <Value>Διαγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.confirm.delete.text</Name>
+    <Value>Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το στοιχείο;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.confirm.delete.items</Name>
+    <Value>Είστε βέβαιοι ότι θέλετε να διαγράψετε {0} στοιχεία;</Value>
+  </LocaleResource>
 </Language>

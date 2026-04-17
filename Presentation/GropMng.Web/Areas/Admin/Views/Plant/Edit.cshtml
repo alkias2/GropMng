@@ -8,8 +8,6 @@
     var deletePlantText = T("admin.plant.delete");
     var deleteConfirmText = T("admin.plant.delete.confirm");
     var cannotUndoText = T("common.delete.cannotundo");
-    var cancelText = T("common.cancel");
-    var deleteText = T("common.delete");
 
     ViewData["Title"] = titleText;
     ViewData["ActiveMenu"] = "Plants";
@@ -49,12 +47,7 @@
               asp-controller="Plant"
               asp-action="Delete"
               method="post"
-              data-grop-delete="true"
-              data-confirm-icon="warning"
-              data-confirm-title="@deletePlantText"
-              data-confirm-text="@deleteConfirmText"
-              data-confirm-button-text="@deleteText"
-              data-cancel-button-text="@cancelText">
+              data-grop-delete="true">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-danger">

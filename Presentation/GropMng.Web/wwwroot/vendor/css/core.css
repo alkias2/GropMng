@@ -20103,6 +20103,28 @@ html:not([dir=rtl]) .menu-vertical .app-brand {
   margin-left: -1.75rem;
 }
 
+div.dataTables_wrapper div.dataTables_length {
+  display: flex;
+  justify-content: flex-start !important;
+  margin: 0 0 1rem !important;
+}
+
+div.dataTables_wrapper div.dataTables_length label {
+  justify-content: flex-start !important;
+  margin-bottom: 0;
+}
+
+div.dataTables_wrapper div.dataTables_paginate {
+  display: flex;
+  justify-content: flex-start !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+  margin: 2px 0;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+
 .timeline {
   position: relative;
   height: 100%;
@@ -20483,6 +20505,28 @@ html:not([dir=rtl]) .menu-vertical .app-brand {
 .blockUI.blockOverlay, .blockUI.blockMsg {
   z-index: 1091 !important;
   color: #fff !important;
+}
+
+div.dataTables_wrapper div.dataTables_length {
+  display: flex;
+  justify-content: flex-start !important;
+  margin: 0 0 1rem !important;
+}
+
+div.dataTables_wrapper div.dataTables_length label {
+  justify-content: flex-start !important;
+  margin-bottom: 0;
+}
+
+div.dataTables_wrapper div.dataTables_paginate {
+  display: flex;
+  justify-content: flex-start !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+  margin: 2px 0;
+  white-space: nowrap;
+  justify-content: flex-start;
 }
 
 .divider {

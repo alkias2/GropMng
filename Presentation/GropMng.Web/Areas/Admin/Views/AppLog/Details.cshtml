@@ -34,12 +34,7 @@
         <i class="bx bx-arrow-back me-1"></i> Back to List
     </a>
     <form asp-area="Admin" asp-controller="AppLog" asp-action="Delete" method="post"
-          data-grop-delete="true"
-          data-confirm-icon="warning"
-          data-confirm-title="Delete log entry"
-          data-confirm-text="This log entry will be permanently deleted."
-          data-confirm-button-text="Delete"
-          data-cancel-button-text="Cancel">
+          data-grop-delete="true">
         @Html.AntiForgeryToken()
         <input type="hidden" name="id" value="@Model.Id" />
         <button type="submit" class="btn btn-danger">

@@ -1,4 +1,38 @@
 @model GropMng.Web.Framework.Models.DataTables.GropDataTablesModel
+@using GropMng.Web.Framework.Models.DataTables
+
+@functions
+{
+    string GetUrl(GropDataUrl dataUrl)
+    {
+        if (!string.IsNullOrEmpty(dataUrl?.ActionName) && !string.IsNullOrEmpty(dataUrl.ControllerName))
+        {
+            var resolvedActionUrl = Url.Action(dataUrl.ActionName, dataUrl.ControllerName, dataUrl.RouteValues);
+            return string.IsNullOrEmpty(resolvedActionUrl)
+                ? string.Empty
+                : resolvedActionUrl.TrimEnd('/') + (!dataUrl.TrimEnd ? "/" : "");
+        }
+
+        if (!string.IsNullOrEmpty(dataUrl?.Url))
+        {
+            var resolved = dataUrl.Url.StartsWith("~/", StringComparison.Ordinal)
+                ? Url.Content(dataUrl.Url)
+                : dataUrl.Url;
+            return resolved.TrimEnd('/') + (!dataUrl.TrimEnd ? "/" : "");
+        }
+
+        return string.Empty;
+    }
+
+    string ReplaceName(string str) => str.Replace("-", "_");
+
+    void GetAllModels(GropDataTablesModel model, List<GropDataTablesModel> models)
+    {
+        models.Add(model);
+        if (!string.IsNullOrEmpty(model.ChildTable?.Name))
+            GetAllModels(model.ChildTable, models);
+    }
+}
 
 <div class="card">
     <div class="card-datatable table-responsive pt-0">
@@ -18,3 +52,104 @@
 </div>
 
 <partial name="_Table.Definition" model="Model" />
+
+@{
+    var listOfTables = new List<GropDataTablesModel>();
+    GetAllModels(Model, listOfTables);
+    var isMasterCheckBoxUsed = Model.ColumnCollection.Any(x => x.IsMasterCheckBox);
+}
+
+@if (isMasterCheckBoxUsed)
+{
+    var masterCol = Model.ColumnCollection.First(x => x.IsMasterCheckBox);
+    var cbCls = masterCol.Render is RenderCheckBox rcb ? rcb.Name : "dt-checkbox";
+    var masterColIndex = 0;
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        if (Model.ColumnCollection[i].IsMasterCheckBox) { masterColIndex = i; break; }
+    }
+    <script>
+        (function () {
+            'use strict';
+            function tryInitSelection(retry) {
+                var $ = window.jQuery;
+                if (!$ || !window.GropAdminTable) {
+                    if (retry < 50) { window.setTimeout(function () { tryInitSelection(retry + 1); }, 100); }
+                    return;
+                }
+                $(function () {
+                    window.GropAdminTable.bindSelectionHandlers('#@Model.Name', '@cbCls', {
+                        masterSelector: '#@(Model.Name)_wrapper .mastercheckbox, #@Model.Name thead th:nth-child(@(masterColIndex + 1)) input[type="checkbox"]'
+                    });
+                });
+            }
+            tryInitSelection(0);
+        })();
+    </script>
+}
+
+@if (Model.UrlDelete != null || Model.ChildTable?.UrlDelete != null)
+{
+    foreach (var curModel in listOfTables)
+    {
+        var tableName = ReplaceName(curModel.Name);
+        <script>
+            function table_deletedata_@(tableName)(dataId) {
+                var postData = {
+                    @if (!string.IsNullOrEmpty(Model.BindColumnNameActionDelete))
+                    {
+                        <text>@Model.BindColumnNameActionDelete: dataId</text>
+                    }
+                    else
+                    {
+                        <text>id: dataId</text>
+                    }
+                };
+                postData['__RequestVerificationToken'] =
+                    $('input[name="__RequestVerificationToken"]').first().val();
+
+                $.ajax({
+                    url: "@Html.Raw(GetUrl(Model.ChildTable?.UrlDelete ?? Model.UrlDelete))",
+                    type: "POST",
+                    dataType: "json",
+                    data: postData,
+                    success: function (data) {
+                        window.GropAdminTable.refreshTable('#@Model.Name', false);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        window.GropAdminTable.handleActionError('Delete failed.', errorThrown);
+                    }
+                });
+            }
+        </script>
+    }
+}
+
+@if (Model.ChildTable != null)
+{
+    foreach (var curModel in listOfTables.Where(m => m.ChildTable != null))
+    {
+        var tableName = ReplaceName(curModel.Name);
+        <script>
+            function getchild_@(tableName)(d) {
+                return '<table id="child' + d.@(curModel.PrimaryKeyColumn) +
+                       '_@(tableName)" class="table table-bordered dataTable" width="100%"></table>';
+            }
+            $(function () {
+                $('#@curModel.Name tbody').on('click', 'td.child-control', function () {
+                    var tr = $(this).closest('tr');
+                    var row = $('#@curModel.Name').DataTable().row(tr);
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                    } else {
+                        var childHtml = getchild_@(tableName)(row.data());
+                        row.child(childHtml).show();
+                        tr.addClass('shown');
+                    }
+                    $('#@curModel.Name').DataTable().columns.adjust();
+                });
+            });
+        </script>
+    }
+}

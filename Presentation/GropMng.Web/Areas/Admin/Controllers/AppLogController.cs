@@ -72,13 +72,13 @@ public class AppLogController : Controller
         return View(log);
     }
 
-    /// <summary>Deletes a single log entry and redirects back to the index.</summary>
+    /// <summary>Deletes a single log entry and returns JSON for AJAX callers.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         await _appLogService.DeleteLogAsync(id);
-        return RedirectToAction(nameof(Index));
+        return Json(new { success = true });
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ public class AppLogController : Controller
     public async Task<IActionResult> DeleteSelected([FromForm] int[] selectedIds)
     {
         if (selectedIds == null || selectedIds.Length == 0)
-            return BadRequest(new { success = false, message = "No log entries were selected." });
+            return NoContent();
 
         await _appLogService.DeleteLogsAsync(selectedIds);
         return Json(new { success = true, deletedCount = selectedIds.Length });

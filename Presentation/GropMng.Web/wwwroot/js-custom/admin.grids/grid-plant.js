@@ -59,7 +59,7 @@
         var deleteUrl = String(config.deleteUrl || '');
 
         return '<a class="btn btn-sm btn-outline-primary me-1" href="' + editUrl + '/' + safeId + '"><i class="bx bx-edit-alt"></i></a>' +
-            '<form class="d-inline js-delete-form" action="' + escapeHtml(deleteUrl) + '" method="post" data-grop-delete="true" data-confirm-icon="warning" data-confirm-title="' + escapeHtml(config.deleteTitleText || '') + '" data-confirm-text="' + escapeHtml(config.deleteConfirmText || '') + '" data-confirm-button-text="' + escapeHtml(config.deleteText || '') + '" data-cancel-button-text="' + escapeHtml(config.cancelText || '') + '">' +
+            '<form class="d-inline js-delete-form" action="' + escapeHtml(deleteUrl) + '" method="post" data-grop-delete="true">' +
             '<input type="hidden" name="__RequestVerificationToken" value="' + escapeHtml(config.token || '') + '" />' +
             '<input type="hidden" name="id" value="' + safeId + '" />' +
             '<button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>' +

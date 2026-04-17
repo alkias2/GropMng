@@ -12,12 +12,17 @@
  * - Bootstrap 5 integration
  * - Localization support
  */
-(function (window, $) {
+(function (window) {
     'use strict';
 
-    if (!window || !$) {
-        return;
-    }
+    function initialize($) {
+        if (!window || !$) {
+            return false;
+        }
+
+        if (window.GropAdminTable) {
+            return true;
+        }
 
     // ============================================================================
     // Private Data: Per-table selection state (not global)
@@ -243,7 +248,9 @@
                 }
             },
             error: function (xhr, error, thrown) {
-                console.error('GropAdminTable: AJAX error', { xhr, error, thrown });
+                console.error('GropAdminTable: AJAX error — HTTP ' + xhr.status + ' ' + xhr.statusText
+                    + ' | textStatus=' + error
+                    + ' | responseText=' + (xhr.responseText ? xhr.responseText.substring(0, 300) : '(empty)'));
                 window.GropSwal?.showError?.('Failed to load data. Please try again.');
             }
         };
@@ -309,19 +316,59 @@
 
         if (config.applyButtonSelector) {
             $(config.applyButtonSelector).off('click').on('click', function () {
+                const tableSelector = '#' + table.table().node().id;
+                clearSelectedIds(tableSelector);
+                window.selectedIds = [];
                 table.ajax.reload();
+                return false;
             });
         }
 
         if (config.clearButtonSelector) {
             $(config.clearButtonSelector).off('click').on('click', function () {
+                const tableSelector = '#' + table.table().node().id;
                 if (typeof config.clearCallback === 'function') {
                     config.clearCallback();
                 }
 
+                clearSelectedIds(tableSelector);
+                window.selectedIds = [];
                 table.ajax.reload();
+                return false;
             });
         }
+    }
+
+    /**
+     * Clears a set of filter inputs by HTML element ID.
+     * Automatically resets flatpickr-backed controls when present.
+     * @param {Array<string>} filterIds - Array of HTML element IDs.
+     */
+    function clearFilterInputs(filterIds) {
+        if (!Array.isArray(filterIds)) {
+            return;
+        }
+
+        filterIds.forEach(function (filterId) {
+            if (!filterId) {
+                return;
+            }
+
+            const element = document.getElementById(filterId);
+            if (!element) {
+                return;
+            }
+
+            if (element._flatpickr) {
+                element._flatpickr.clear();
+            } else if (element.tagName === 'SELECT') {
+                $(element).val('');
+            } else if (element.type === 'checkbox') {
+                element.checked = false;
+            } else {
+                element.value = '';
+            }
+        });
     }
 
     /**
@@ -377,6 +424,181 @@
      */
     function clearSelectedIds(tableSelector) {
         clearSelectionState(tableSelector);
+        window.selectedIds = [];
+    }
+
+    /**
+     * Binds checkbox selection management for a DataTable.
+     * Handles row checkboxes, master checkbox, and draw restore.
+     * After calling this, use getSelectedIds(tableSelector) to read the current selection.
+     * Fires 'grop:selectionChanged' event on the table element after each change.
+     * @param {string} tableSelector - CSS selector for the table
+     * @param {string} cbClass - CSS class of row checkboxes (e.g., 'dt-checkbox')
+     * @param {Object} [options] - Options
+     * @param {string} [options.masterSelector] - Selector for the master/select-all checkbox
+     */
+    function bindSelectionHandlers(tableSelector, cbClass, options) {
+        const config = options || {};
+        const checkboxClass = String(cbClass || 'checkboxGroups').split(' ')[0];
+        const masterSelector = config.masterSelector || (tableSelector + '_wrapper .mastercheckbox, ' + tableSelector + ' thead input.mastercheckbox');
+        const rowCheckboxSelector = 'tbody input[type="checkbox"].' + checkboxClass;
+
+        $(tableSelector).off('change.gropSelection');
+        if (masterSelector) {
+            $(document).off('change.gropSelectionMaster', masterSelector);
+        }
+        $(tableSelector).off('draw.dt.gropSelection');
+
+        function notifyChanged() {
+            const ids = getSelectedIds(tableSelector);
+            window.selectedIds = ids.slice();
+            $(tableSelector).trigger('grop:selectionChanged', [ids]);
+        }
+
+        function syncMaster() {
+            if (!masterSelector) {
+                return;
+            }
+
+            const total = $(tableSelector).find(rowCheckboxSelector).length;
+            const checked = $(tableSelector).find(rowCheckboxSelector + ':checked').length;
+            $(masterSelector)
+                .prop('checked', total > 0 && total === checked)
+                .prop('indeterminate', checked > 0 && total > checked);
+        }
+
+        $(tableSelector).on('change.gropSelection', rowCheckboxSelector, function () {
+            const val = String($(this).val());
+            if ($(this).is(':checked')) {
+                addSelectedIds(tableSelector, [val]);
+            } else {
+                removeSelectedIds(tableSelector, [val]);
+            }
+
+            syncMaster();
+            notifyChanged();
+        });
+
+        if (masterSelector) {
+            $(document).on('change.gropSelectionMaster', masterSelector, function () {
+                const shouldSelect = $(this).is(':checked');
+                const ids = [];
+
+                $(tableSelector).find(rowCheckboxSelector).each(function () {
+                    $(this).prop('checked', shouldSelect);
+                    ids.push(String($(this).val()));
+                });
+
+                if (shouldSelect) {
+                    setSelectedIds(tableSelector, ids);
+                } else {
+                    clearSelectedIds(tableSelector);
+                }
+
+                syncMaster();
+                notifyChanged();
+            });
+        }
+
+        $(tableSelector).on('draw.dt.gropSelection', function () {
+            const selectedIds = getSelectionState(tableSelector);
+            $(tableSelector).find(rowCheckboxSelector).each(function () {
+                $(this).prop('checked', selectedIds.has(String($(this).val())));
+            });
+
+            syncMaster();
+            notifyChanged();
+        });
+
+        syncMaster();
+    }
+
+    /**
+     * Shows a previously hidden grop-alert element with an optional message.
+     * @param {string} alertId - The id attribute of the alert element (without #)
+     * @param {string} [message] - Optional message to display inside the alert
+     */
+    function showAlert(alertId, message) {
+        const $alert = $('#' + alertId);
+        if (!$alert.length) return;
+        if (message) {
+            $alert.find('.grop-alert-message').text(message);
+        }
+        $alert.removeClass('d-none').show();
+    }
+
+    /**
+     * Wires up single-row and bulk-delete AJAX handlers for a DataTable.
+     * Reads default confirmation texts from window.gropCommonTexts (set in _Layout).
+     * Configuration overrides are optional — omit them to use the global defaults.
+     *
+     * @param {string} tableSelector - CSS selector for the table (e.g. '#appLogsTable')
+     * @param {Object} config
+     * @param {string} [config.deleteUrl]                  - POST URL for single-row delete
+     * @param {string} [config.deleteSelectedUrl]          - POST URL for bulk delete
+     * @param {string} [config.deleteSelectedButtonSelector] - Selector of the "Delete selected" button
+     * @param {string} [config.selectedCountSelector]      - Selector of the badge showing count
+     * @param {string} [config.alertId]                    - ID of a <grop-alert> element for errors
+     * @param {string} [config.deleteTitle]                - Override confirm dialog title
+     * @param {string} [config.deleteText]                 - Override confirm dialog single-item text
+     * @param {string} [config.deleteItemsText]            - Override confirm dialog multi-item text template ({0})
+     * @param {string} [config.deleteButtonText]           - Override confirm button label
+     * @param {string} [config.cancelButtonText]           - Override cancel button label
+     */
+    function bindDeleteHandlers(tableSelector, config) {
+        const cfg = config || {};
+        const texts = window.gropCommonTexts || {};
+        const token = function () { return $('input[name="__RequestVerificationToken"]').first().val(); };
+
+        const title      = cfg.deleteTitle       || texts.deleteTitle       || 'Delete';
+        const text       = cfg.deleteText        || texts.deleteText        || 'Are you sure?';
+        const itemsText  = cfg.deleteItemsText   || texts.deleteItemsText   || 'Are you sure you want to delete {0} items?';
+        const btnConfirm = cfg.deleteButtonText  || texts.deleteButtonText  || 'Delete';
+        const btnCancel  = cfg.cancelButtonText  || texts.cancelButtonText  || 'Cancel';
+
+        // Update selected-count badge and toggle delete-selected button
+        $(tableSelector).on('grop:selectionChanged', function (e, ids) {
+            if (cfg.selectedCountSelector) $(cfg.selectedCountSelector).text(ids.length);
+            if (cfg.deleteSelectedButtonSelector) $(cfg.deleteSelectedButtonSelector).prop('disabled', ids.length === 0);
+        });
+
+        // Single row delete — triggered by any .btn-delete[data-id] inside the table
+        if (cfg.deleteUrl) {
+            $(tableSelector).on('click', '.btn-delete', async function () {
+                var id = $(this).data('id');
+                if (!await window.GropSwal.confirm({ icon: 'warning', title: title, text: text, confirmButtonText: btnConfirm, cancelButtonText: btnCancel })) return;
+                $.post(cfg.deleteUrl, { id: id, __RequestVerificationToken: token() })
+                    .done(function () {
+                        window.GropAdminTable.removeSelectedIds(tableSelector, [String(id)]);
+                        window.GropAdminTable.refreshTable(tableSelector, false);
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        if (cfg.alertId) showAlert(cfg.alertId, errorThrown);
+                    });
+            });
+        }
+
+        // Bulk delete — triggered by the configured button
+        if (cfg.deleteSelectedUrl && cfg.deleteSelectedButtonSelector) {
+            $(cfg.deleteSelectedButtonSelector).on('click', async function () {
+                var ids = getSelectedIds(tableSelector);
+                if (!ids.length) return;
+                var confirmText = ids.length === 1 ? text : formatString(itemsText, ids.length);
+                if (!await window.GropSwal.confirm({ icon: 'warning', title: title, text: confirmText, confirmButtonText: btnConfirm, cancelButtonText: btnCancel })) return;
+                $.ajax({
+                    url: cfg.deleteSelectedUrl,
+                    type: 'POST',
+                    data: { selectedIds: ids, __RequestVerificationToken: token() },
+                    traditional: true,
+                    error: function (jqXHR, textStatus, errorThrown) { if (cfg.alertId) showAlert(cfg.alertId, errorThrown); },
+                    complete: function (jqXHR) {
+                        if (jqXHR.status === 204) return;
+                        clearSelectedIds(tableSelector);
+                        refreshTable(tableSelector, false);
+                    }
+                });
+            });
+        }
     }
 
     /**
@@ -393,7 +615,7 @@
             const rowData = this.data();
             const rowId = rowData && rowData.id ? rowData.id : null;
             
-            if (rowId && selectedIds.has(rowId)) {
+            if (rowId !== null && rowId !== undefined && selectedIds.has(String(rowId))) {
                 $(this.node()).find('input[type="checkbox"]').prop('checked', true);
                 $(this.node()).addClass('selected');
             }
@@ -536,35 +758,60 @@
     // Public API Exposure
     // ============================================================================
 
-    window.GropAdminTable = {
-        // Core DataTables functions
-        buildLanguage: buildLanguage,
-        bindFilterButtons: bindFilterButtons,
-        createDataTable: createDataTable,
+        window.GropAdminTable = {
+            // Core DataTables functions
+            buildLanguage: buildLanguage,
+            bindFilterButtons: bindFilterButtons,
+            clearFilterInputs: clearFilterInputs,
+            createDataTable: createDataTable,
 
-        // Selection management (per-table, not global)
-        getSelectedIds: getSelectedIds,
-        setSelectedIds: setSelectedIds,
-        addSelectedIds: addSelectedIds,
-        removeSelectedIds: removeSelectedIds,
-        clearSelectedIds: clearSelectedIds,
+            // Selection management (per-table, not global)
+            getSelectedIds: getSelectedIds,
+            setSelectedIds: setSelectedIds,
+            addSelectedIds: addSelectedIds,
+            removeSelectedIds: removeSelectedIds,
+            clearSelectedIds: clearSelectedIds,
+            bindSelectionHandlers: bindSelectionHandlers,
+            bindDeleteHandlers: bindDeleteHandlers,
+            showAlert: showAlert,
 
-        // Table refresh and action handlers
-        refreshTable: refreshTable,
-        handleActionSuccess: handleActionSuccess,
-        handleActionError: handleActionError,
+            // Table refresh and action handlers
+            refreshTable: refreshTable,
+            handleActionSuccess: handleActionSuccess,
+            handleActionError: handleActionError,
 
-        // Utility functions
-        formatString: formatString,
-        localizeByMap: localizeByMap,
-        escapeHtml: escapeHtml,
+            // Utility functions
+            formatString: formatString,
+            localizeByMap: localizeByMap,
+            escapeHtml: escapeHtml,
 
-        // Render helpers
-        renderLink: renderLink,
-        renderButton: renderButton,
-        renderBadge: renderBadge,
-        renderDate: renderDate,
-        renderStatus: renderStatus
-    };
+            // Render helpers
+            renderLink: renderLink,
+            renderButton: renderButton,
+            renderBadge: renderBadge,
+            renderDate: renderDate,
+            renderStatus: renderStatus
+        };
 
-})(window, window.jQuery);
+        return true;
+    }
+
+    if (!initialize(window.jQuery)) {
+        var retryCount = 0;
+        var maxRetries = 100;
+
+        (function waitForDependencies() {
+            if (initialize(window.jQuery)) {
+                return;
+            }
+
+            retryCount += 1;
+            if (retryCount <= maxRetries) {
+                window.setTimeout(waitForDependencies, 50);
+            }
+            else {
+                console.warn('GropAdminTable initialization skipped: jQuery is unavailable.');
+            }
+        })();
+    }
+})(window);

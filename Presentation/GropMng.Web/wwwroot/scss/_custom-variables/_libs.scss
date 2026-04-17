@@ -6,3 +6,25 @@
 @import 'support';
 
 // $flatpickr-content-padding: 0.5rem;
+
+div.dataTables_wrapper div.dataTables_length {
+  display: flex;
+  justify-content: flex-start !important;
+  margin: 0 0 1rem !important;
+}
+
+div.dataTables_wrapper div.dataTables_length label {
+  justify-content: flex-start !important;
+  margin-bottom: 0;
+}
+
+div.dataTables_wrapper div.dataTables_paginate {
+  display: flex;
+  justify-content: flex-start !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+  margin: 2px 0;
+  white-space: nowrap;
+  justify-content: flex-start;
+}

@@ -81,13 +81,21 @@ public class AppLogModelFactory : IAppLogModelFactory
         // Repository expects 0-based page index
         var pageIndex = searchModel.Page - 1;
 
+        var fromUtc = searchModel.FromDate.HasValue
+            ? (DateTime?)DateTime.SpecifyKind(searchModel.FromDate.Value, DateTimeKind.Local).ToUniversalTime()
+            : null;
+
+        var toUtc = searchModel.ToDate.HasValue
+            ? (DateTime?)DateTime.SpecifyKind(searchModel.ToDate.Value, DateTimeKind.Local).ToUniversalTime().AddDays(1)
+            : null;
+
         var logs = await _appLogService.GetAllLogsAsync(
             pageIndex,
             searchModel.PageSize,
             searchModel.Level,
             searchModel.Message,
-            searchModel.FromDate,
-            searchModel.ToDate);
+            fromUtc,
+            toUtc);
 
         var languageId = await ResolveCurrentLanguageIdAsync();
         var mappedRows = logs.Select(x => _mapper.Map<AppLogRowModel>(x)).ToList();

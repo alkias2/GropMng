@@ -93,12 +93,7 @@
                                 <i class="bx bx-edit"></i>
                             </a>
                             <form class="d-inline" asp-area="Admin" asp-controller="Localization" asp-action="DeleteResource" method="post"
-                                  data-grop-delete="true"
-                                  data-confirm-icon="warning"
-                                  data-confirm-title="@T("admin.localization.resource.delete")"
-                                  data-confirm-text="@T("admin.localization.resource.delete.confirm")"
-                                  data-confirm-button-text="@T("common.delete")"
-                                  data-cancel-button-text="@T("common.cancel")">
+                                  data-grop-delete="true">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@resource.Id" />
                                 <input type="hidden" name="languageId" value="@resource.LanguageId" />
