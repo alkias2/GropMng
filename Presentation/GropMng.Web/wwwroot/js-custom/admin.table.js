@@ -444,10 +444,22 @@
         const rowCheckboxSelector = 'tbody input[type="checkbox"].' + checkboxClass;
 
         $(tableSelector).off('change.gropSelection');
+        $(tableSelector).off('click.gropSelection mousedown.gropSelection mouseup.gropSelection', rowCheckboxSelector);
         if (masterSelector) {
             $(document).off('change.gropSelectionMaster', masterSelector);
+            $(document).off('click.gropSelectionMaster mousedown.gropSelectionMaster mouseup.gropSelectionMaster', masterSelector);
         }
         $(tableSelector).off('draw.dt.gropSelection');
+
+        $(tableSelector).on('click.gropSelection mousedown.gropSelection mouseup.gropSelection', rowCheckboxSelector, function (event) {
+            event.stopPropagation();
+        });
+
+        if (masterSelector) {
+            $(document).on('click.gropSelectionMaster mousedown.gropSelectionMaster mouseup.gropSelectionMaster', masterSelector, function (event) {
+                event.stopPropagation();
+            });
+        }
 
         function notifyChanged() {
             const ids = getSelectedIds(tableSelector);

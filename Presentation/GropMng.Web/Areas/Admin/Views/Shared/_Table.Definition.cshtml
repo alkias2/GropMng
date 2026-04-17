@@ -141,6 +141,37 @@
         return sb.ToString();
     }
 
+    var responsiveControlColumnIndex = -1;
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var candidateColumn = Model.ColumnCollection[i];
+        if (!candidateColumn.Visible || candidateColumn.IsMasterCheckBox)
+        {
+            continue;
+        }
+
+        var renderTypeName = candidateColumn.Render?.GetType().Name;
+        if (renderTypeName is "RenderButtonEdit" or "RenderButtonRemove" or "RenderButtonView")
+        {
+            continue;
+        }
+
+        responsiveControlColumnIndex = i;
+        break;
+    }
+
+    if (responsiveControlColumnIndex < 0)
+    {
+        for (int i = 0; i < Model.ColumnCollection.Count; i++)
+        {
+            if (Model.ColumnCollection[i].Visible && !Model.ColumnCollection[i].IsMasterCheckBox)
+            {
+                responsiveControlColumnIndex = i;
+                break;
+            }
+        }
+    }
+
     var columnDefsSb = new StringBuilder();
     for (int i = 0; i < Model.ColumnCollection.Count; i++)
     {
@@ -150,12 +181,30 @@
             columnDefsSb.Append(",\n");
         }
 
+        var cssClassNames = new List<string>();
+        if (!string.IsNullOrWhiteSpace(col.ClassName))
+        {
+            cssClassNames.Add(col.ClassName);
+        }
+
+        if (col.IsMasterCheckBox)
+        {
+            cssClassNames.Add("grop-select-checkbox-cell");
+        }
+
+        if (i == responsiveControlColumnIndex)
+        {
+            cssClassNames.Add("dtr-control");
+        }
+
+        var effectiveClassName = string.Join(" ", cssClassNames.Where(className => !string.IsNullOrWhiteSpace(className)).Distinct());
+
         columnDefsSb.Append($@"            {{
                 targets: {i},
                 orderable: {col.Orderable.ToString().ToLowerInvariant()},
                 searchable: {col.Searchable.ToString().ToLowerInvariant()},
                 visible: {col.Visible.ToString().ToLowerInvariant()},
-                className: '{col.ClassName ?? string.Empty}'
+                className: '{effectiveClassName}'
             }}");
     }
     string columnDefsJs = columnDefsSb.ToString();
@@ -323,7 +372,12 @@ else
                     ordering: @Model.Ordering.ToString().ToLowerInvariant(),
                     info: @Model.Info.ToString().ToLowerInvariant(),
                     scrollX: true,
-                    responsive: true,
+                    responsive: {
+                        details: {
+                            type: 'inline',
+                            target: 'td.dtr-control, th.dtr-control'
+                        }
+                    },
                     dom: supportsButtons ? '@JavaScriptEncoder.Default.Encode(dom)' : '@JavaScriptEncoder.Default.Encode(fallbackDom)',
 @if (!string.IsNullOrWhiteSpace(Model.DrawCallback))
 {
