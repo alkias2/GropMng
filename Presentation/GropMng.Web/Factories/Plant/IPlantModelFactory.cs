@@ -8,9 +8,10 @@ namespace GropMng.Web.Factories.Plant;
 public interface IPlantModelFactory
 {
     /// <summary>
-    /// Initializes or resets a search model for the initial Plant index load.
+    /// Initializes a search model for the initial Plant index GET.
+    /// Populates the grid definition and available filter options via localization.
     /// </summary>
-    PlantSearchModel PrepareSearchModel(PlantSearchModel? searchModel = null);
+    Task<PlantSearchModel> PrepareSearchModelAsync(PlantSearchModel? searchModel = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the paged Plant query and returns a DataTables list model.

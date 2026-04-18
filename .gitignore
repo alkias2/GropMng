@@ -97,6 +97,7 @@ Presentation/GropMng.Web/_ReferenceFiles/
 **/_ReferenceFiles/
 docs/
 Presentation/GropMng.Web/docs/
+.github/copilot-instructions.md
 
 # ==============================
 # App settings with local secrets

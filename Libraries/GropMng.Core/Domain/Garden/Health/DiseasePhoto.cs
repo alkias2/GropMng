@@ -2,7 +2,7 @@ namespace GropMng.Core.Domain.Garden.Health;
 
 public partial class DiseasePhoto : AuditableEntity
 {
-    public required string OwnerId { get; set; }
+    public Guid OwnerId { get; set; }
 
     public int PlantDiseaseRecordId { get; set; }
 

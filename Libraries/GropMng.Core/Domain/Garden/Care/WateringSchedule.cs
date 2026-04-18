@@ -5,7 +5,7 @@ namespace GropMng.Core.Domain.Garden.Care;
 
 public partial class WateringSchedule : AuditableEntity
 {
-    public required string OwnerId { get; set; }
+    public Guid OwnerId { get; set; }
 
     public int PlantInstanceId { get; set; }
 

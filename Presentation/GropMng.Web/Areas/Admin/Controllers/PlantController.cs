@@ -1,6 +1,7 @@
 using FluentValidation;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Factories.Plant;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ public class PlantController : Controller
     private readonly IPlantModelFactory _plantModelFactory;
     private readonly IPlantService _plantService;
     private readonly IValidator<PlantModel> _plantValidator;
+    private readonly ILocalizationService _localizationService;
 
     #endregion
 
@@ -26,11 +28,13 @@ public class PlantController : Controller
     public PlantController(
         IPlantModelFactory plantModelFactory,
         IPlantService plantService,
-        IValidator<PlantModel> plantValidator)
+        IValidator<PlantModel> plantValidator,
+        ILocalizationService localizationService)
     {
         _plantModelFactory = plantModelFactory;
         _plantService = plantService;
         _plantValidator = plantValidator;
+        _localizationService = localizationService;
     }
 
     #endregion
@@ -41,9 +45,9 @@ public class PlantController : Controller
     /// Renders the Plant index page.
     /// </summary>
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var searchModel = _plantModelFactory.PrepareSearchModel();
+        var searchModel = await _plantModelFactory.PrepareSearchModelAsync(cancellationToken: cancellationToken);
         return View(searchModel);
     }
 
@@ -91,7 +95,7 @@ public class PlantController : Controller
         try
         {
             await _plantModelFactory.SaveCreateAsync(model, cancellationToken);
-            TempData["SuccessMessage"] = "Plant was created successfully.";
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.plant.notifications.create.success");
             return RedirectToAction(nameof(Index));
         }
         catch (DomainException ex)
@@ -146,7 +150,7 @@ public class PlantController : Controller
             if (!updated)
                 return RedirectToAction(nameof(Index));
 
-            TempData["SuccessMessage"] = "Plant was updated successfully.";
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.plant.notifications.edit.success");
             return RedirectToAction(nameof(Edit), new { id = model.Id });
         }
         catch (DomainException ex)
@@ -172,7 +176,7 @@ public class PlantController : Controller
         try
         {
             await _plantService.DeletePlantAsync(id, cancellationToken);
-            TempData["SuccessMessage"] = "Plant was deleted successfully.";
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.plant.notifications.delete.success");
         }
         catch (DomainException ex)
         {

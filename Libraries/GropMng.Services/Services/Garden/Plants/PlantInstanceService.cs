@@ -73,7 +73,7 @@ public class PlantInstanceService : IPlantInstanceService
     #region Public
 
     /// <inheritdoc />
-    public Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(string ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default)
+    public Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(Guid ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
@@ -104,7 +104,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, string ownerId, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public async Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, Guid ownerId, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
@@ -172,14 +172,14 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeletePlantInstanceAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeletePlantInstanceAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         var plantInstance = await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         await _plantInstanceRepository.DeleteAsync(plantInstance, cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<IReadOnlyList<Container>> GetContainersAsync(string ownerId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Container>> GetContainersAsync(Guid ownerId, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
@@ -220,7 +220,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeleteContainerAsync(int containerId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteContainerAsync(int containerId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         var container = await EnsureContainerOwnedAsync(containerId, ownerId, cancellationToken);
         var linkedCount = await _plantInstanceRepository.CountAsync(entity => entity.ContainerId == containerId && entity.OwnerId == ownerId, cancellationToken: cancellationToken);
@@ -281,7 +281,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<WateringSchedule>> GetWateringSchedulesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WateringSchedule>> GetWateringSchedulesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
 
@@ -327,7 +327,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeleteWateringScheduleAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteWateringScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var schedule = await EnsureWateringScheduleOwnedAsync(plantInstanceId, scheduleId, ownerId, cancellationToken);
@@ -335,7 +335,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<FertilizingSchedule>> GetFertilizingSchedulesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<FertilizingSchedule>> GetFertilizingSchedulesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
 
@@ -384,7 +384,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeleteFertilizingScheduleAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteFertilizingScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var schedule = await EnsureFertilizingScheduleOwnedAsync(plantInstanceId, scheduleId, ownerId, cancellationToken);
@@ -392,7 +392,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<PlantPhoto>> GetPlantPhotosAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PlantPhoto>> GetPlantPhotosAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
 
@@ -440,7 +440,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeletePlantPhotoAsync(int plantInstanceId, int photoId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeletePlantPhotoAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var photo = await EnsurePlantPhotoOwnedAsync(plantInstanceId, photoId, ownerId, cancellationToken);
@@ -448,7 +448,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<PlantNote>> GetPlantNotesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PlantNote>> GetPlantNotesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
 
@@ -491,7 +491,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeletePlantNoteAsync(int plantInstanceId, int noteId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeletePlantNoteAsync(int plantInstanceId, int noteId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var note = await EnsurePlantNoteOwnedAsync(plantInstanceId, noteId, ownerId, cancellationToken);
@@ -499,7 +499,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<PlantDiseaseRecord>> GetDiseaseRecordsAsync(int plantInstanceId, string ownerId, bool includePhotos = false, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PlantDiseaseRecord>> GetDiseaseRecordsAsync(int plantInstanceId, Guid ownerId, bool includePhotos = false, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
 
@@ -559,7 +559,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeleteDiseaseRecordAsync(int plantInstanceId, int recordId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteDiseaseRecordAsync(int plantInstanceId, int recordId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var record = await EnsureDiseaseRecordOwnedAsync(plantInstanceId, recordId, ownerId, cancellationToken);
@@ -567,7 +567,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DiseasePhoto>> GetDiseasePhotosAsync(int plantInstanceId, int recordId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<DiseasePhoto>> GetDiseasePhotosAsync(int plantInstanceId, int recordId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsureDiseaseRecordOwnedAsync(plantInstanceId, recordId, ownerId, cancellationToken);
 
@@ -611,7 +611,7 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task DeleteDiseasePhotoAsync(int plantInstanceId, int recordId, int photoId, string ownerId, CancellationToken cancellationToken = default)
+    public async Task DeleteDiseasePhotoAsync(int plantInstanceId, int recordId, int photoId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsureDiseaseRecordOwnedAsync(plantInstanceId, recordId, ownerId, cancellationToken);
         var photo = await EnsureDiseasePhotoOwnedAsync(recordId, photoId, ownerId, cancellationToken);
@@ -644,7 +644,7 @@ public class PlantInstanceService : IPlantInstanceService
         return plant ?? throw new DomainException($"Plant with id '{plantId}' was not found.");
     }
 
-    private async Task<GardenSpot> EnsureGardenSpotOwnedAsync(int gardenSpotId, string ownerId, CancellationToken cancellationToken)
+    private async Task<GardenSpot> EnsureGardenSpotOwnedAsync(int gardenSpotId, Guid ownerId, CancellationToken cancellationToken)
     {
         ValidateOwnerId(ownerId);
 
@@ -655,7 +655,7 @@ public class PlantInstanceService : IPlantInstanceService
         return gardenSpot ?? throw new DomainException($"GardenSpot with id '{gardenSpotId}' was not found for owner '{ownerId}'.");
     }
 
-    private async Task<PlantInstance> EnsurePlantInstanceOwnedAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken)
+    private async Task<PlantInstance> EnsurePlantInstanceOwnedAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken)
     {
         ValidateOwnerId(ownerId);
 
@@ -666,7 +666,7 @@ public class PlantInstanceService : IPlantInstanceService
         return plantInstance ?? throw new DomainException($"PlantInstance with id '{plantInstanceId}' was not found for owner '{ownerId}'.");
     }
 
-    private async Task<Container> EnsureContainerOwnedAsync(int containerId, string ownerId, CancellationToken cancellationToken)
+    private async Task<Container> EnsureContainerOwnedAsync(int containerId, Guid ownerId, CancellationToken cancellationToken)
     {
         ValidateOwnerId(ownerId);
 
@@ -683,7 +683,7 @@ public class PlantInstanceService : IPlantInstanceService
         return soilMix ?? throw new DomainException($"SoilMix with id '{soilMixId}' was not found.");
     }
 
-    private async Task<WateringSchedule> EnsureWateringScheduleOwnedAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken)
+    private async Task<WateringSchedule> EnsureWateringScheduleOwnedAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken)
     {
         var schedule = await _wateringScheduleRepository.FirstOrDefaultAsync(
             entity => entity.Id == scheduleId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
@@ -692,7 +692,7 @@ public class PlantInstanceService : IPlantInstanceService
         return schedule ?? throw new DomainException($"WateringSchedule with id '{scheduleId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
-    private async Task<FertilizingSchedule> EnsureFertilizingScheduleOwnedAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken)
+    private async Task<FertilizingSchedule> EnsureFertilizingScheduleOwnedAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken)
     {
         var schedule = await _fertilizingScheduleRepository.FirstOrDefaultAsync(
             entity => entity.Id == scheduleId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
@@ -701,7 +701,7 @@ public class PlantInstanceService : IPlantInstanceService
         return schedule ?? throw new DomainException($"FertilizingSchedule with id '{scheduleId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
-    private async Task<PlantPhoto> EnsurePlantPhotoOwnedAsync(int plantInstanceId, int photoId, string ownerId, CancellationToken cancellationToken)
+    private async Task<PlantPhoto> EnsurePlantPhotoOwnedAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken)
     {
         var photo = await _plantPhotoRepository.FirstOrDefaultAsync(
             entity => entity.Id == photoId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
@@ -710,7 +710,7 @@ public class PlantInstanceService : IPlantInstanceService
         return photo ?? throw new DomainException($"PlantPhoto with id '{photoId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
-    private async Task<PlantNote> EnsurePlantNoteOwnedAsync(int plantInstanceId, int noteId, string ownerId, CancellationToken cancellationToken)
+    private async Task<PlantNote> EnsurePlantNoteOwnedAsync(int plantInstanceId, int noteId, Guid ownerId, CancellationToken cancellationToken)
     {
         var note = await _plantNoteRepository.FirstOrDefaultAsync(
             entity => entity.Id == noteId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
@@ -719,7 +719,7 @@ public class PlantInstanceService : IPlantInstanceService
         return note ?? throw new DomainException($"PlantNote with id '{noteId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
-    private async Task<PlantDiseaseRecord> EnsureDiseaseRecordOwnedAsync(int plantInstanceId, int recordId, string ownerId, CancellationToken cancellationToken)
+    private async Task<PlantDiseaseRecord> EnsureDiseaseRecordOwnedAsync(int plantInstanceId, int recordId, Guid ownerId, CancellationToken cancellationToken)
     {
         var record = await _plantDiseaseRecordRepository.FirstOrDefaultAsync(
             entity => entity.Id == recordId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
@@ -728,7 +728,7 @@ public class PlantInstanceService : IPlantInstanceService
         return record ?? throw new DomainException($"PlantDiseaseRecord with id '{recordId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
-    private async Task<DiseasePhoto> EnsureDiseasePhotoOwnedAsync(int recordId, int photoId, string ownerId, CancellationToken cancellationToken)
+    private async Task<DiseasePhoto> EnsureDiseasePhotoOwnedAsync(int recordId, int photoId, Guid ownerId, CancellationToken cancellationToken)
     {
         var photo = await _diseasePhotoRepository.FirstOrDefaultAsync(
             entity => entity.Id == photoId && entity.PlantDiseaseRecordId == recordId && entity.OwnerId == ownerId,
@@ -751,9 +751,9 @@ public class PlantInstanceService : IPlantInstanceService
             throw new DomainException($"Fertilizer with id '{fertilizerId}' was not found.");
     }
 
-    private static void ValidateOwnerId(string ownerId)
+    private static void ValidateOwnerId(Guid ownerId)
     {
-        if (string.IsNullOrWhiteSpace(ownerId))
+        if (ownerId == Guid.Empty)
             throw new DomainException("OwnerId is required.");
     }
 
@@ -801,3 +801,5 @@ public class PlantInstanceService : IPlantInstanceService
 
     #endregion
 }
+
+

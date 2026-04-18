@@ -1,0 +1,109 @@
+@model IReadOnlyList<GropMng.Core.Domain.Localization.LocaleStringResource>
+@{
+    var language = ViewData["Language"] as GropMng.Core.Domain.Localization.Language;
+    var searchTerm = (ViewData["SearchTerm"] as string) ?? string.Empty;
+
+    var titleText = T("admin.localization.resources.title");
+    var dashboardText = T("common.dashboard");
+    var languagesText = T("admin.localization.languages.title");
+
+    ViewData["Title"] = titleText;
+    ViewData["ActiveMenu"] = "Localization";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = language is null ? titleText : $"{titleText} - {language.Name}",
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
+            new() { Text = titleText }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="d-flex justify-content-between mb-4">
+    <form method="get" asp-area="Admin" asp-controller="Localization" asp-action="Resources" class="d-flex gap-2">
+        <input type="hidden" name="languageId" value="@language?.Id" />
+        <input type="text" name="searchTerm" value="@searchTerm" class="form-control" placeholder="@T("common.search")" />
+        <button type="submit" class="btn btn-outline-primary">@T("common.apply")</button>
+    </form>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-area="Admin" asp-controller="Localization" asp-action="CreateResource" asp-route-languageId="@language?.Id">
+            <i class="bx bx-plus me-1"></i> @T("admin.localization.resource.create")
+        </a>
+        <a class="btn btn-outline-success" asp-area="Admin" asp-controller="Localization" asp-action="ExportResources" asp-route-languageId="@language?.Id">
+            <i class="bx bx-export me-1"></i> @T("admin.localization.resource.export")
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Localization" asp-action="ImportResources" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="languageId" value="@language?.Id" />
+            <div class="col-md-6">
+                <label class="form-label">XML</label>
+                <input class="form-control" type="file" name="xmlFile" accept=".xml" />
+            </div>
+            <div class="col-md-3">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" name="updateExistingResources" value="true" checked />
+                    <label class="form-check-label">@T("admin.localization.resource.import.updateexisting")</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bx bx-import me-1"></i> @T("admin.localization.resource.import")
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>@T("admin.localization.resource.fields.name")</th>
+                    <th>@T("admin.localization.resource.fields.value")</th>
+                    <th class="text-center">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var resource in Model)
+                {
+                    <tr>
+                        <td>@resource.Id</td>
+                        <td><code>@resource.ResourceName</code></td>
+                        <td class="text-break">@resource.ResourceValue</td>
+                        <td class="text-center">
+                            <a class="btn btn-sm btn-outline-primary me-1"
+                               asp-area="Admin"
+                               asp-controller="Localization"
+                               asp-action="EditResource"
+                               asp-route-id="@resource.Id">
+                                <i class="bx bx-edit"></i>
+                            </a>
+                            <form class="d-inline" asp-area="Admin" asp-controller="Localization" asp-action="DeleteResource" method="post"
+                                  data-grop-delete="true">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@resource.Id" />
+                                <input type="hidden" name="languageId" value="@resource.LanguageId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
