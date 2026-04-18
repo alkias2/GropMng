@@ -1,0 +1,462 @@
+@using System.Text
+@using System.Text.Encodings.Web
+@model GropMng.Web.Framework.Models.DataTables.GropDataTablesModel
+
+@{
+    string GetUrl(GropMng.Web.Framework.Models.DataTables.GropDataUrl dataUrl)
+    {
+        if (!string.IsNullOrEmpty(dataUrl?.ActionName) && !string.IsNullOrEmpty(dataUrl.ControllerName))
+        {
+            var resolvedActionUrl = Url.Action(dataUrl.ActionName, dataUrl.ControllerName, dataUrl.RouteValues);
+            return string.IsNullOrEmpty(resolvedActionUrl)
+                ? string.Empty
+                : resolvedActionUrl.TrimEnd('/') + (!dataUrl.TrimEnd ? "/" : string.Empty);
+        }
+
+        if (!string.IsNullOrEmpty(dataUrl?.Url))
+        {
+            var resolved = dataUrl.Url.StartsWith("~/", StringComparison.Ordinal)
+                ? Url.Content(dataUrl.Url)
+                : dataUrl.Url;
+            return resolved.TrimEnd('/') + (!dataUrl.TrimEnd ? "/" : string.Empty);
+        }
+
+        return string.Empty;
+    }
+
+    string ReplaceName(string str) => str.Replace("-", "_");
+
+    string GetRenderFunction(GropMng.Web.Framework.Models.DataTables.IGropRender render, GropMng.Web.Framework.Models.DataTables.GropColumnProperty col = null)
+    {
+        if (render == null)
+        {
+            return (col?.Encode ?? true)
+                ? ",\n                render: function(data, type, row) { return window.GropAdminTable.escapeHtml(data != null ? String(data) : ''); }"
+                : string.Empty;
+        }
+
+        var renderType = render.GetType().Name;
+        return renderType switch
+        {
+            "RenderCheckBox" => BuildCheckBoxRender(render),
+            "RenderButtonEdit" => BuildButtonEditRender(render),
+            "RenderButtonRemove" => BuildButtonRemoveRender(render),
+            "RenderButtonView" => BuildButtonViewRender(render),
+            "RenderLink" => BuildLinkRender(render),
+            "RenderBoolean" => BuildBooleanRender(render),
+            "RenderDate" => BuildDateRender(render),
+            "RenderPicture" => BuildPictureRender(render),
+            "RenderCustom" => BuildCustomRender(render),
+            "RenderBadge" => BuildBadgeRender(render),
+            _ => string.Empty
+        };
+    }
+
+    string BuildLinkRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var linkRender = render as GropMng.Web.Framework.Models.DataTables.RenderLink;
+        var baseUrl = !string.IsNullOrWhiteSpace(linkRender?.RouteName) ? linkRender.RouteName : "#";
+        return $",\n                render: function(data, type, row) {{ return '<a href=\"{baseUrl}' + window.GropAdminTable.escapeHtml(data) + '\">' + window.GropAdminTable.escapeHtml(data) + '</a>'; }}";
+    }
+
+    string BuildButtonEditRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var buttonRender = render as GropMng.Web.Framework.Models.DataTables.RenderButtonEdit;
+        var baseUrl = GetUrl(buttonRender?.DataUrl);
+        return $",\n                render: function(data, type, row) {{ return '<a class=\"btn btn-sm btn-icon btn-outline-secondary\" href=\"{baseUrl}' + window.GropAdminTable.escapeHtml(data) + '\" title=\"Edit\"><i class=\"bx bx-pencil\"></i></a>'; }}";
+    }
+
+    string BuildButtonRemoveRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var tableName = ReplaceName(Model.Name);
+        return $",\n                render: function(data, type, row) {{ return '<a href=\"#\" class=\"btn btn-sm btn-icon btn-outline-danger\" onclick=\"table_deletedata_{tableName}(\\'' + window.GropAdminTable.escapeHtml(data) + '\\');return false;\" title=\"Delete\"><i class=\"bx bx-trash\"></i></a>'; }}";
+    }
+
+    string BuildButtonViewRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var buttonRender = render as GropMng.Web.Framework.Models.DataTables.RenderButtonView;
+        var baseUrl = GetUrl(buttonRender?.DataUrl);
+        return $",\n                render: function(data, type, row) {{ return '<a class=\"btn btn-sm btn-icon btn-outline-primary\" href=\"{baseUrl}' + window.GropAdminTable.escapeHtml(data) + '\" title=\"View\"><i class=\"bx bx-show\"></i></a>'; }}";
+    }
+
+    string BuildBooleanRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var boolRender = render as GropMng.Web.Framework.Models.DataTables.RenderBoolean;
+        return $",\n                render: function(data, type, row) {{ return data ? '{boolRender?.TrueValue ?? "True"}' : '{boolRender?.FalseValue ?? "False"}'; }}";
+    }
+
+    string BuildDateRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var dateRender = render as GropMng.Web.Framework.Models.DataTables.RenderDate;
+        var format = !string.IsNullOrWhiteSpace(dateRender?.Format) ? dateRender.Format : "toLocaleDateString";
+        return $",\n                render: function(data, type, row) {{ if (!data) return ''; var d = new Date(data); return d.{format}(); }}";
+    }
+
+    string BuildPictureRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var picRender = render as GropMng.Web.Framework.Models.DataTables.RenderPicture;
+        var style = picRender?.MaxWidth.HasValue == true ? $"max-width: {picRender.MaxWidth}px;" : string.Empty;
+        return $",\n                render: function(data, type, row) {{ return '<img src=\"' + window.GropAdminTable.escapeHtml(data) + '\" alt=\"\" class=\"{picRender?.ImageClass ?? string.Empty}\" style=\"{style}\">'; }}";
+    }
+
+    string BuildCustomRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var customRender = render as GropMng.Web.Framework.Models.DataTables.RenderCustom;
+        return $",\n                render: {customRender?.FunctionName ?? "function() { return ''; }"}";
+    }
+
+    string BuildBadgeRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var badgeRender = render as GropMng.Web.Framework.Models.DataTables.RenderBadge;
+        return $",\n                render: function(data, type, row) {{ return '<span class=\"{badgeRender?.DefaultClass ?? "badge bg-primary"}\">' + window.GropAdminTable.escapeHtml(data) + '</span>'; }}";
+    }
+
+    string BuildCheckBoxRender(GropMng.Web.Framework.Models.DataTables.IGropRender render)
+    {
+        var checkboxRender = render as GropMng.Web.Framework.Models.DataTables.RenderCheckBox;
+        var checkboxName = checkboxRender?.Name ?? "checkboxGroups";
+        var propertyKeyName = checkboxRender?.PropertyKeyName ?? "id";
+        return $",\n                render: function(data, type, row) {{ var value = row && row.{propertyKeyName} != null ? row.{propertyKeyName} : data; return '<input name=\"{checkboxName}\" value=\"' + window.GropAdminTable.escapeHtml(value) + '\" type=\"checkbox\" class=\"{checkboxName} checkboxGroups form-check-input\" />'; }}";
+    }
+
+    string BuildAjaxFilterData()
+    {
+        if (Model.Filters == null || Model.Filters.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var filter in Model.Filters)
+        {
+            if (string.IsNullOrWhiteSpace(filter?.Name) || string.IsNullOrWhiteSpace(filter.ResolvedElementId))
+            {
+                continue;
+            }
+
+            sb.Append($"var filterElement_{filter.Name} = $('#{filter.ResolvedElementId}');\n                        ");
+            sb.Append($"if (filterElement_{filter.Name}.is(':checkbox')) {{ d.{filter.Name} = filterElement_{filter.Name}.is(':checked'); }} else {{ d.{filter.Name} = filterElement_{filter.Name}.val(); }}\n                        ");
+        }
+
+        return sb.ToString();
+    }
+
+    var responsiveControlColumnIndex = -1;
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var candidateColumn = Model.ColumnCollection[i];
+        if (!candidateColumn.Visible || candidateColumn.IsMasterCheckBox)
+        {
+            continue;
+        }
+
+        var renderTypeName = candidateColumn.Render?.GetType().Name;
+        if (renderTypeName is "RenderButtonEdit" or "RenderButtonRemove" or "RenderButtonView")
+        {
+            continue;
+        }
+
+        responsiveControlColumnIndex = i;
+        break;
+    }
+
+    if (responsiveControlColumnIndex < 0)
+    {
+        for (int i = 0; i < Model.ColumnCollection.Count; i++)
+        {
+            if (Model.ColumnCollection[i].Visible && !Model.ColumnCollection[i].IsMasterCheckBox)
+            {
+                responsiveControlColumnIndex = i;
+                break;
+            }
+        }
+    }
+
+    var columnDefsSb = new StringBuilder();
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var col = Model.ColumnCollection[i];
+        if (i > 0)
+        {
+            columnDefsSb.Append(",\n");
+        }
+
+        var cssClassNames = new List<string>();
+        if (!string.IsNullOrWhiteSpace(col.ClassName))
+        {
+            cssClassNames.Add(col.ClassName);
+        }
+
+        if (col.IsMasterCheckBox)
+        {
+            cssClassNames.Add("grop-select-checkbox-cell");
+        }
+
+        if (i == responsiveControlColumnIndex)
+        {
+            cssClassNames.Add("dtr-control");
+        }
+
+        var effectiveClassName = string.Join(" ", cssClassNames.Where(className => !string.IsNullOrWhiteSpace(className)).Distinct());
+
+        columnDefsSb.Append($@"            {{
+                targets: {i},
+                orderable: {col.Orderable.ToString().ToLowerInvariant()},
+                searchable: {col.Searchable.ToString().ToLowerInvariant()},
+                visible: {col.Visible.ToString().ToLowerInvariant()},
+                className: '{effectiveClassName}'
+            }}");
+    }
+    string columnDefsJs = columnDefsSb.ToString();
+
+    var columnsSb = new StringBuilder();
+    for (int i = 0; i < Model.ColumnCollection.Count; i++)
+    {
+        var col = Model.ColumnCollection[i];
+        if (i > 0)
+        {
+            columnsSb.Append(",\n");
+        }
+
+        string renderFunc = GetRenderFunction(col.Render, col);
+        columnsSb.Append($@"            {{
+                data: '{col.Data}'{renderFunc}
+            }}");
+    }
+    string columnsJs = columnsSb.ToString();
+    var ajaxFilterDataJs = BuildAjaxFilterData();
+    var clearFilterIds = (Model.ClearFilterIds?.Any() == true
+            ? Model.ClearFilterIds
+            : (Model.Filters ?? new List<GropMng.Web.Framework.Models.DataTables.GropFilterParameter>())
+                .Select(filter => filter.ResolvedElementId))
+        .Where(id => !string.IsNullOrWhiteSpace(id))
+        .Distinct()
+        .ToList();
+
+    var topRightDefaultControls = string.Empty;
+    var topRightFallbackControls = string.Empty;
+
+    if (Model.ShowSearch)
+    {
+        topRightDefaultControls += "f";
+        topRightFallbackControls += "f";
+    }
+
+    if (Model.RefreshButton && !Model.IsChildTable)
+    {
+        topRightDefaultControls += "B";
+    }
+
+    var topRightDefaultPanel = !string.IsNullOrWhiteSpace(topRightDefaultControls)
+        ? $"<'col-sm-12 col-md-6 d-flex flex-wrap justify-content-center justify-content-md-end align-items-center gap-2'{topRightDefaultControls}>"
+        : "<'col-sm-12 col-md-6'>";
+
+    var topRightFallbackPanel = !string.IsNullOrWhiteSpace(topRightFallbackControls)
+        ? $"<'col-sm-12 col-md-6 d-flex flex-wrap justify-content-center justify-content-md-end align-items-center gap-2'{topRightFallbackControls}>"
+        : "<'col-sm-12 col-md-6'>";
+
+    var defaultDom = "<'row mx-2 mb-2 align-items-center'" +
+                        "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-start'l>" +
+                        topRightDefaultPanel +
+                     ">" +
+                     "<'row'<'col-sm-12't>>" +
+                     "<'row mx-2 mt-2 align-items-center'" +
+                        "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-start'p>" +
+                        "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end'i>" +
+                     ">";
+
+    var fallbackDom = "<'row mx-2 mb-2 align-items-center'" +
+                         "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-start'l>" +
+                         topRightFallbackPanel +
+                      ">" +
+                      "<'row'<'col-sm-12't>>" +
+                      "<'row mx-2 mt-2 align-items-center'" +
+                         "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-start'p>" +
+                         "<'col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end'i>" +
+                      ">";
+
+    var dom = !string.IsNullOrWhiteSpace(Model.Dom)
+        ? Model.Dom
+        : defaultDom;
+}
+
+<script type="text/javascript">
+    (function (window) {
+        'use strict';
+
+        var maxRetries = 50;
+        var retryDelayMs = 100;
+
+        function tryInitialize(retry) {
+            var $ = window.jQuery;
+
+            if (!window || !$ || !window.GropAdminTable) {
+                if (retry < maxRetries) {
+                    window.setTimeout(function () {
+                        tryInitialize(retry + 1);
+                    }, retryDelayMs);
+                }
+                else {
+                    console.warn('DataTables initialization skipped: jQuery or GropAdminTable is unavailable.');
+                }
+
+                return;
+            }
+
+            $(function () {
+                var tableElement = '#@Model.Name';
+                var $tableElement = $(tableElement);
+
+                if ($tableElement.length === 0) {
+                    console.error('DataTables element not found: ' + tableElement);
+                    return;
+                }
+
+                if ($.fn.DataTable && $.fn.DataTable.isDataTable(tableElement)) {
+                    return;
+                }
+
+                @{
+                    string resolvedAjaxUrl;
+                    if (!string.IsNullOrEmpty(Model.UrlRead?.Url))
+                    {
+                        resolvedAjaxUrl = Model.UrlRead.Url.StartsWith("~/", StringComparison.Ordinal)
+                            ? Url.Content(Model.UrlRead.Url)
+                            : Model.UrlRead.Url;
+                    }
+                    else
+                    {
+                        var ajaxArea = Model.UrlRead.RouteValues?.TryGetValue("area", out var routeValue) == true
+                            ? routeValue?.ToString()
+                            : ViewContext.RouteData.Values["area"]?.ToString();
+
+                        resolvedAjaxUrl = string.IsNullOrEmpty(ajaxArea)
+                            ? $"/{Model.UrlRead.ControllerName}/{Model.UrlRead.ActionName}"
+                            : $"/{ajaxArea}/{Model.UrlRead.ControllerName}/{Model.UrlRead.ActionName}";
+                    }
+                }
+
+                var supportsButtons = !!($.fn.dataTable && $.fn.dataTable.Buttons);
+                var dtConfig = {
+                    language: @await Html.PartialAsync("_GridLocalization.cshtml"),
+@if (Model.Data != null)
+{
+<text>
+                    data: @Html.Raw(Model.Data.ToString()),
+</text>
+}
+else
+{
+<text>
+                    ajax: {
+                        url: '@resolvedAjaxUrl',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: function (d) {
+                            @Html.Raw(ajaxFilterDataJs)
+                            if (typeof addAntiForgeryToken === 'function') {
+                                addAntiForgeryToken(d);
+                            }
+                        }
+                    },
+</text>
+}
+                    processing: @Model.Processing.ToString().ToLowerInvariant(),
+                    serverSide: @Model.ServerSide.ToString().ToLowerInvariant(),
+                    paging: @Model.Paging.ToString().ToLowerInvariant(),
+                    pagingType: '@Model.PagingType',
+                    pageLength: @Model.Length,
+                    lengthMenu: @Html.Raw(Model.LengthMenuJs),
+                    lengthChange: @Model.ShowLengthMenu.ToString().ToLowerInvariant(),
+                    searching: @Model.ShowSearch.ToString().ToLowerInvariant(),
+                    ordering: @Model.Ordering.ToString().ToLowerInvariant(),
+                    info: @Model.Info.ToString().ToLowerInvariant(),
+                    scrollX: true,
+                    responsive: {
+                        details: {
+                            type: 'inline',
+                            target: 'td.dtr-control, th.dtr-control'
+                        }
+                    },
+                    dom: supportsButtons ? '@JavaScriptEncoder.Default.Encode(dom)' : '@JavaScriptEncoder.Default.Encode(fallbackDom)',
+@if (!string.IsNullOrWhiteSpace(Model.DrawCallback))
+{
+<text>
+                    drawCallback: function (settings) {
+                        return @(Model.DrawCallback)(settings);
+                    },
+</text>
+}
+@if (!string.IsNullOrWhiteSpace(Model.HeaderCallback))
+{
+<text>
+                    headerCallback: function (thead, data, start, end, display) {
+                        return @(Model.HeaderCallback)(thead, data, start, end, display);
+                    },
+</text>
+}
+@if (!string.IsNullOrWhiteSpace(Model.FooterCallback))
+{
+<text>
+                    footerCallback: function (tfoot, data, start, end, display) {
+                        return @(Model.FooterCallback)(tfoot, data, start, end, display);
+                    },
+</text>
+}
+@if (!string.IsNullOrWhiteSpace(Model.RowIdBasedOnField))
+{
+<text>
+                    rowId: function (item) {
+                        if (!item || item['@Model.RowIdBasedOnField'] === undefined || item['@Model.RowIdBasedOnField'] === null) {
+                            return '';
+                        }
+
+                        var rowValue = String(item['@Model.RowIdBasedOnField']).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                        return rowValue ? 'row_' + rowValue : '';
+                    },
+</text>
+}
+                    columnDefs: [
+@Html.Raw(columnDefsJs)
+                    ],
+                    columns: [
+@Html.Raw(columnsJs)
+                    ]
+                };
+
+                if (supportsButtons && @Model.RefreshButton.ToString().ToLowerInvariant() && !@Model.IsChildTable.ToString().ToLowerInvariant()) {
+                    dtConfig.buttons = [{
+                        name: 'refresh',
+                        className: 'btn btn-sm btn-icon btn-outline-primary border-0 shadow-none',
+                        text: '<i class="bx bx-refresh" aria-hidden="true"></i>',
+                        action: function () {
+                            if (@Model.ServerSide.ToString().ToLowerInvariant()) {
+                                updateTable(tableElement, @Model.ColumnCollection.Any(x => x.IsMasterCheckBox).ToString().ToLowerInvariant());
+                            }
+                            else {
+                                updateTableSrc(tableElement, @Model.ColumnCollection.Any(x => x.IsMasterCheckBox).ToString().ToLowerInvariant());
+                            }
+                        }
+                    }];
+                }
+
+                var table = window.GropAdminTable.createDataTable(tableElement, dtConfig);
+
+                @if (!string.IsNullOrWhiteSpace(Model.SearchButtonId))
+                {
+                    <text>
+                    window.GropAdminTable.bindFilterButtons(table, {
+                        applyButtonSelector: '#@Model.SearchButtonId',
+                        clearButtonSelector: '@(!string.IsNullOrWhiteSpace(Model.ClearButtonId) ? "#" + Model.ClearButtonId : string.Empty)',
+                        clearCallback: function () {
+                            window.GropAdminTable.clearFilterInputs(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(clearFilterIds)));
+                        }
+                    });
+                    </text>
+                }
+            });
+        }
+
+        tryInitialize(0);
+    })(window);
+</script>

@@ -68,6 +68,15 @@ public class DefaultAppMenuProvider : IAppMenuProvider
                         Controller = "Setting",
                         Action = "AdminArea",
                         ItemType = AppMenuItemType.Link
+                    },
+                    new()
+                    {
+                        Key = "admin-localization",
+                        Title = "Localization",
+                        Area = "Admin",
+                        Controller = "Localization",
+                        Action = "Languages",
+                        ItemType = AppMenuItemType.Link
                     }
                 }
             }

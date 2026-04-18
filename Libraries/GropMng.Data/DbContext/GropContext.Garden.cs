@@ -4,6 +4,7 @@ using GropMng.Core.Domain.Garden.Care;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Locations;
+using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Domain.Garden.Preferences;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_Location");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
         entity.Property(e => e.City).HasMaxLength(100).IsRequired();
         entity.Property(e => e.Country).HasMaxLength(100).HasDefaultValue("Greece").IsRequired();
@@ -76,6 +77,13 @@ public partial class GropContext
             .HasForeignKey(e => e.LocationId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_GardenSpot_Location");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Location_Owner");
     }
 
     private static void ConfigureGardenSpot(EntityTypeBuilder<GardenSpot> entity)
@@ -90,7 +98,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_GardenSpot");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
         entity.Property(e => e.Orientation).HasMaxLength(50).HasNullableStorageEnumConversion();
         entity.Property(e => e.CoverType).HasMaxLength(50).HasNullableStorageEnumConversion();
@@ -103,6 +111,13 @@ public partial class GropContext
             .IsUnique()
             .HasDatabaseName("UQ_GardenSpot_LocationId_Name")
             .HasFilter("[IsDeleted] = 0");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_GardenSpot_Owner");
     }
 
     private static void ConfigurePlant(EntityTypeBuilder<Plant> entity)
@@ -174,7 +189,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_Container");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.ContainerType).HasMaxLength(30).HasStorageEnumConversion().HasDefaultValue(GardenContainerType.Pot);
         entity.Property(e => e.Material).HasMaxLength(100);
         entity.Property(e => e.LengthCm).HasPrecision(8, 2);
@@ -187,6 +202,13 @@ public partial class GropContext
         entity.Property(e => e.Notes).HasMaxLength(500);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Container_OwnerId");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Container_Owner");
     }
 
     private static void ConfigurePlantInstance(EntityTypeBuilder<PlantInstance> entity)
@@ -202,7 +224,7 @@ public partial class GropContext
 
         entity.Ignore(e => e.AgeYears);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.GardenSpotId).HasColumnName("SpotId");
         entity.Property(e => e.Nickname).HasMaxLength(200);
         entity.Property(e => e.PlantedDate).HasColumnType("date");
@@ -241,6 +263,13 @@ public partial class GropContext
             .HasForeignKey(e => e.SoilMixId)
             .OnDelete(DeleteBehavior.SetNull)
             .HasConstraintName("FK_PlantInstance_SoilMix");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantInstance_Owner");
     }
 
     private static void ConfigureWateringSchedule(EntityTypeBuilder<WateringSchedule> entity)
@@ -255,7 +284,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_WateringSchedule");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
         entity.Property(e => e.Season).HasMaxLength(20).HasStorageEnumConversion();
         entity.Property(e => e.FrequencyDays).HasDefaultValue((byte)3);
@@ -275,6 +304,13 @@ public partial class GropContext
             .HasForeignKey(e => e.PlantInstanceId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_WateringSchedule_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_WateringSchedule_Owner");
     }
 
     private static void ConfigureFertilizer(EntityTypeBuilder<Fertilizer> entity)
@@ -312,7 +348,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_FertilizingSchedule");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
         entity.Property(e => e.Season).HasMaxLength(20).HasStorageEnumConversion();
         entity.Property(e => e.FrequencyDays).HasDefaultValue((byte)14);
@@ -334,6 +370,13 @@ public partial class GropContext
             .HasForeignKey(e => e.FertilizerId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_FertilizingSchedule_Fertilizer");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_FertilizingSchedule_Owner");
     }
 
     private static void ConfigurePlantPhoto(EntityTypeBuilder<PlantPhoto> entity)
@@ -342,7 +385,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_PlantPhoto");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
         entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
         entity.Property(e => e.ThumbnailPath).HasMaxLength(500);
@@ -358,6 +401,13 @@ public partial class GropContext
             .HasForeignKey(e => e.PlantInstanceId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_PlantPhoto_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantPhoto_Owner");
     }
 
     private static void ConfigurePlantNote(EntityTypeBuilder<PlantNote> entity)
@@ -366,7 +416,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_PlantNote");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
         entity.Property(e => e.Title).HasMaxLength(300);
         entity.Property(e => e.RichHtmlContent).IsRequired();
@@ -380,6 +430,13 @@ public partial class GropContext
             .HasForeignKey(e => e.PlantInstanceId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_PlantNote_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantNote_Owner");
     }
 
     private static void ConfigureDisease(EntityTypeBuilder<Disease> entity)
@@ -475,7 +532,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_PlantDiseaseRecord");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
         entity.Property(e => e.DetectedDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
         entity.Property(e => e.ResolvedDate).HasColumnType("date");
@@ -499,6 +556,13 @@ public partial class GropContext
             .HasForeignKey(e => e.DiseaseId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_PlantDiseaseRecord_Disease");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantDiseaseRecord_Owner");
     }
 
     private static void ConfigureDiseasePhoto(EntityTypeBuilder<DiseasePhoto> entity)
@@ -507,7 +571,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_DiseasePhoto");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantDiseaseRecordId).HasColumnName("RecordId");
         entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
         entity.Property(e => e.ThumbnailPath).HasMaxLength(500);
@@ -522,6 +586,13 @@ public partial class GropContext
             .HasForeignKey(e => e.PlantDiseaseRecordId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_DiseasePhoto_PlantDiseaseRecord");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_DiseasePhoto_Owner");
     }
 
     private static void ConfigureAiQueryTemplate(EntityTypeBuilder<AIQueryTemplate> entity)
@@ -561,7 +632,7 @@ public partial class GropContext
         entity.HasKey(e => e.Id).HasName("PK_UserPreference");
         ConfigureAuditableEntity(entity);
 
-        entity.Property(e => e.OwnerId).HasMaxLength(450).IsRequired();
+        entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.LengthUnit).HasMaxLength(5).HasStorageEnumConversion().HasDefaultValue(LengthUnitType.Centimetre);
         entity.Property(e => e.VolumeUnit).HasMaxLength(5).HasStorageEnumConversion().HasDefaultValue(VolumeUnitType.Litre);
         entity.Property(e => e.TemperatureUnit).HasMaxLength(2).HasStorageEnumConversion().HasDefaultValue(TemperatureUnitType.Celsius);
@@ -571,6 +642,13 @@ public partial class GropContext
             .IsUnique()
             .HasDatabaseName("UQ_UserPreference_OwnerId")
             .HasFilter("[IsDeleted] = 0");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_UserPreference_Owner");
     }
 
     private static void ConfigureAuditableEntity<TEntity>(EntityTypeBuilder<TEntity> entity)
@@ -617,3 +695,4 @@ internal static class EnumPropertyBuilderExtensions
             storageValue => string.IsNullOrWhiteSpace(storageValue) ? null : EnumStorageValueExtensions.FromStorageValue<TEnum>(storageValue));
     }
 }
+

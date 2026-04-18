@@ -1,6 +1,7 @@
 using FluentValidation;
 using GropMng.Web.Areas.Admin.Models.Logging;
 using GropMng.Web.Areas.Admin.Validators.Common;
+using AppLogLevel = GropMng.Core.Domain.Logging.LogLevel;
 
 namespace GropMng.Web.Areas.Admin.Validators.Logging;
 
@@ -17,8 +18,8 @@ public class AppLogSearchModelValidator : BaseGropValidator<AppLogSearchModel>
             .WithMessage("Page size must be between 1 and 200.");
 
         RuleFor(x => x.Level)
-            .MaximumLength(40)
-            .WithMessage("Level filter cannot exceed 40 characters.");
+            .Must(level => !level.HasValue || Enum.IsDefined(typeof(AppLogLevel), level.Value))
+            .WithMessage("Invalid log level filter value.");
 
         RuleForDateRange(x => x.FromDate, x => x.ToDate, "From Date must be earlier than or equal to To Date.");
     }

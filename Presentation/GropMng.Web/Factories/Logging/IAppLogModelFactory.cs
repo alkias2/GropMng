@@ -8,10 +8,10 @@ namespace GropMng.Web.Factories.Logging;
 public interface IAppLogModelFactory
 {
     /// <summary>
-    /// Initialises or resets a search model for the initial GET page load.
-    /// Sets sensible default paging and returns the same instance.
+    /// Initialises a search model for the initial GET page load.
+    /// Populates filter lists and applies sensible default paging.
     /// </summary>
-    AppLogSearchModel PrepareSearchModel(AppLogSearchModel? searchModel = null);
+    Task<AppLogSearchModel> PrepareSearchModelAsync(AppLogSearchModel? searchModel = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the filtered, paged query and returns a DataTables-compatible list model.

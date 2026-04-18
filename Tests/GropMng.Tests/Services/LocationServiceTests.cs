@@ -20,7 +20,7 @@ public class LocationServiceTests
     public async Task AddGardenSpotAsync_AssignsAggregateDataAndAuditFields()
     {
         // Arrange
-        var ownerId = "owner-1";
+        var ownerId = Guid.NewGuid();
         var locationRepository = new Mock<IRepository<Location>>();
         var gardenSpotRepository = new Mock<IRepository<GardenSpot>>();
         var location = new Location

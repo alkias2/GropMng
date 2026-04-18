@@ -15,7 +15,9 @@ public class GropAdminMapperProfile : Profile
 {
     public GropAdminMapperProfile()
     {
-        CreateMap<AppLog, AppLogRowModel>();
+        CreateMap<AppLog, AppLogRowModel>()
+            .ForMember(dest => dest.LevelLocalized, opt => opt.Ignore())
+            .ForMember(dest => dest.TimestampLocalized, opt => opt.Ignore());
 
         CreateMap<Plant, PlantRowModel>()
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()));

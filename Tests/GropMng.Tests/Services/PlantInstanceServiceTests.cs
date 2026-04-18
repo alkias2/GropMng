@@ -21,7 +21,7 @@ public class PlantInstanceServiceTests
     public async Task AddWateringScheduleAsync_AssignsPlantInstanceAndOwner()
     {
         // Arrange
-        var ownerId = "owner-1";
+        var ownerId = Guid.NewGuid();
         var plantInstanceRepository = new Mock<IRepository<PlantInstance>>();
         var wateringScheduleRepository = new Mock<IRepository<WateringSchedule>>();
 

@@ -1,16 +1,69 @@
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 
+@{
+    var generalText = T("common.general");
+    var growthEnvironmentText = T("admin.plant.growth.environment");
+    var relatedText = T("common.related");
+    var saveText = T("common.save");
+    var cancelText = T("common.cancel");
+    var noneText = T("common.none");
+
+    var localizedCategories = Model.AvailableCategories
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? noneText
+                : T($"admin.plant.category.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+
+    var localizedGrowthTypes = Model.AvailableGrowthTypes
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? noneText
+                : T($"admin.plant.growthtype.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+
+    var localizedSunRequirements = Model.AvailableSunRequirements
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? noneText
+                : T($"admin.plant.sunrequirement.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+
+    var localizedWaterRequirements = Model.AvailableWaterRequirements
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? noneText
+                : T($"admin.plant.waterrequirement.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
 <ul class="nav nav-pills flex-column flex-md-row mb-3">
     <li class="nav-item">
-        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> General</a>
+        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> @generalText</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> Growth & Environment</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> @growthEnvironmentText</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> Related</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> @relatedText</a>
     </li>
 </ul>
 
@@ -35,25 +88,25 @@
 
     <div class="col-md-6">
         <grop-label asp-for="Category" />
-        <grop-select asp-for="Category" asp-items="Model.AvailableCategories" asp-required="true" />
+        <grop-select asp-for="Category" asp-items="localizedCategories" asp-required="true" />
         <span class="text-danger" asp-validation-for="Category"></span>
     </div>
 
     <div class="col-md-4">
         <grop-label asp-for="GrowthType" />
-        <grop-select asp-for="GrowthType" asp-items="Model.AvailableGrowthTypes" />
+        <grop-select asp-for="GrowthType" asp-items="localizedGrowthTypes" />
         <span class="text-danger" asp-validation-for="GrowthType"></span>
     </div>
 
     <div class="col-md-4">
         <grop-label asp-for="SunRequirement" />
-        <grop-select asp-for="SunRequirement" asp-items="Model.AvailableSunRequirements" />
+        <grop-select asp-for="SunRequirement" asp-items="localizedSunRequirements" />
         <span class="text-danger" asp-validation-for="SunRequirement"></span>
     </div>
 
     <div class="col-md-4">
         <grop-label asp-for="WaterRequirement" />
-        <grop-select asp-for="WaterRequirement" asp-items="Model.AvailableWaterRequirements" />
+        <grop-select asp-for="WaterRequirement" asp-items="localizedWaterRequirements" />
         <span class="text-danger" asp-validation-for="WaterRequirement"></span>
     </div>
 
@@ -99,9 +152,10 @@
 
 <div class="mt-4 d-flex gap-2">
     <button type="submit" class="btn btn-primary">
-        <i class="bx bx-save me-1"></i> Save
+        <i class="bx bx-save me-1"></i> @saveText
     </button>
     <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Plant" asp-action="Index">
-        Cancel
+        @cancelText
     </a>
 </div>
+

@@ -1,0 +1,183 @@
+﻿@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
+@using GropMng.Web.Areas.Admin.Models.Logging
+@using GropMng.Web.Framework.Models.DataTables
+@using Microsoft.AspNetCore.Routing
+@{
+    ViewData["Title"] = T("admin.applog.title");
+    ViewData["ActiveMenu"] = "AppLogs";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = T("admin.applog.title"),
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = T("admin.applog.breadcrumb") }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex justify-content-end gap-2 mb-4">
+    <button id="delete-selected" name="delete-selected" type="button" class="btn btn-danger">
+        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.selected")
+    </button>
+    <grop-action-confirmation asp-button-id="delete-selected" />
+
+    <button id="clearall" name="clearall" type="button" class="btn btn-danger">
+        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.all")
+    </button>
+    <grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("common.filters")</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> @T("common.clear")
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4 col-sm-6">
+                <grop-label asp-for="Level" />
+                <grop-select asp-for="Level" asp-items="Model.AvailableLogLevels" />
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <grop-label asp-for="FromDate" />
+                <grop-editor asp-for="FromDate" />
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <grop-label asp-for="ToDate" />
+                <grop-editor asp-for="ToDate" />
+            </div>
+            <div class="col-md-12">
+                <grop-label asp-for="Message" />
+                <grop-editor asp-for="Message" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "appLogsTable",
+    UrlRead = new GropDataUrl("AppLogList", "AppLog", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(AppLogSearchModel.Level)),
+        new GropFilterParameter(nameof(AppLogSearchModel.FromDate)),
+        new GropFilterParameter(nameof(AppLogSearchModel.ToDate)),
+        new GropFilterParameter(nameof(AppLogSearchModel.Message))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("id")
+        {
+            Title = "<input type=\"checkbox\" class=\"form-check-input mastercheckbox\" />",
+            Width = "44px",
+            ClassName = GropColumnClassDefaults.CenterAll,
+            Orderable = false,
+            Searchable = false,
+            IsMasterCheckBox = true,
+            Render = new RenderCheckBox("checkboxGroups", "id"),
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("admin.applog.fields.id"),
+            Width = "60px",
+        },
+        new GropColumnProperty("levelLocalized")
+        {
+            Title = T("admin.applog.fields.level"),
+            Width = "120px",
+        },
+        new GropColumnProperty("category")
+        {
+            Title = T("admin.applog.fields.category"),
+            Width = "200px",
+            ClassName = "text-truncate"
+        },
+        new GropColumnProperty("message")
+        {
+            Title = T("admin.applog.fields.message"),
+            ClassName = "text-truncate",
+        },
+        new GropColumnProperty("timestampLocalized")
+        {
+            Title = T("admin.applog.fields.timestamp"),
+            Width = "160px",
+            ClassName = GropColumnClassDefaults.NoWrap,
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.details"),
+            Width = "90px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonView(new GropDataUrl("Details", "AppLog", new RouteValueDictionary(new { area = "Admin" }))),
+        }
+    ]
+})
+
+<grop-alert asp-alert-id="deleteSelectedFailed" />
+<grop-alert asp-alert-id="nothingSelectedAlert" />
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.css" />
+}
+
+@section Scripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script>
+        $(function () {
+            $(document).on('click', '#delete-selected-action-confirmation-submit-button', function () {
+                if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+                    showAlert('nothingSelectedAlert', 'Please select at least one record.');
+                    return false;
+                }
+
+                var postData = {
+                    selectedIds: selectedIds
+                };
+
+                addAntiForgeryToken(postData);
+
+                $.ajax({
+                    cache: false,
+                    type: 'POST',
+                    url: '@Url.Action("DeleteSelected", "AppLog", new { area = "Admin" })',
+                    data: postData,
+                    traditional: true,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        showAlert('deleteSelectedFailed', errorThrown);
+                    },
+                    complete: function (jqXHR) {
+                        if (jqXHR.status === 204) {
+                            showAlert('nothingSelectedAlert', 'Please select at least one record.');
+                            return;
+                        }
+
+                        updateTable('#appLogsTable', true);
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+}

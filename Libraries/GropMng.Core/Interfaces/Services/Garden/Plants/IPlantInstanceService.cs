@@ -21,7 +21,7 @@ public interface IPlantInstanceService
     /// <param name="pageSize">The number of items to include in the page.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A paged list of plant instances.</returns>
-    Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(string ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default);
+    Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(Guid ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a single plant instance for an owner.
@@ -31,7 +31,7 @@ public interface IPlantInstanceService
     /// <param name="includeDetails">A value indicating whether supporting entities should be loaded together with the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>The matching plant instance when found; otherwise, <see langword="null" />.</returns>
-    Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, string ownerId, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, Guid ownerId, bool includeDetails = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new plant instance.
@@ -55,7 +55,7 @@ public interface IPlantInstanceService
     /// <param name="plantInstanceId">The identifier of the plant instance to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeletePlantInstanceAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeletePlantInstanceAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all containers available to a specific owner.
@@ -63,7 +63,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to scope the result.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of containers.</returns>
-    Task<IReadOnlyList<Container>> GetContainersAsync(string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Container>> GetContainersAsync(Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new container that can be assigned through the plant instance administration workflow.
@@ -87,7 +87,7 @@ public interface IPlantInstanceService
     /// <param name="containerId">The identifier of the container to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the container.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteContainerAsync(int containerId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteContainerAsync(int containerId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all soil mixes available for administration workflows.
@@ -126,7 +126,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of watering schedules.</returns>
-    Task<IReadOnlyList<WateringSchedule>> GetWateringSchedulesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WateringSchedule>> GetWateringSchedulesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a watering schedule to a plant instance.
@@ -153,7 +153,7 @@ public interface IPlantInstanceService
     /// <param name="scheduleId">The identifier of the watering schedule to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteWateringScheduleAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteWateringScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all fertilizing schedules for a plant instance.
@@ -162,7 +162,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of fertilizing schedules.</returns>
-    Task<IReadOnlyList<FertilizingSchedule>> GetFertilizingSchedulesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<FertilizingSchedule>> GetFertilizingSchedulesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a fertilizing schedule to a plant instance.
@@ -189,7 +189,7 @@ public interface IPlantInstanceService
     /// <param name="scheduleId">The identifier of the fertilizing schedule to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteFertilizingScheduleAsync(int plantInstanceId, int scheduleId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteFertilizingScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all photos for a plant instance.
@@ -198,7 +198,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of plant photos.</returns>
-    Task<IReadOnlyList<PlantPhoto>> GetPlantPhotosAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PlantPhoto>> GetPlantPhotosAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a photo to a plant instance.
@@ -225,7 +225,7 @@ public interface IPlantInstanceService
     /// <param name="photoId">The identifier of the photo to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeletePlantPhotoAsync(int plantInstanceId, int photoId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeletePlantPhotoAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all notes for a plant instance.
@@ -234,7 +234,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of plant notes.</returns>
-    Task<IReadOnlyList<PlantNote>> GetPlantNotesAsync(int plantInstanceId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PlantNote>> GetPlantNotesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a note to a plant instance.
@@ -261,7 +261,7 @@ public interface IPlantInstanceService
     /// <param name="noteId">The identifier of the note to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeletePlantNoteAsync(int plantInstanceId, int noteId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeletePlantNoteAsync(int plantInstanceId, int noteId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all disease records for a plant instance.
@@ -271,7 +271,7 @@ public interface IPlantInstanceService
     /// <param name="includePhotos">A value indicating whether disease photos should be loaded for each record.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of plant disease records.</returns>
-    Task<IReadOnlyList<PlantDiseaseRecord>> GetDiseaseRecordsAsync(int plantInstanceId, string ownerId, bool includePhotos = false, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PlantDiseaseRecord>> GetDiseaseRecordsAsync(int plantInstanceId, Guid ownerId, bool includePhotos = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a disease record to a plant instance.
@@ -298,7 +298,7 @@ public interface IPlantInstanceService
     /// <param name="recordId">The identifier of the disease record to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteDiseaseRecordAsync(int plantInstanceId, int recordId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteDiseaseRecordAsync(int plantInstanceId, int recordId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all disease photos for a disease record that belongs to a plant instance.
@@ -308,7 +308,7 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the aggregate.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of disease photos.</returns>
-    Task<IReadOnlyList<DiseasePhoto>> GetDiseasePhotosAsync(int plantInstanceId, int recordId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<DiseasePhoto>> GetDiseasePhotosAsync(int plantInstanceId, int recordId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a disease photo to a disease record that belongs to a plant instance.
@@ -338,5 +338,5 @@ public interface IPlantInstanceService
     /// <param name="photoId">The identifier of the disease photo to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the aggregate.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteDiseasePhotoAsync(int plantInstanceId, int recordId, int photoId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteDiseasePhotoAsync(int plantInstanceId, int recordId, int photoId, Guid ownerId, CancellationToken cancellationToken = default);
 }

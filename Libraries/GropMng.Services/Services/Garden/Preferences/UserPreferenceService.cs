@@ -4,7 +4,6 @@ using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Preferences;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Preferences;
-using System.Text.Json;
 
 namespace GropMng.Services.Services.Garden.Preferences;
 
@@ -37,9 +36,9 @@ public class UserPreferenceService : IUserPreferenceService
     /// <summary>
     /// Gets user preferences for a specific user.
     /// </summary>
-    public async Task<UserPreference> GetUserPreferenceAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserPreference> GetUserPreferenceAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
             throw new DomainException("User ID is required and cannot be empty.");
 
         var preferences = await _preferenceRepository.FindAsync(
@@ -72,7 +71,7 @@ public class UserPreferenceService : IUserPreferenceService
     {
         ArgumentNullException.ThrowIfNull(preference);
 
-        if (string.IsNullOrWhiteSpace(preference.OwnerId))
+        if (preference.OwnerId == Guid.Empty)
             throw new DomainException("User ID is required and cannot be empty.");
 
         await EnsureUserPreferenceIsUniqueAsync(preference.OwnerId, cancellationToken);
@@ -94,7 +93,7 @@ public class UserPreferenceService : IUserPreferenceService
         if (preference.Id <= 0)
             throw new DomainException("Preference ID is required for update.");
 
-        if (string.IsNullOrWhiteSpace(preference.OwnerId))
+        if (preference.OwnerId == Guid.Empty)
             throw new DomainException("User ID is required and cannot be empty.");
 
         var existingPreference = await EnsurePreferenceExistsAsync(preference.Id, cancellationToken);
@@ -144,9 +143,9 @@ public class UserPreferenceService : IUserPreferenceService
     /// <summary>
     /// Validates that a user has only one preference record.
     /// </summary>
-    private async Task EnsureUserPreferenceIsUniqueAsync(string userId, CancellationToken cancellationToken = default)
+    private async Task EnsureUserPreferenceIsUniqueAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
             throw new DomainException("User ID cannot be empty for uniqueness validation.");
 
         var existingPreferences = await _preferenceRepository.FindAsync(
@@ -185,3 +184,6 @@ public class UserPreferenceService : IUserPreferenceService
 
     #endregion
 }
+
+
+

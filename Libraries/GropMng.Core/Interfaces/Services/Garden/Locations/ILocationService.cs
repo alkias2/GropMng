@@ -15,7 +15,7 @@ public interface ILocationService
     /// <param name="pageSize">The number of items to include in the page.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A paged list of locations for the specified owner.</returns>
-    Task<IPagedList<Location>> GetLocationsAsync(string ownerId, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default);
+    Task<IPagedList<Location>> GetLocationsAsync(Guid ownerId, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a single location by identifier for a specific owner.
@@ -25,7 +25,7 @@ public interface ILocationService
     /// <param name="includeGardenSpots">A value indicating whether the related garden spots should be loaded.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>The matching location when found; otherwise, <see langword="null" />.</returns>
-    Task<Location?> GetLocationByIdAsync(int locationId, string ownerId, bool includeGardenSpots = false, CancellationToken cancellationToken = default);
+    Task<Location?> GetLocationByIdAsync(int locationId, Guid ownerId, bool includeGardenSpots = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new location.
@@ -49,7 +49,7 @@ public interface ILocationService
     /// <param name="locationId">The identifier of the location to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the location.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteLocationAsync(int locationId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteLocationAsync(int locationId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all garden spots associated with a location.
@@ -58,7 +58,7 @@ public interface ILocationService
     /// <param name="ownerId">The owner identifier used to validate access to the location.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A read-only list of garden spots belonging to the location.</returns>
-    Task<IReadOnlyList<GardenSpot>> GetGardenSpotsAsync(int locationId, string ownerId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<GardenSpot>> GetGardenSpotsAsync(int locationId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new garden spot under a location.
@@ -85,5 +85,5 @@ public interface ILocationService
     /// <param name="gardenSpotId">The identifier of the garden spot to delete.</param>
     /// <param name="ownerId">The owner identifier used to validate access to the location and garden spot.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
-    Task DeleteGardenSpotAsync(int locationId, int gardenSpotId, string ownerId, CancellationToken cancellationToken = default);
+    Task DeleteGardenSpotAsync(int locationId, int gardenSpotId, Guid ownerId, CancellationToken cancellationToken = default);
 }
