@@ -13,6 +13,7 @@
        DiscoverPrecompressedAssets does not encounter duplicate file keys caused by
        node_modules containing the same libraries as wwwroot\lib or wwwroot\vendor. -->
   <ItemGroup>
+    <Content Remove="Data\**" />
     <Content Remove="wwwroot\node_modules\**" />
     <StaticWebAsset Remove="wwwroot\node_modules\**" />
   </ItemGroup>
@@ -190,7 +191,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="Factories\" />
   </ItemGroup>
 
@@ -384,9 +384,12 @@
     <Compile Remove="..\..\Libraries\GropMng.Core\**\*.cs" />
     <Compile Remove="..\..\Libraries\GropMng.Data\**\*.cs" />
     <Compile Remove="..\..\Libraries\GropMng.Services\**\*.cs" />
+    <Compile Remove="Data\**" />
     <Compile Remove="_ReferenceFiles\**" />
     <Content Remove="_ReferenceFiles\**" />
+    <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="_ReferenceFiles\**" />
+    <None Remove="Data\**" />
     <None Remove="_ReferenceFiles\**" />
   </ItemGroup>
 

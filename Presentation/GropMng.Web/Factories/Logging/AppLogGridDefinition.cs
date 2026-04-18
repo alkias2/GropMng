@@ -24,7 +24,7 @@ public static class AppLogGridDefinition
         return new GropDataTablesModel
         {
             Name = "appLogsTable",
-            UrlRead = new GropDataUrl("List", "AppLog"),
+            UrlRead = new GropDataUrl("AppLogList", "AppLog"),
             SearchButtonId = "btnApplyFilters",
             Length = searchModel.PageSize,
             LengthMenu = [10, 25, 50, 100],

@@ -12,11 +12,15 @@ public class AppLogController : Controller
 {
     [HttpGet]
     public IActionResult Index()
-        => RedirectToAction("Index", "AppLog", new { area = "Admin" });
+        => RedirectToAction("List", "AppLog", new { area = "Admin" });
+
+    [HttpGet]
+    public IActionResult List()
+        => RedirectToAction("List", "AppLog", new { area = "Admin" });
 
     [HttpPost]
-    public IActionResult List()
-        => RedirectToAction("Index", "AppLog", new { area = "Admin" });
+    public IActionResult AppLogList()
+        => RedirectToAction("List", "AppLog", new { area = "Admin" });
 
     [HttpGet]
     public IActionResult Details(int id)
@@ -24,9 +28,9 @@ public class AppLogController : Controller
 
     [HttpPost]
     public IActionResult Delete(int id)
-        => RedirectToAction("Index", "AppLog", new { area = "Admin" });
+        => RedirectToAction("List", "AppLog", new { area = "Admin" });
 
     [HttpPost]
     public IActionResult DeleteAll()
-        => RedirectToAction("Index", "AppLog", new { area = "Admin" });
+        => RedirectToAction("List", "AppLog", new { area = "Admin" });
 }

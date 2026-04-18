@@ -68,7 +68,7 @@
 @await Html.PartialAsync("Table", new GropDataTablesModel
 {
     Name = "appLogsTable",
-    UrlRead = new GropDataUrl("List", "AppLog", new RouteValueDictionary(new { area = "Admin" })),
+    UrlRead = new GropDataUrl("AppLogList", "AppLog", new RouteValueDictionary(new { area = "Admin" })),
     SearchButtonId = "btnApplyFilters",
     ClearButtonId = "btnClearFilters",
     Length = Model.PageSize,

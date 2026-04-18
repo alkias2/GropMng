@@ -29,9 +29,14 @@ public class AppLogController : Controller
         _searchValidator = searchValidator;
     }
 
-    /// <summary>Renders the AppLog index page, passing an initialised search model to the view.</summary>
+    /// <summary>Redirects the legacy index route to the canonical list page.</summary>
     [HttpGet]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public IActionResult Index()
+        => RedirectToAction(nameof(List));
+
+    /// <summary>Renders the AppLog list page, passing an initialised search model to the view.</summary>
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
         var searchModel = await _factory.PrepareSearchModelAsync(cancellationToken: cancellationToken);
         return View(searchModel);
@@ -43,7 +48,7 @@ public class AppLogController : Controller
     /// <see cref="AppLogSearchModel"/>.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> List([FromForm] AppLogSearchModel searchModel)
+    public async Task<IActionResult> AppLogList([FromForm] AppLogSearchModel searchModel)
     {
         var validationResult = await _searchValidator.ValidateAsync(searchModel);
         if (!validationResult.IsValid)
@@ -67,7 +72,7 @@ public class AppLogController : Controller
     {
         var log = await _appLogService.GetLogByIdAsync(id);
         if (log == null)
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(List));
 
         return View(log);
     }
@@ -95,12 +100,12 @@ public class AppLogController : Controller
         return Json(new { success = true, deletedCount = selectedIds.Length });
     }
 
-    /// <summary>Deletes all log entries and redirects back to the index.</summary>
+    /// <summary>Deletes all log entries and redirects back to the list.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAll()
     {
         await _appLogService.ClearAllLogsAsync();
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(List));
     }
 }
