@@ -43,18 +43,6 @@ public class PlantModelFactory : IPlantModelFactory
         searchModel ??= new PlantSearchModel();
         searchModel.SetGridPageSize();
 
-        var titles = new PlantGridColumnTitles
-        {
-            Id             = await _localizationService.GetResourceAsync("admin.plant.grid.id"),
-            CommonName     = await _localizationService.GetResourceAsync("admin.plant.fields.commonname"),
-            ScientificName = await _localizationService.GetResourceAsync("admin.plant.fields.scientificname"),
-            Family         = await _localizationService.GetResourceAsync("admin.plant.fields.family"),
-            Category       = await _localizationService.GetResourceAsync("admin.plant.fields.category"),
-            Flags          = await _localizationService.GetResourceAsync("admin.plant.grid.flags"),
-            Actions        = await _localizationService.GetResourceAsync("common.actions"),
-        };
-
-        searchModel.GridModel = PlantGridDefinition.Build(searchModel, titles);
         searchModel.AvailableCategories = await _localizationService.GetLocalizedEnumSelectListAsync<PlantCategory>(
             "admin.plant.category",
             "admin.plant.category.all");
@@ -75,9 +63,39 @@ public class PlantModelFactory : IPlantModelFactory
             searchModel.PageSize,
             cancellationToken);
 
+        var edibleText = await _localizationService.GetResourceAsync("admin.plant.flags.edible");
+        var medicinalText = await _localizationService.GetResourceAsync("admin.plant.flags.medicinal");
+        var toxicText = await _localizationService.GetResourceAsync("admin.plant.flags.toxic");
+        var noneText = await _localizationService.GetResourceAsync("common.none");
+
+        var mappedRows = plants.Select(entity => _mapper.Map<PlantRowModel>(entity)).ToList();
+
+        foreach (var row in mappedRows)
+        {
+            if (Enum.TryParse<PlantCategory>(row.Category, true, out var parsedCategory))
+                row.CategoryLocalized = await _localizationService.GetLocalizedEnumAsync(parsedCategory);
+            else
+                row.CategoryLocalized = row.Category;
+
+            var flags = new List<string>();
+
+            if (row.IsEdible)
+                flags.Add(edibleText);
+
+            if (row.IsMedicinal)
+                flags.Add(medicinalText);
+
+            if (row.IsToxic)
+                flags.Add(toxicText);
+
+            row.FlagsSummary = flags.Count > 0
+                ? string.Join(", ", flags)
+                : noneText;
+        }
+
         var listModel = new PlantListModel();
         return listModel.PrepareToGrid(searchModel, plants, () =>
-            plants.Select(entity => _mapper.Map<PlantRowModel>(entity)));
+            mappedRows);
     }
 
     /// <inheritdoc />

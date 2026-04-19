@@ -42,10 +42,17 @@ public class PlantController : Controller
     #region Public
 
     /// <summary>
-    /// Renders the Plant index page.
+    /// Redirects the legacy index route to the canonical list page.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public IActionResult Index()
+        => RedirectToAction(nameof(List));
+
+    /// <summary>
+    /// Renders the Plant list page.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
         var searchModel = await _plantModelFactory.PrepareSearchModelAsync(cancellationToken: cancellationToken);
         return View(searchModel);
@@ -55,7 +62,7 @@ public class PlantController : Controller
     /// Returns paged and filtered plant rows for DataTables.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> List([FromForm] PlantSearchModel searchModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> PlantList([FromForm] PlantSearchModel searchModel, CancellationToken cancellationToken)
     {
         var listModel = await _plantModelFactory.PrepareListModelAsync(searchModel, cancellationToken);
         return Json(listModel);
@@ -96,7 +103,7 @@ public class PlantController : Controller
         {
             await _plantModelFactory.SaveCreateAsync(model, cancellationToken);
             TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.plant.notifications.create.success");
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(List));
         }
         catch (DomainException ex)
         {
@@ -115,7 +122,7 @@ public class PlantController : Controller
     {
         var model = await _plantModelFactory.PrepareEditModelAsync(id, cancellationToken);
         if (model == null)
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(List));
 
         return View(model);
     }
@@ -148,7 +155,7 @@ public class PlantController : Controller
         {
             var updated = await _plantModelFactory.SaveEditAsync(model, cancellationToken);
             if (!updated)
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(List));
 
             TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.plant.notifications.edit.success");
             return RedirectToAction(nameof(Edit), new { id = model.Id });
@@ -183,7 +190,7 @@ public class PlantController : Controller
             TempData["ErrorMessage"] = ex.Message;
         }
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(List));
     }
 
     #endregion
