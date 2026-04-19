@@ -1,56 +1,231 @@
+using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Owners;
+using GropMng.Core.Interfaces.Services.Configuration;
 using GropMng.Data.DbContext;
+using GropMng.Web.Initialization.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace GropMng.Web.Initialization.Seeders;
 
 /// <summary>
-/// Seeds the default owner required by the baseline startup flow.
+/// Seeds the baseline owner, role, and registration-setting records required by the authorization subsystem.
 /// </summary>
 internal sealed class OwnerSeeder
 {
     private static readonly Guid DefaultOwnerBusinessId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private const string DefaultOwnerEmail = "owner@gropmng.local";
+    private const string AdministratorRoleSystemName = "Administrator";
+    private const string RegisteredOwnerRoleSystemName = "RegisteredOwner";
+    private const string RegistrationSettingsPrefix = "grop.gropownerregistrationsettings.";
 
     private readonly GropContext _dbContext;
+    private readonly ISettingService _settingService;
+    private readonly OwnerBootstrapOptions _bootstrapOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OwnerSeeder"/> class.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
-    public OwnerSeeder(GropContext dbContext)
+    /// <param name="settingService">The application setting service.</param>
+    /// <param name="bootstrapOptions">The administrator bootstrap options.</param>
+    public OwnerSeeder(
+        GropContext dbContext,
+        ISettingService settingService,
+        IOptions<OwnerBootstrapOptions> bootstrapOptions)
     {
         _dbContext = dbContext;
+        _settingService = settingService;
+        _bootstrapOptions = bootstrapOptions.Value;
     }
 
     /// <summary>
-    /// Seeds the default owner if it does not already exist.
+    /// Seeds the default authorization foundation if it does not already exist.
     /// </summary>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>A task that represents the asynchronous seed operation.</returns>
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var owner = await _dbContext.Owners.FirstOrDefaultAsync(entity => entity.Email == DefaultOwnerEmail, cancellationToken);
-        if (owner is not null)
-            return;
+        await EnsureDefaultRegistrationSettingsAsync(cancellationToken);
 
-        var now = DateTime.UtcNow;
-        owner = new Owner
+        var administratorRole = await EnsureRoleAsync(
+            name: "Administrator",
+            systemName: AdministratorRoleSystemName,
+            description: "Full access. Manages settings, owners, roles, and permissions.",
+            cancellationToken: cancellationToken);
+
+        await EnsureRoleAsync(
+            name: "Registered Owner",
+            systemName: RegisteredOwnerRoleSystemName,
+            description: "Standard authenticated owner who manages their own garden workspace.",
+            cancellationToken: cancellationToken);
+
+        var owner = await EnsureAdministratorOwnerAsync(cancellationToken);
+        await EnsureAdministratorMembershipAsync(owner, administratorRole, cancellationToken);
+        await EnsureCurrentPasswordRecordAsync(owner, cancellationToken);
+    }
+
+    private async Task EnsureDefaultRegistrationSettingsAsync(CancellationToken cancellationToken)
+    {
+        var existing = await _settingService.GetAllByPrefixAsync(RegistrationSettingsPrefix, cancellationToken);
+
+        if (!existing.ContainsKey(RegistrationSettingsPrefix + "requireemailconfirmation"))
         {
-            OwnerId = DefaultOwnerBusinessId,
-            FirstName = "Default",
-            LastName = "Owner",
-            Email = DefaultOwnerEmail,
-            PasswordHash = ComputeSha256("ChangeMe123!"),
+            await _settingService.SetByKeyAsync(
+                RegistrationSettingsPrefix + "requireemailconfirmation",
+                false,
+                cancellationToken);
+        }
+
+        if (!existing.ContainsKey(RegistrationSettingsPrefix + "passwordresettokenexpirationhours"))
+        {
+            await _settingService.SetByKeyAsync(
+                RegistrationSettingsPrefix + "passwordresettokenexpirationhours",
+                24,
+                cancellationToken);
+        }
+    }
+
+    private async Task<OwnerRole> EnsureRoleAsync(
+        string name,
+        string systemName,
+        string description,
+        CancellationToken cancellationToken)
+    {
+        var role = await _dbContext.OwnerRoles.FirstOrDefaultAsync(
+            entity => entity.SystemName == systemName,
+            cancellationToken);
+
+        if (role is not null)
+            return role;
+
+        role = new OwnerRole
+        {
+            Name = name,
+            SystemName = systemName,
+            Description = description,
             IsActive = true,
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now,
-            IsDeleted = false
+            IsSystemRole = true
         };
 
-        _dbContext.Owners.Add(owner);
+        _dbContext.OwnerRoles.Add(role);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return role;
+    }
+
+    private async Task<Owner> EnsureAdministratorOwnerAsync(CancellationToken cancellationToken)
+    {
+        var email = string.IsNullOrWhiteSpace(_bootstrapOptions.AdministratorEmail)
+            ? DefaultOwnerEmail
+            : _bootstrapOptions.AdministratorEmail.Trim();
+
+        var firstName = string.IsNullOrWhiteSpace(_bootstrapOptions.AdministratorFirstName)
+            ? "System"
+            : _bootstrapOptions.AdministratorFirstName.Trim();
+
+        var lastName = string.IsNullOrWhiteSpace(_bootstrapOptions.AdministratorLastName)
+            ? "Administrator"
+            : _bootstrapOptions.AdministratorLastName.Trim();
+
+        var displayName = string.IsNullOrWhiteSpace(_bootstrapOptions.AdministratorDisplayName)
+            ? string.Join(' ', new[] { firstName, lastName }.Where(value => !string.IsNullOrWhiteSpace(value)))
+            : _bootstrapOptions.AdministratorDisplayName.Trim();
+
+        var password = string.IsNullOrWhiteSpace(_bootstrapOptions.AdministratorPassword)
+            ? "ChangeMe123!"
+            : _bootstrapOptions.AdministratorPassword;
+
+        var owner = await _dbContext.Owners.FirstOrDefaultAsync(entity => entity.Email == email, cancellationToken);
+        if (owner is null)
+        {
+            var now = DateTime.UtcNow;
+            owner = new Owner
+            {
+                OwnerId = DefaultOwnerBusinessId,
+                FirstName = firstName,
+                LastName = lastName,
+                DisplayName = displayName,
+                Email = email,
+                PasswordHash = ComputeSha256(password),
+                Status = OwnerAccountStatus.Active,
+                IsEmailConfirmed = true,
+                IsActive = true,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now,
+                IsDeleted = false
+            };
+
+            _dbContext.Owners.Add(owner);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return owner;
+        }
+
+        var hasChanges = false;
+
+        if (string.IsNullOrWhiteSpace(owner.DisplayName))
+        {
+            owner.DisplayName = displayName;
+            hasChanges = true;
+        }
+
+        if (owner.Status != OwnerAccountStatus.Active)
+        {
+            owner.Status = OwnerAccountStatus.Active;
+            hasChanges = true;
+        }
+
+        if (!owner.IsEmailConfirmed)
+        {
+            owner.IsEmailConfirmed = true;
+            hasChanges = true;
+        }
+
+        if (!owner.IsActive)
+        {
+            owner.IsActive = true;
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            owner.UpdatedAtUtc = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        return owner;
+    }
+
+    private async Task EnsureAdministratorMembershipAsync(Owner owner, OwnerRole administratorRole, CancellationToken cancellationToken)
+    {
+        await _dbContext.Entry(owner).Collection(entity => entity.OwnerRoles).LoadAsync(cancellationToken);
+        if (owner.OwnerRoles.Any(role => role.Id == administratorRole.Id))
+            return;
+
+        owner.OwnerRoles.Add(administratorRole);
+        owner.UpdatedAtUtc = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task EnsureCurrentPasswordRecordAsync(Owner owner, CancellationToken cancellationToken)
+    {
+        var hasCurrentPassword = await _dbContext.OwnerPasswords.AnyAsync(
+            entity => entity.OwnerId == owner.Id && entity.IsCurrent,
+            cancellationToken);
+
+        if (hasCurrentPassword)
+            return;
+
+        _dbContext.OwnerPasswords.Add(new OwnerPassword
+        {
+            OwnerId = owner.Id,
+            PasswordHash = owner.PasswordHash,
+            PasswordSalt = string.Empty,
+            CreatedAtUtc = DateTime.UtcNow,
+            IsCurrent = true
+        });
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

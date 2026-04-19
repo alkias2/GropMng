@@ -23,6 +23,7 @@ using GropMng.Services.Services.Localization;
 using GropMng.Services.Services.Logging;
 using GropMng.Services.Services.User;
 using GropMng.Web.Initialization;
+using GropMng.Web.Initialization.Options;
 using GropMng.Web.Initialization.Seeders;
 using GropMng.Web.Areas.Admin.Validators.Logging;
 using GropMng.Web.Factories.Logging;
@@ -51,6 +52,7 @@ public static class DependencyInjectionExtensions
         IConfiguration configuration)
     {
         services.AddCoreFrameworkServices();
+        services.Configure<OwnerBootstrapOptions>(configuration.GetSection(OwnerBootstrapOptions.SectionName));
         services.AddRequestLocalizationOptions();
         services.AddDataAccessAndDomainServices(configuration);
 
