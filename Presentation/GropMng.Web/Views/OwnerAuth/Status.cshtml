@@ -1,0 +1,32 @@
+@model GropMng.Web.Models.OwnerAuth.OwnerAuthStatusViewModel
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = Model.PageTitle;
+}
+
+<div class="card">
+    <div class="card-body text-center">
+        <div class="app-brand justify-content-center mb-4">
+            <a asp-controller="Home" asp-action="Index" class="app-brand-link gap-2">
+                <span class="app-brand-logo">
+                    <img src="~/grop-mng-logo.svg" alt="GropMng" />
+                </span>
+                <span class="app-brand-text demo text-body fw-bold">GropMng</span>
+            </a>
+        </div>
+
+        <span class="badge bg-label-primary mb-3">Owner Access</span>
+        <h4 class="mb-2">@Model.Heading</h4>
+        <p class="mb-2">@Model.Message</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SecondaryMessage))
+        {
+            <p class="text-muted mb-4">@Model.SecondaryMessage</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ActionText) && !string.IsNullOrWhiteSpace(Model.ActionUrl))
+        {
+            <a href="@Model.ActionUrl" class="btn btn-primary">@Model.ActionText</a>
+        }
+    </div>
+</div>

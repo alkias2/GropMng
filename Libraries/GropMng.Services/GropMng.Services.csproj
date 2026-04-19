@@ -11,4 +11,8 @@
     <ProjectReference Include="..\GropMng.Data\GropMng.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
 </Project>

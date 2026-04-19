@@ -23,6 +23,7 @@ public static class MiddlewarePipelineExtensions
         app.UseStaticFiles();
         app.UseRouting();
         app.UseRequestLocalization();
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllerRoute(

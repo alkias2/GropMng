@@ -30,6 +30,7 @@ using GropMng.Web.Factories.Logging;
 using GropMng.Web.Factories.Plant;
 using GropMng.Web.Factories.Settings;
 using GropMng.Web.Infrastructure.Navigation;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -69,6 +70,17 @@ public static class DependencyInjectionExtensions
         services.AddControllersWithViews();
         services.AddMemoryCache();
         services.AddHttpContextAccessor();
+        services.AddDataProtection();
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.Cookie.Name = "GropMng.OwnerAuth";
+                options.LoginPath = "/owner/auth/login";
+                options.AccessDeniedPath = "/Common/Error";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            });
+        services.AddAuthorization();
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
         services.AddValidatorsFromAssemblyContaining<AppLogSearchModelValidator>();
         services.AddScoped<IAppMenuProvider, DefaultAppMenuProvider>();
@@ -137,6 +149,11 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<GropMng.Core.Interfaces.Services.Garden.Preferences.IUserPreferenceService, UserPreferenceService>();
         services.AddScoped<ICurrentOwnerProvider, CurrentOwnerProvider>();
+        services.AddScoped<IOwnerService, OwnerService>();
+        services.AddScoped<IOwnerPasswordService, OwnerPasswordService>();
+        services.AddScoped<IOwnerAuthenticationService, OwnerAuthenticationService>();
+        services.AddScoped<IOwnerAccountFlowService, OwnerAccountFlowService>();
+        services.AddScoped<IPermissionService, PermissionService>();
 
         services.AddScoped<ILanguageService, LanguageService>();
         services.AddScoped<ICurrentLanguageContext, CurrentLanguageContext>();

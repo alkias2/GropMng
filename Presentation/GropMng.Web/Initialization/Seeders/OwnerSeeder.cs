@@ -1,12 +1,11 @@
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Services.Configuration;
+using GropMng.Core.Interfaces.Services.User;
 using GropMng.Data.DbContext;
 using GropMng.Web.Initialization.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace GropMng.Web.Initialization.Seeders;
 
@@ -23,6 +22,7 @@ internal sealed class OwnerSeeder
 
     private readonly GropContext _dbContext;
     private readonly ISettingService _settingService;
+    private readonly IOwnerPasswordService _ownerPasswordService;
     private readonly OwnerBootstrapOptions _bootstrapOptions;
 
     /// <summary>
@@ -34,10 +34,12 @@ internal sealed class OwnerSeeder
     public OwnerSeeder(
         GropContext dbContext,
         ISettingService settingService,
+        IOwnerPasswordService ownerPasswordService,
         IOptions<OwnerBootstrapOptions> bootstrapOptions)
     {
         _dbContext = dbContext;
         _settingService = settingService;
+        _ownerPasswordService = ownerPasswordService;
         _bootstrapOptions = bootstrapOptions.Value;
     }
 
@@ -64,7 +66,6 @@ internal sealed class OwnerSeeder
 
         var owner = await EnsureAdministratorOwnerAsync(cancellationToken);
         await EnsureAdministratorMembershipAsync(owner, administratorRole, cancellationToken);
-        await EnsureCurrentPasswordRecordAsync(owner, cancellationToken);
     }
 
     private async Task EnsureDefaultRegistrationSettingsAsync(CancellationToken cancellationToken)
@@ -141,6 +142,8 @@ internal sealed class OwnerSeeder
         if (owner is null)
         {
             var now = DateTime.UtcNow;
+            var passwordHashResult = _ownerPasswordService.HashPassword(password);
+
             owner = new Owner
             {
                 OwnerId = DefaultOwnerBusinessId,
@@ -148,7 +151,7 @@ internal sealed class OwnerSeeder
                 LastName = lastName,
                 DisplayName = displayName,
                 Email = email,
-                PasswordHash = ComputeSha256(password),
+                PasswordHash = passwordHashResult.Hash,
                 Status = OwnerAccountStatus.Active,
                 IsEmailConfirmed = true,
                 IsActive = true,
@@ -159,6 +162,7 @@ internal sealed class OwnerSeeder
 
             _dbContext.Owners.Add(owner);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await EnsureCurrentPasswordRecordAsync(owner, passwordHashResult, cancellationToken);
             return owner;
         }
 
@@ -194,6 +198,7 @@ internal sealed class OwnerSeeder
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        await EnsureCurrentPasswordRecordAsync(owner, null, cancellationToken);
         return owner;
     }
 
@@ -208,7 +213,10 @@ internal sealed class OwnerSeeder
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task EnsureCurrentPasswordRecordAsync(Owner owner, CancellationToken cancellationToken)
+    private async Task EnsureCurrentPasswordRecordAsync(
+        Owner owner,
+        PasswordHashResult? passwordHashResult,
+        CancellationToken cancellationToken)
     {
         var hasCurrentPassword = await _dbContext.OwnerPasswords.AnyAsync(
             entity => entity.OwnerId == owner.Id && entity.IsCurrent,
@@ -217,21 +225,18 @@ internal sealed class OwnerSeeder
         if (hasCurrentPassword)
             return;
 
+        var effectiveHash = passwordHashResult?.Hash ?? owner.PasswordHash;
+        var effectiveSalt = passwordHashResult?.Salt ?? string.Empty;
+
         _dbContext.OwnerPasswords.Add(new OwnerPassword
         {
             OwnerId = owner.Id,
-            PasswordHash = owner.PasswordHash,
-            PasswordSalt = string.Empty,
+            PasswordHash = effectiveHash,
+            PasswordSalt = effectiveSalt,
             CreatedAtUtc = DateTime.UtcNow,
             IsCurrent = true
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private static string ComputeSha256(string raw)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
-        return Convert.ToHexString(bytes);
     }
 }
