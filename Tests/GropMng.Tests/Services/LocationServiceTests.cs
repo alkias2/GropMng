@@ -62,4 +62,32 @@ public class LocationServiceTests
     }
 
     #endregion
+
+    #region Ownership Enforcement Tests
+
+    /// <summary>
+    /// Verifies that no data is returned when a different owner attempts to load a location.
+    /// </summary>
+    [Fact]
+    public async Task GetLocationByIdAsync_WhenLocationBelongsToDifferentOwner_ReturnsNull()
+    {
+        // Arrange
+        var wrongOwnerId = Guid.NewGuid();
+        var locationRepository = new Mock<IRepository<Location>>();
+        var gardenSpotRepository = new Mock<IRepository<GardenSpot>>();
+
+        locationRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Location, bool>>>(), false, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Location?)null);
+
+        var service = new LocationService(locationRepository.Object, gardenSpotRepository.Object);
+
+        // Act
+        var result = await service.GetLocationByIdAsync(7, wrongOwnerId);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    #endregion
 }

@@ -1,0 +1,21 @@
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var displayName = User?.Identity?.Name;
+}
+
+<div class="d-flex align-items-center gap-2 flex-wrap">
+    @if (isAuthenticated)
+    {
+        <span class="badge bg-label-success">@(!string.IsNullOrWhiteSpace(displayName) ? displayName : "Signed in")</span>
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary">Dashboard</a>
+        <form asp-area="" asp-controller="OwnerAuth" asp-action="Logout" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-primary">Logout</button>
+        </form>
+    }
+    else
+    {
+        <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="btn btn-sm btn-outline-primary">Login</a>
+        <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="btn btn-sm btn-primary">Register</a>
+    }
+</div>

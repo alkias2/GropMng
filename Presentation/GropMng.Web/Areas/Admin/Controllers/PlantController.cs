@@ -4,6 +4,7 @@ using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Factories.Plant;
+using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
@@ -12,6 +13,8 @@ namespace GropMng.Web.Areas.Admin.Controllers;
 /// Administers plant catalog entities in the Admin area.
 /// </summary>
 [Area("Admin")]
+[AuthorizeAdmin]
+[CheckPermission(GropMngPermissions.Garden.ManagePlants)]
 public class PlantController : Controller
 {
     #region Fields

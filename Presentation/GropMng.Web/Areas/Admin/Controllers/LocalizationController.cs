@@ -2,6 +2,7 @@ using GropMng.Core.Domain.Localization;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Areas.Admin.Models.Localization;
+using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
@@ -10,6 +11,8 @@ namespace GropMng.Web.Areas.Admin.Controllers;
 /// Administers languages and locale resources.
 /// </summary>
 [Area("Admin")]
+[AuthorizeAdmin]
+[CheckPermission(GropMngPermissions.Localization.ManageLocalization)]
 public class LocalizationController : Controller
 {
     private readonly IRepository<Language> _languageRepository;

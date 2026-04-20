@@ -23,6 +23,15 @@
     <script src="~/js/config.js" asp-append-version="true"></script>
 </head>
 <body>
+    <div class="container-xxl pt-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="app-brand-link text-decoration-none">
+                <span class="app-brand-text text-body fw-bold">GropMng</span>
+            </a>
+            @await Html.PartialAsync("_AuthAccessPartial")
+        </div>
+    </div>
+
     <div class="authentication-wrapper authentication-basic container-p-y">
         <div class="authentication-inner">
             @RenderBody()

@@ -1,11 +1,14 @@
 using FluentValidation;
 using GropMng.Web.Factories.Settings;
 using GropMng.Web.Areas.Admin.Models.Settings;
+using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[AuthorizeAdmin]
+[CheckPermission(GropMngPermissions.Configuration.ManageSettings)]
 public class SettingController : Controller
 {
     private readonly ISettingModelFactory _settingModelFactory;

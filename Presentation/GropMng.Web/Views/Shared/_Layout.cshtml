@@ -81,7 +81,7 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
                         </a>
                     </div>
 
-                    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                    <div class="navbar-nav-right d-flex align-items-center w-100" id="navbar-collapse">
                         <div class="navbar-nav align-items-center">
                         <div class="nav-item dropdown-style-switcher dropdown me-2 me-xl-0">
                             <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -157,6 +157,9 @@ class="dark-style layout-navbar-fixed layout-menu-fixed layout-compact"
                             </ul>
                         </div>
                         <!-- / Language Switcher Dropdown -->
+                    </div>
+                    <div class="d-flex align-items-center ms-auto">
+                        @await Html.PartialAsync("_AuthAccessPartial")
                     </div>
                     </div>
                 </nav>

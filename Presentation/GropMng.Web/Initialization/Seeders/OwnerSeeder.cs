@@ -3,6 +3,7 @@ using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Services.Configuration;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Data.DbContext;
+using GropMng.Web.Infrastructure.Security;
 using GropMng.Web.Initialization.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -58,11 +59,13 @@ internal sealed class OwnerSeeder
             description: "Full access. Manages settings, owners, roles, and permissions.",
             cancellationToken: cancellationToken);
 
-        await EnsureRoleAsync(
+        var registeredOwnerRole = await EnsureRoleAsync(
             name: "Registered Owner",
             systemName: RegisteredOwnerRoleSystemName,
             description: "Standard authenticated owner who manages their own garden workspace.",
             cancellationToken: cancellationToken);
+
+        await EnsurePermissionsAsync(administratorRole, registeredOwnerRole, cancellationToken);
 
         var owner = await EnsureAdministratorOwnerAsync(cancellationToken);
         await EnsureAdministratorMembershipAsync(owner, administratorRole, cancellationToken);
@@ -200,6 +203,47 @@ internal sealed class OwnerSeeder
 
         await EnsureCurrentPasswordRecordAsync(owner, null, cancellationToken);
         return owner;
+    }
+
+    private async Task EnsurePermissionsAsync(
+        OwnerRole administratorRole,
+        OwnerRole registeredOwnerRole,
+        CancellationToken cancellationToken)
+    {
+        await _dbContext.Entry(administratorRole).Collection(entity => entity.PermissionRecords).LoadAsync(cancellationToken);
+        await _dbContext.Entry(registeredOwnerRole).Collection(entity => entity.PermissionRecords).LoadAsync(cancellationToken);
+
+        var hasChanges = false;
+
+        foreach (var definition in GropMngPermissionProvider.GetAllPermissions())
+        {
+            var permission = await _dbContext.PermissionRecords.FirstOrDefaultAsync(
+                entity => entity.SystemName == definition.SystemName,
+                cancellationToken);
+
+            if (permission is null)
+            {
+                permission = definition.ToEntity();
+                _dbContext.PermissionRecords.Add(permission);
+                hasChanges = true;
+            }
+
+            if (administratorRole.PermissionRecords.All(entity => entity.SystemName != definition.SystemName))
+            {
+                administratorRole.PermissionRecords.Add(permission);
+                hasChanges = true;
+            }
+
+            if (definition.AssignToRegisteredOwnerByDefault
+                && registeredOwnerRole.PermissionRecords.All(entity => entity.SystemName != definition.SystemName))
+            {
+                registeredOwnerRole.PermissionRecords.Add(permission);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges)
+            await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task EnsureAdministratorMembershipAsync(Owner owner, OwnerRole administratorRole, CancellationToken cancellationToken)
