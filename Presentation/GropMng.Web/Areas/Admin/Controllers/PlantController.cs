@@ -3,7 +3,7 @@ using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Areas.Admin.Models.Plant;
-using GropMng.Web.Factories.Plant;
+using GropMng.Web.Areas.Admin.Factories.Plant;
 using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 

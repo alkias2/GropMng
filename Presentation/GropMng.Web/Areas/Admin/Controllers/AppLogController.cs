@@ -1,7 +1,7 @@
 using FluentValidation;
 using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Web.Areas.Admin.Models.Logging;
-using GropMng.Web.Factories.Logging;
+using GropMng.Web.Areas.Admin.Factories.Logging;
 using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 

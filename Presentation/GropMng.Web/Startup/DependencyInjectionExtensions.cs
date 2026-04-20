@@ -26,9 +26,10 @@ using GropMng.Web.Initialization;
 using GropMng.Web.Initialization.Options;
 using GropMng.Web.Initialization.Seeders;
 using GropMng.Web.Areas.Admin.Validators.Logging;
-using GropMng.Web.Factories.Logging;
-using GropMng.Web.Factories.Plant;
-using GropMng.Web.Factories.Settings;
+using GropMng.Web.Areas.Admin.Factories.Logging;
+using GropMng.Web.Areas.Admin.Factories.Plant;
+using GropMng.Web.Areas.Admin.Factories.Settings;
+using GropMng.Web.Areas.Admin.Factories.User;
 using GropMng.Web.Infrastructure.Navigation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
@@ -165,6 +166,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
         services.AddScoped<IPlantModelFactory, PlantModelFactory>();
         services.AddScoped<ISettingModelFactory, SettingModelFactory>();
+        services.AddScoped<IOwnerModelFactory, OwnerModelFactory>();
+        services.AddScoped<IOwnerRoleModelFactory, OwnerRoleModelFactory>();
 
         services.AddScoped<IStartupSeeder, StartupSeeder>();
         services.AddScoped<OwnerSeeder>();

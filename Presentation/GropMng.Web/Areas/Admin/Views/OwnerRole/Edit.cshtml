@@ -1,0 +1,29 @@
+@model GropMng.Web.Areas.Admin.Models.Roles.OwnerRoleEditModel
+@{
+    ViewData["Title"] = "Edit Role";
+    ViewData["ActiveMenu"] = "Roles";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = Model.Name,
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Roles & Permissions", Url = Url.Action("List", "OwnerRole", new { area = "Admin" }) },
+            new() { Text = "Edit Role" }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="OwnerRole" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>

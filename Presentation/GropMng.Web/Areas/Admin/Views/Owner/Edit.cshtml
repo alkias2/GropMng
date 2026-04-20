@@ -1,0 +1,29 @@
+@model GropMng.Web.Areas.Admin.Models.Owner.OwnerEditModel
+@{
+    ViewData["Title"] = "Edit Owner";
+    ViewData["ActiveMenu"] = "Owners";
+
+    var headerModel = new AdminPageHeaderModel
+    {
+        Title = string.IsNullOrWhiteSpace(Model.DisplayName) ? "Edit Owner" : Model.DisplayName,
+        Breadcrumbs = new List<AdminBreadcrumbItemModel>
+        {
+            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = "Owners", Url = Url.Action("List", "Owner", new { area = "Admin" }) },
+            new() { Text = "Edit Owner" }
+        }
+    };
+}
+
+@await Html.PartialAsync("_AdminPageHeader", headerModel)
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Owner" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="OwnerId" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>

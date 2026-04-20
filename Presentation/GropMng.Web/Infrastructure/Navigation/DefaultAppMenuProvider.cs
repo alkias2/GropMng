@@ -67,6 +67,24 @@ public class DefaultAppMenuProvider : IAppMenuProvider
             {
                 new()
                 {
+                    Key = "admin-owners",
+                    Title = "Owners",
+                    Area = "Admin",
+                    Controller = "Owner",
+                    Action = "List",
+                    ItemType = AppMenuItemType.Link
+                },
+                new()
+                {
+                    Key = "admin-roles",
+                    Title = "Roles & Permissions",
+                    Area = "Admin",
+                    Controller = "OwnerRole",
+                    Action = "List",
+                    ItemType = AppMenuItemType.Link
+                },
+                new()
+                {
                     Key = "admin-plants",
                     Title = "Plants",
                     Area = "Admin",

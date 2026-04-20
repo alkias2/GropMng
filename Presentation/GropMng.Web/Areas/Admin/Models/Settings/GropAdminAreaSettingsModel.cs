@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace GropMng.Web.Areas.Admin.Models.Settings;
 
 /// <summary>
@@ -14,6 +16,12 @@ public class GropAdminAreaSettingsModel
     public bool RichEditorAllowHtml { get; set; } = true;
 
     public string AdminDashboardWelcomeHtml { get; set; } = string.Empty;
+
+    [Display(Name = "Require email confirmation")]
+    public bool RequireEmailConfirmation { get; set; } = false;
+
+    [Display(Name = "Password reset expiration in hours")]
+    public int PasswordResetTokenExpirationHours { get; set; } = 24;
 
     public bool UseIsoDateFormatInJsonResult { get; set; } = true;
 }

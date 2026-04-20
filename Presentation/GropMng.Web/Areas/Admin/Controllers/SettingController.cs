@@ -1,5 +1,5 @@
 using FluentValidation;
-using GropMng.Web.Factories.Settings;
+using GropMng.Web.Areas.Admin.Factories.Settings;
 using GropMng.Web.Areas.Admin.Models.Settings;
 using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;

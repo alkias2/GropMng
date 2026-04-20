@@ -15,6 +15,7 @@ public static class GropMngPermissions
     public static class Owners
     {
         public const string ManageOwners = "Owners.Manage";
+        public const string ManageRoles = "Owners.ManageRoles";
     }
 
     public static class Garden
@@ -69,6 +70,7 @@ public static class GropMngPermissionProvider
     [
         new("Access Admin Area", GropMngPermissions.Security.AccessAdminArea, "Security"),
         new("Manage Owners", GropMngPermissions.Owners.ManageOwners, "Owners"),
+        new("Manage Owner Roles", GropMngPermissions.Owners.ManageRoles, "Owners"),
         new("Access Owner Workspace", GropMngPermissions.Garden.AccessOwnerWorkspace, "Garden", AssignToRegisteredOwnerByDefault: true),
         new("Manage Plants", GropMngPermissions.Garden.ManagePlants, "Garden"),
         new("Manage Settings", GropMngPermissions.Configuration.ManageSettings, "Configuration"),
