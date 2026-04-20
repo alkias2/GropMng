@@ -38,8 +38,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public async Task<IActionResult> Languages(CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         var languages = await _languageRepository.GetAllAsync(
             query => query.OrderBy(entity => entity.DisplayOrder).ThenBy(entity => entity.Id),
             cancellationToken: cancellationToken);
@@ -53,7 +51,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public IActionResult CreateLanguage()
     {
-        ViewData["ActiveMenu"] = "Localization";
         return View(new LanguageModel());
     }
 
@@ -64,8 +61,6 @@ public class LocalizationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateLanguage(LanguageModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
             return View(model);
 
@@ -93,8 +88,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public async Task<IActionResult> EditLanguage(int id, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         var language = await _languageRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
         if (language is null)
             return RedirectToAction(nameof(Languages));
@@ -119,8 +112,6 @@ public class LocalizationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditLanguage(LanguageModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
             return View(model);
 
@@ -173,8 +164,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public async Task<IActionResult> Resources(int languageId, string? searchTerm, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         var language = await _languageRepository.GetByIdAsync(languageId, cancellationToken: cancellationToken);
         if (language is null)
             return RedirectToAction(nameof(Languages));
@@ -205,7 +194,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public IActionResult CreateResource(int languageId)
     {
-        ViewData["ActiveMenu"] = "Localization";
         return View(new LocaleResourceModel { LanguageId = languageId });
     }
 
@@ -216,8 +204,6 @@ public class LocalizationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateResource(LocaleResourceModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
             return View(model);
 
@@ -238,8 +224,6 @@ public class LocalizationController : Controller
     [HttpGet]
     public async Task<IActionResult> EditResource(int id, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         var resource = await _resourceRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
         if (resource is null)
             return RedirectToAction(nameof(Languages));
@@ -260,8 +244,6 @@ public class LocalizationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditResource(LocaleResourceModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
             return View(model);
 

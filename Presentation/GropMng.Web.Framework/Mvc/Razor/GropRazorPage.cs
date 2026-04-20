@@ -1,4 +1,5 @@
 using GropMng.Core.Interfaces.Services.Localization;
+using GropMng.Web.Framework.UI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -13,6 +14,11 @@ namespace GropMng.Web.Framework.Mvc.Razor;
 /// <typeparam name="TModel">The page model type.</typeparam>
 public abstract class GropRazorPage<TModel> : RazorPage<TModel>
 {
+    /// <summary>
+    /// Gets the request-scoped UI helper used to coordinate admin page state.
+    /// </summary>
+    public IGropHtmlHelper GropHtml => Context.RequestServices.GetRequiredService<IGropHtmlHelper>();
+
     /// <summary>
     /// Resolves a localized resource by key, respecting the current request culture.
     /// </summary>

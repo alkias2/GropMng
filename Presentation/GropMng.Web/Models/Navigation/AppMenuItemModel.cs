@@ -27,6 +27,11 @@ public class AppMenuItemModel
     public string Key { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the stable system name used to identify the active admin menu item.
+    /// </summary>
+    public string SystemName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the menu item type.
     /// </summary>
     public AppMenuItemType ItemType { get; set; } = AppMenuItemType.Link;

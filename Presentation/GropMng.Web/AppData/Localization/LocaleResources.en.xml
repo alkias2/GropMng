@@ -49,6 +49,30 @@
     <Value>Dashboard</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.menu.main</Name>
+    <Value>Main</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.administration</Name>
+    <Value>Administration</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.admin</Name>
+    <Value>Admin</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.owners</Name>
+    <Value>Owners</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.roles</Name>
+    <Value>Roles &amp; Permissions</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.settings</Name>
+    <Value>Admin Settings</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>common.general</Name>
     <Value>General</Value>
   </LocaleResource>

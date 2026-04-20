@@ -1,7 +1,7 @@
 @model IReadOnlyList<GropMng.Core.Domain.Localization.Language>
 @{
     ViewData["Title"] = T("admin.localization.languages.title");
-    ViewData["ActiveMenu"] = "Localization";
+    GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");

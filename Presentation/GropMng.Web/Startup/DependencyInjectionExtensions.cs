@@ -25,6 +25,7 @@ using GropMng.Services.Services.User;
 using GropMng.Web.Initialization;
 using GropMng.Web.Initialization.Options;
 using GropMng.Web.Initialization.Seeders;
+using GropMng.Web.Framework.UI;
 using GropMng.Web.Areas.Admin.Validators.Logging;
 using GropMng.Web.Areas.Admin.Factories.Logging;
 using GropMng.Web.Areas.Admin.Factories.Plant;
@@ -84,6 +85,8 @@ public static class DependencyInjectionExtensions
         services.AddAuthorization();
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
         services.AddValidatorsFromAssemblyContaining<AppLogSearchModelValidator>();
+        services.AddScoped<IGropHtmlHelper, GropHtmlHelper>();
+        services.AddScoped<IAppMenuSiteMap, XmlAppMenuSiteMap>();
         services.AddScoped<IAppMenuProvider, DefaultAppMenuProvider>();
 
         return services;

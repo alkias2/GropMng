@@ -1,7 +1,7 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LanguageModel
 @{
     ViewData["Title"] = T("admin.localization.language.edit");
-    ViewData["ActiveMenu"] = "Localization";
+    GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");

@@ -49,6 +49,30 @@
     <Value>Πίνακας Ελέγχου</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.menu.main</Name>
+    <Value>Κύρια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.administration</Name>
+    <Value>Διαχείριση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.admin</Name>
+    <Value>Admin</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.owners</Name>
+    <Value>Ιδιοκτήτες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.roles</Name>
+    <Value>Ρόλοι &amp; Δικαιώματα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.menu.settings</Name>
+    <Value>Ρυθμίσεις Διαχείρισης</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>common.general</Name>
     <Value>Γενικά</Value>
   </LocaleResource>

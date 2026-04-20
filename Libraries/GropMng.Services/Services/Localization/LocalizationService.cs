@@ -42,6 +42,10 @@ public class LocalizationService : ILocalizationService
     /// <inheritdoc />
     public async Task<string> GetResourceAsync(string resourceKey)
     {
+        var currentLanguage = await _currentLanguageContext.GetCurrentLanguageAsync();
+        if (currentLanguage is not null)
+            return await GetResourceAsync(resourceKey, currentLanguage.Id);
+
         var defaultLanguage = await _languageService.GetDefaultLanguageAsync();
         return await GetResourceAsync(resourceKey, defaultLanguage.Id);
     }

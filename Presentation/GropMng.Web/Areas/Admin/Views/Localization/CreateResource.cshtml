@@ -1,7 +1,7 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LocaleResourceModel
 @{
     ViewData["Title"] = T("admin.localization.resource.create");
-    ViewData["ActiveMenu"] = "Localization";
+    GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");

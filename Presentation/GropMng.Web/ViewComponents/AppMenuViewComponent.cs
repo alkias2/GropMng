@@ -1,42 +1,47 @@
 using GropMng.Web.Infrastructure.Navigation;
 using GropMng.Web.Models.Navigation;
+using GropMng.Web.Framework.UI;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.ViewComponents;
 
 /// <summary>
-/// Renders the application sidebar menu and marks active/open items based on current route.
+/// Renders the application sidebar menu and marks active/open items based on the selected menu system name.
 /// </summary>
 public class AppMenuViewComponent : ViewComponent
 {
     private readonly IAppMenuProvider _menuProvider;
+    private readonly IGropHtmlHelper _gropHtmlHelper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AppMenuViewComponent"/> class.
     /// </summary>
     /// <param name="menuProvider">The menu provider.</param>
-    public AppMenuViewComponent(IAppMenuProvider menuProvider)
+    /// <param name="gropHtmlHelper">The request-scoped UI helper.</param>
+    public AppMenuViewComponent(IAppMenuProvider menuProvider, IGropHtmlHelper gropHtmlHelper)
     {
         _menuProvider = menuProvider;
+        _gropHtmlHelper = gropHtmlHelper;
     }
 
     /// <summary>
     /// Builds and returns the sidebar menu tree for the current request.
     /// </summary>
     /// <returns>A view result containing a route-aware menu tree.</returns>
-    public IViewComponentResult Invoke()
+    public async Task<IViewComponentResult> InvokeAsync()
     {
+        var activeSystemName = _gropHtmlHelper.GetActiveMenuItemSystemName();
         var currentArea = (ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty).Trim();
         var currentController = (ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty).Trim();
         var currentAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty).Trim();
 
-        var menu = _menuProvider.Build();
-        MarkState(menu, currentArea, currentController, currentAction);
+        var menu = await _menuProvider.BuildAsync(HttpContext.RequestAborted);
+        MarkState(menu, activeSystemName, currentArea, currentController, currentAction);
 
         return View(menu);
     }
 
-    private static bool MarkState(IEnumerable<AppMenuItemModel> items, string area, string controller, string action)
+    private static bool MarkState(IEnumerable<AppMenuItemModel> items, string activeSystemName, string area, string controller, string action)
     {
         var anyActive = false;
 
@@ -49,8 +54,9 @@ public class AppMenuViewComponent : ViewComponent
                 continue;
             }
 
-            var selfActive = IsCurrent(item, area, controller, action);
-            var childActive = item.Children.Count > 0 && MarkState(item.Children, area, controller, action);
+            var selfActive = IsCurrentSystemName(item, activeSystemName)
+                || (string.IsNullOrWhiteSpace(activeSystemName) && IsCurrentRoute(item, area, controller, action));
+            var childActive = item.Children.Count > 0 && MarkState(item.Children, activeSystemName, area, controller, action);
 
             item.IsActive = selfActive || childActive;
             item.IsOpen = childActive;
@@ -62,7 +68,14 @@ public class AppMenuViewComponent : ViewComponent
         return anyActive;
     }
 
-    private static bool IsCurrent(AppMenuItemModel item, string area, string controller, string action)
+    private static bool IsCurrentSystemName(AppMenuItemModel item, string activeSystemName)
+    {
+        return !string.IsNullOrWhiteSpace(activeSystemName)
+            && !string.IsNullOrWhiteSpace(item.SystemName)
+            && string.Equals(item.SystemName, activeSystemName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsCurrentRoute(AppMenuItemModel item, string area, string controller, string action)
     {
         if (string.IsNullOrWhiteSpace(item.Controller) || string.IsNullOrWhiteSpace(item.Action))
             return false;
