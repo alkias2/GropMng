@@ -1,7 +1,9 @@
 using AutoMapper;
 using GropMng.Core.Domain.Configuration;
 using GropMng.Core.Domain.Garden.Plants;
+using GropMng.Core.Domain.Localization;
 using GropMng.Core.Domain.Logging;
+using GropMng.Web.Areas.Admin.Models.Localization;
 using GropMng.Web.Areas.Admin.Models.Logging;
 using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Areas.Admin.Models.Settings;
@@ -18,6 +20,10 @@ public class GropAdminMapperProfile : Profile
         CreateMap<AppLog, AppLogRowModel>()
             .ForMember(dest => dest.LevelLocalized, opt => opt.Ignore())
             .ForMember(dest => dest.TimestampLocalized, opt => opt.Ignore());
+
+        CreateMap<Language, LanguageRowModel>();
+
+        CreateMap<LocaleStringResource, LocaleResourceRowModel>();
 
         CreateMap<Plant, PlantRowModel>()
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()));

@@ -1,0 +1,4 @@
+<Project>
+  <!-- Workaround for duplicate DiscoverPrecompressedAssets issue with Water_Lily.mp3 -->
+  <Target Name="DiscoverPrecompressedAssets" BeforeTargets="Build" Condition="false" />
+</Project>

@@ -808,22 +808,26 @@
         return true;
     }
 
-    if (!initialize(window.jQuery)) {
-        var retryCount = 0;
-        var maxRetries = 100;
+    // Defer initialization until jQuery is available
+    var retryCount = 0;
+    var maxRetries = 200; // Increased from 100 to allow more time
 
-        (function waitForDependencies() {
+    function attemptInitialize() {
+        if (window.jQuery) {
             if (initialize(window.jQuery)) {
                 return;
             }
+        }
 
-            retryCount += 1;
-            if (retryCount <= maxRetries) {
-                window.setTimeout(waitForDependencies, 50);
-            }
-            else {
-                console.warn('GropAdminTable initialization skipped: jQuery is unavailable.');
-            }
-        })();
+        retryCount += 1;
+        if (retryCount <= maxRetries) {
+            window.setTimeout(attemptInitialize, 25); // Reduced delay from 50ms to 25ms for responsiveness
+        }
+        else {
+            console.warn('GropAdminTable initialization skipped: jQuery is unavailable after 5 seconds.');
+        }
     }
+
+    // Start initialization attempt immediately when script loads
+    attemptInitialize();
 })(window);

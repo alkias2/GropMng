@@ -521,6 +521,14 @@
     <Value>Σειρά Εμφάνισης</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.language.fields.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.manage</Name>
+    <Value>Διαχείριση Πόρων</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.localization.resources.title</Name>
     <Value>Πόροι Μετάφρασης</Value>
   </LocaleResource>

@@ -16,7 +16,7 @@
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
+            new() { Text = languagesText, Url = Url.Action("List", "Localization", new { area = "Admin" }) },
             new() { Text = titleText }
         }
     };

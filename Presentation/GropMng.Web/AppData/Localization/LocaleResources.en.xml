@@ -521,6 +521,14 @@
     <Value>Display Order</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.language.fields.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.manage</Name>
+    <Value>Manage Resources</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.localization.resources.title</Name>
     <Value>Locale Resources</Value>
   </LocaleResource>

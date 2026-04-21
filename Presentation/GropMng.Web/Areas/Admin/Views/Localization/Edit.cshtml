@@ -1,6 +1,6 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LanguageModel
 @{
-    ViewData["Title"] = T("admin.localization.language.create");
+    ViewData["Title"] = T("admin.localization.language.edit");
     GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var titleText = (string)ViewData["Title"]!;
@@ -9,11 +9,11 @@
 
     var headerModel = new AdminPageHeaderModel
     {
-        Title = titleText,
+        Title = $"{titleText}: {Model.Name}",
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
+            new() { Text = languagesText, Url = Url.Action("List", "Localization", new { area = "Admin" }) },
             new() { Text = titleText }
         }
     };
@@ -22,11 +22,19 @@
 @await Html.PartialAsync("_AdminPageHeader", headerModel)
 @await Html.PartialAsync("Notifications")
 
+<div class="d-flex justify-content-end gap-2 mb-4">
+    <button id="delete-language" name="delete-language" type="button" class="btn btn-danger">
+        <i class="bx bx-trash me-1"></i> @T("common.delete")
+    </button>
+    <grop-action-confirmation asp-button-id="delete-language" asp-action="Delete" asp-route-id="@Model.Id" />
+</div>
+
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Localization" asp-action="CreateLanguage" method="post">
+        <form asp-area="Admin" asp-controller="Localization" asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
-            <partial name="_LanguageForm" model="Model" />
+            <input asp-for="Id" type="hidden" />
+            <partial name="_CreateOrUpdate" model="Model" />
         </form>
     </div>
 </div>

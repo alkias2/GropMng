@@ -27,6 +27,7 @@ using GropMng.Web.Initialization.Options;
 using GropMng.Web.Initialization.Seeders;
 using GropMng.Web.Framework.UI;
 using GropMng.Web.Areas.Admin.Validators.Logging;
+using GropMng.Web.Areas.Admin.Factories.Localization;
 using GropMng.Web.Areas.Admin.Factories.Logging;
 using GropMng.Web.Areas.Admin.Factories.Plant;
 using GropMng.Web.Areas.Admin.Factories.Settings;
@@ -167,6 +168,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ISettingService, SettingService>();
 
         services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
+        services.AddScoped<ILocalizationModelFactory, LocalizationModelFactory>();
         services.AddScoped<IPlantModelFactory, PlantModelFactory>();
         services.AddScoped<ISettingModelFactory, SettingModelFactory>();
         services.AddScoped<IOwnerModelFactory, OwnerModelFactory>();

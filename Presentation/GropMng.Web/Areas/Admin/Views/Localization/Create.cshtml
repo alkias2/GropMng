@@ -1,6 +1,6 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LanguageModel
 @{
-    ViewData["Title"] = T("admin.localization.language.edit");
+    ViewData["Title"] = T("admin.localization.language.create");
     GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var titleText = (string)ViewData["Title"]!;
@@ -9,11 +9,11 @@
 
     var headerModel = new AdminPageHeaderModel
     {
-        Title = $"{titleText}: {Model.Name}",
+        Title = titleText,
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
+            new() { Text = languagesText, Url = Url.Action("List", "Localization", new { area = "Admin" }) },
             new() { Text = titleText }
         }
     };
@@ -24,10 +24,9 @@
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Localization" asp-action="EditLanguage" method="post">
+        <form asp-area="Admin" asp-controller="Localization" asp-action="Create" method="post">
             @Html.AntiForgeryToken()
-            <input asp-for="Id" type="hidden" />
-            <partial name="_LanguageForm" model="Model" />
+            <partial name="_CreateOrUpdate" model="Model" />
         </form>
     </div>
 </div>
