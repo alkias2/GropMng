@@ -1,18 +1,18 @@
-@model IReadOnlyList<GropMng.Core.Domain.Localization.LocaleStringResource>
+@model GropMng.Web.Areas.Admin.Models.Localization.LocaleResourceSearchModel
+@using GropMng.Web.Areas.Admin.Models.Localization
+@using GropMng.Web.Framework.Models.DataTables
+@using Microsoft.AspNetCore.Routing
 @{
-    var language = ViewData["Language"] as GropMng.Core.Domain.Localization.Language;
-    var searchTerm = (ViewData["SearchTerm"] as string) ?? string.Empty;
+    ViewData["Title"] = T("admin.localization.resources.title");
+    GropHtml.SetActiveMenuItemSystemName("Localization");
 
-    var titleText = T("admin.localization.resources.title");
+    var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");
     var languagesText = T("admin.localization.languages.title");
 
-    ViewData["Title"] = titleText;
-    GropHtml.SetActiveMenuItemSystemName("Localization");
-
     var headerModel = new AdminPageHeaderModel
     {
-        Title = language is null ? titleText : $"{titleText} - {language.Name}",
+        Title = string.IsNullOrWhiteSpace(Model.LanguageName) ? titleText : $"{titleText} - {Model.LanguageName}",
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
@@ -25,85 +25,127 @@
 @await Html.PartialAsync("_AdminPageHeader", headerModel)
 @await Html.PartialAsync("Notifications")
 
-<div class="d-flex justify-content-between mb-4">
-    <form method="get" asp-area="Admin" asp-controller="Localization" asp-action="Resources" class="d-flex gap-2">
-        <input type="hidden" name="languageId" value="@language?.Id" />
-        <input type="text" name="searchTerm" value="@searchTerm" class="form-control" placeholder="@T("common.search")" />
-        <button type="submit" class="btn btn-outline-primary">@T("common.apply")</button>
-    </form>
+@Html.AntiForgeryToken()
 
-    <div class="d-flex gap-2">
-        <a class="btn btn-primary" asp-area="Admin" asp-controller="Localization" asp-action="CreateResource" asp-route-languageId="@language?.Id">
-            <i class="bx bx-plus me-1"></i> @T("admin.localization.resource.create")
-        </a>
-        <a class="btn btn-outline-success" asp-area="Admin" asp-controller="Localization" asp-action="ExportResources" asp-route-languageId="@language?.Id">
-            <i class="bx bx-export me-1"></i> @T("admin.localization.resource.export")
-        </a>
-    </div>
-</div>
+<input asp-for="LanguageId" type="hidden" />
 
 <div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("common.search")</h5>
+        <button id="btnAddResource" class="btn btn-success btn-sm me-2">
+            <i class="bx bx-plus me-1"></i> @T("common.create")
+        </button>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> @T("common.clear")
+        </button>
+    </div>
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Localization" asp-action="ImportResources" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="languageId" value="@language?.Id" />
+        <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">XML</label>
-                <input class="form-control" type="file" name="xmlFile" accept=".xml" />
+                <grop-label asp-for="ResourceName" />
+                <input asp-for="ResourceName" class="form-control" />
             </div>
-            <div class="col-md-3">
-                <div class="form-check mt-4">
-                    <input class="form-check-input" type="checkbox" name="updateExistingResources" value="true" checked />
-                    <label class="form-check-label">@T("admin.localization.resource.import.updateexisting")</label>
-                </div>
+            <div class="col-md-6">
+                <grop-label asp-for="ResourceValue" />
+                <input asp-for="ResourceValue" class="form-control" />
             </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-outline-primary w-100">
-                    <i class="bx bx-import me-1"></i> @T("admin.localization.resource.import")
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>@T("admin.localization.resource.fields.name")</th>
-                    <th>@T("admin.localization.resource.fields.value")</th>
-                    <th class="text-center">@T("common.actions")</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var resource in Model)
-                {
-                    <tr>
-                        <td>@resource.Id</td>
-                        <td><code>@resource.ResourceName</code></td>
-                        <td class="text-break">@resource.ResourceValue</td>
-                        <td class="text-center">
-                            <a class="btn btn-sm btn-outline-primary me-1"
-                               asp-area="Admin"
-                               asp-controller="Localization"
-                               asp-action="EditResource"
-                               asp-route-id="@resource.Id">
-                                <i class="bx bx-edit"></i>
-                            </a>
-                            <form class="d-inline" asp-area="Admin" asp-controller="Localization" asp-action="DeleteResource" method="post"
-                                  data-grop-delete="true">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@resource.Id" />
-                                <input type="hidden" name="languageId" value="@resource.LanguageId" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div id="addResourcePanel" class="card mb-4 d-none">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("common.create")</h5>
+    </div>
+    <div class="card-body">
+        <div id="addResourceErrors" class="alert alert-danger d-none" role="alert"></div>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label" for="addResourceName">@T("admin.localization.resource.fields.name")</label>
+                <input type="text" id="addResourceName" class="form-control" maxlength="400" />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="addResourceValue">@T("admin.localization.resource.fields.value")</label>
+                <input type="text" id="addResourceValue" class="form-control" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button id="btnSaveNewResource" class="btn btn-primary btn-sm">
+                    <i class="bx bx-save me-1"></i> @T("common.save")
+                </button>
+                <button id="btnCancelNewResource" class="btn btn-outline-secondary btn-sm">
+                    @T("common.cancel")
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "localeResourcesTable",
+    UrlRead = new GropDataUrl("LocaleResourceList", "Localization", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    ClearFilterIds = [nameof(LocaleResourceSearchModel.ResourceName), nameof(LocaleResourceSearchModel.ResourceValue)],
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(LocaleResourceSearchModel.LanguageId)),
+        new GropFilterParameter(nameof(LocaleResourceSearchModel.ResourceName)),
+        new GropFilterParameter(nameof(LocaleResourceSearchModel.ResourceValue))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("id")
+        {
+            Title = "ID",
+            Width = "80px"
+        },
+        new GropColumnProperty("resourceName")
+        {
+            Title = T("admin.localization.resource.fields.name")
+        },
+        new GropColumnProperty("resourceValue")
+        {
+            Title = T("admin.localization.resource.fields.value")
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.actions"),
+            Width = "120px",
+            Render = new RenderCustom("localeResource_renderActions"),
+            Orderable = false,
+            Searchable = false
+        }
+    ]
+})
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+}
+
+@section Scripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script>
+        window.localeResourceConfig = {
+            languageId: @Model.LanguageId,
+            urlAdd: '@Url.Action("AddLocaleResource", "Localization", new { area = "Admin" })',
+            urlUpdate: '@Url.Action("UpdateLocaleResource", "Localization", new { area = "Admin" })',
+            urlDelete: '@Url.Action("DeleteLocaleResource", "Localization", new { area = "Admin" })',
+            tableSelector: '#localeResourcesTable',
+            texts: {
+                edit: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.edit"))),
+                delete: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.delete"))),
+                save: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.save"))),
+                cancel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel")))
+            }
+        };
+    </script>
+    <script src="~/js-custom/admin.locale-resources.js"></script>
+}
 

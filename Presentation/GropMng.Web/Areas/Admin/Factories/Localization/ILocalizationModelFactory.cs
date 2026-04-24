@@ -110,4 +110,42 @@ public interface ILocalizationModelFactory
     Task<string> GetLocalizationResourceAsync(
         string resourceKey,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Loads an existing locale resource into a <see cref="LocaleResourceModel"/> for editing.
+    /// </summary>
+    /// <param name="id">The locale resource identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The populated model, or null when not found.</returns>
+    Task<LocaleResourceModel?> PrepareLocaleResourceForEditAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new locale string resource and returns its row model.
+    /// </summary>
+    /// <param name="model">The create model with LanguageId, ResourceName and ResourceValue.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The newly created resource as a <see cref="LocaleResourceRowModel"/>.</returns>
+    Task<LocaleResourceRowModel> SaveLocaleResourceAddAsync(
+        LocaleResourceModel model,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing locale string resource in place.
+    /// </summary>
+    /// <param name="model">The edit model with Id, LanguageId, ResourceName and ResourceValue.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SaveLocaleResourceUpdateAsync(
+        LocaleResourceModel model,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a locale string resource by identifier.
+    /// </summary>
+    /// <param name="id">The locale resource identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DeleteLocaleResourceAsync(
+        int id,
+        CancellationToken cancellationToken = default);
 }

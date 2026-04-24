@@ -94,6 +94,10 @@ public class LocalizationModelFactory : ILocalizationModelFactory
     {
         searchModel ??= new LocaleResourceSearchModel();
         searchModel.LanguageId = languageId;
+
+        var language = await _languageService.GetLanguageByIdAsync(languageId, cancellationToken);
+        searchModel.LanguageName = language?.Name ?? string.Empty;
+
         searchModel.SetGridPageSize();
 
         return await Task.FromResult(searchModel);
@@ -120,6 +124,13 @@ public class LocalizationModelFactory : ILocalizationModelFactory
                 {
                     var lowerName = searchModel.ResourceName.Trim().ToLowerInvariant();
                     query = query.Where(x => x.ResourceName.ToLower().Contains(lowerName));
+                }
+
+                // Apply resource value filter if provided
+                if (!string.IsNullOrWhiteSpace(searchModel.ResourceValue))
+                {
+                    var lowerValue = searchModel.ResourceValue.Trim().ToLowerInvariant();
+                    query = query.Where(x => x.ResourceValue.ToLower().Contains(lowerValue));
                 }
 
                 // Order by resource name and then by ID
@@ -229,5 +240,71 @@ public class LocalizationModelFactory : ILocalizationModelFactory
         CancellationToken cancellationToken = default)
     {
         return await _localizationService.GetResourceAsync(resourceKey);
+    }
+
+    /// <inheritdoc />
+    public async Task<LocaleResourceModel?> PrepareLocaleResourceForEditAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var resource = await _resourceRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
+        if (resource is null)
+            return null;
+
+        return new LocaleResourceModel
+        {
+            Id = resource.Id,
+            LanguageId = resource.LanguageId,
+            ResourceName = resource.ResourceName,
+            ResourceValue = resource.ResourceValue
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<LocaleResourceRowModel> SaveLocaleResourceAddAsync(
+        LocaleResourceModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var resource = new LocaleStringResource
+        {
+            LanguageId = model.LanguageId,
+            ResourceName = model.ResourceName.Trim(),
+            ResourceValue = model.ResourceValue.Trim(),
+            CreatedOnUtc = now,
+            UpdatedOnUtc = now
+        };
+
+        await _localizationService.InsertLocaleStringResourceAsync(resource, cancellationToken);
+
+        return _mapper.Map<LocaleResourceRowModel>(resource);
+    }
+
+    /// <inheritdoc />
+    public async Task SaveLocaleResourceUpdateAsync(
+        LocaleResourceModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var resource = await _resourceRepository.GetByIdAsync(model.Id, cancellationToken: cancellationToken);
+        if (resource is null)
+            throw new InvalidOperationException($"Locale resource with ID {model.Id} not found.");
+
+        resource.ResourceName = model.ResourceName.Trim();
+        resource.ResourceValue = model.ResourceValue.Trim();
+        resource.UpdatedOnUtc = DateTime.UtcNow;
+
+        await _localizationService.UpdateLocaleStringResourceAsync(resource, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteLocaleResourceAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var resource = await _resourceRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
+        if (resource is null)
+            throw new InvalidOperationException($"Locale resource with ID {id} not found.");
+
+        await _localizationService.DeleteLocaleStringResourceAsync(resource, cancellationToken);
     }
 }

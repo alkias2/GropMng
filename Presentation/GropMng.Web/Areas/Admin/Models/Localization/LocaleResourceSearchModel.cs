@@ -24,7 +24,17 @@ public class LocaleResourceSearchModel : BaseSearchModel
     public int LanguageId { get; set; }
 
     /// <summary>
+    /// Display name of the selected language, used in page context metadata.
+    /// </summary>
+    public string LanguageName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Optional resource name filter (case-insensitive substring match).
     /// </summary>
     public string ResourceName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional resource value filter (case-insensitive substring match).
+    /// </summary>
+    public string ResourceValue { get; set; } = string.Empty;
 }

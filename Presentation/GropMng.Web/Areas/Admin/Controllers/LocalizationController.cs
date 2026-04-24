@@ -18,16 +18,19 @@ public class LocalizationController : Controller
 {
     private readonly ILocalizationModelFactory _factory;
     private readonly IValidator<LanguageSearchModel> _languageSearchValidator;
+    private readonly IValidator<LocaleResourceSearchModel> _localeResourceSearchValidator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalizationController"/> class.
     /// </summary>
     public LocalizationController(
         ILocalizationModelFactory factory,
-        IValidator<LanguageSearchModel> languageSearchValidator)
+        IValidator<LanguageSearchModel> languageSearchValidator,
+        IValidator<LocaleResourceSearchModel> localeResourceSearchValidator)
     {
         _factory = factory;
         _languageSearchValidator = languageSearchValidator;
+        _localeResourceSearchValidator = localeResourceSearchValidator;
     }
 
     /// <summary>
@@ -176,11 +179,19 @@ public class LocalizationController : Controller
 
     /// <summary>
     /// Shows locale resources for a language.
+    /// The route segment maps to <c>id</c> via the default <c>{controller}/{action}/{id?}</c> template.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Resources(int languageId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Resources(int id, CancellationToken cancellationToken)
     {
-        var searchModel = await _factory.PrepareLocaleResourceSearchModelAsync(languageId, cancellationToken: cancellationToken);
+        if (id <= 0)
+            return RedirectToAction(nameof(List));
+
+        var searchModel = await _factory.PrepareLocaleResourceSearchModelAsync(id, cancellationToken: cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(searchModel.LanguageName))
+            return RedirectToAction(nameof(List));
+
         return View(searchModel);
     }
 
@@ -190,8 +201,99 @@ public class LocalizationController : Controller
     [HttpPost]
     public async Task<IActionResult> LocaleResourceList([FromForm] LocaleResourceSearchModel searchModel, CancellationToken cancellationToken)
     {
+        var validationResult = await _localeResourceSearchValidator.ValidateAsync(searchModel, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
         var listModel = await _factory.PrepareLocaleResourceListModelAsync(searchModel, cancellationToken);
         return Json(listModel);
+    }
+
+    /// <summary>
+    /// Creates a new locale string resource inline from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddLocaleResource([FromForm] LocaleResourceModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
+        try
+        {
+            var row = await _factory.SaveLocaleResourceAddAsync(model, cancellationToken);
+            return Json(new { success = true, data = row });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing locale string resource inline from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateLocaleResource([FromForm] LocaleResourceModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
+        try
+        {
+            await _factory.SaveLocaleResourceUpdateAsync(model, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    /// <summary>
+    /// Deletes a locale string resource from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteLocaleResource([FromForm] int id, CancellationToken cancellationToken)
+    {
+        if (id <= 0)
+            return BadRequest(new { errors = new Dictionary<string, string[]> { ["id"] = ["Invalid resource ID."] } });
+
+        try
+        {
+            await _factory.DeleteLocaleResourceAsync(id, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
     }
 
     private static void MergePostedValues(LanguageModel destination, LanguageModel source)
