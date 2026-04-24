@@ -6,6 +6,9 @@
     var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");
     var languagesText = T("admin.localization.languages.title");
+    var listUrl = Url.Action("List", "Localization", new { area = "Admin" })!;
+    var saveText = T("common.save");
+    var cancelText = T("common.cancel");
 
     var headerModel = new AdminPageHeaderModel
     {
@@ -13,29 +16,39 @@
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("List", "Localization", new { area = "Admin" }) },
+            new() { Text = languagesText, Url = listUrl },
             new() { Text = titleText }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<a href=\"" + listUrl + "\" class=\"btn btn-label-secondary\"><i class=\"bx bx-arrow-back me-1\"></i> " + cancelText + "</a>" +
+            " <button type=\"submit\" form=\"languageEditForm\" class=\"btn btn-primary\"><i class=\"bx bx-save me-1\"></i> " + saveText + "</button>")
     };
 }
 
 @await Html.PartialAsync("_AdminPageHeader", headerModel)
 @await Html.PartialAsync("Notifications")
 
-<div class="d-flex justify-content-end gap-2 mb-4">
-    <button id="delete-language" name="delete-language" type="button" class="btn btn-danger">
-        <i class="bx bx-trash me-1"></i> @T("common.delete")
-    </button>
-    <grop-action-confirmation asp-button-id="delete-language" asp-action="Delete" asp-route-id="@Model.Id" />
-</div>
-
-<div class="card">
+<div class="card mb-4">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Localization" asp-action="Edit" method="post">
+        <form id="languageEditForm" asp-area="Admin" asp-controller="Localization" asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <input asp-for="Id" type="hidden" />
             <partial name="_CreateOrUpdate" model="Model" />
         </form>
+    </div>
+</div>
+
+<!-- Danger zone -->
+<div class="card border-danger">
+    <div class="card-header bg-label-danger">
+        <h6 class="card-title mb-0 text-danger">@T("common.dangerzone")</h6>
+    </div>
+    <div class="card-body d-flex align-items-center gap-3">
+        <p class="mb-0">@T("admin.localization.language.delete.hint")</p>
+        <button id="delete-language" name="delete-language" type="button" class="btn btn-danger ms-auto">
+            <i class="bx bx-trash me-1"></i> @T("common.delete")
+        </button>
+        <grop-action-confirmation asp-button-id="delete-language" asp-action="Delete" asp-route-id="@Model.Id" />
     </div>
 </div>
 

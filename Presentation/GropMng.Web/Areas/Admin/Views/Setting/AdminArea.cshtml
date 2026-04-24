@@ -10,7 +10,9 @@
         {
             new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
             new() { Text = "Admin Settings" }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<button type=\"submit\" form=\"settingsForm\" class=\"btn btn-primary\"><i class=\"bx bx-save me-1\"></i> " + T("common.save") + "</button>")
     };
 }
 
@@ -19,7 +21,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Setting" asp-action="AdminArea" method="post">
+        <form id="settingsForm" asp-area="Admin" asp-controller="Setting" asp-action="AdminArea" method="post">
             @Html.AntiForgeryToken()
             @await Html.PartialAsync("_CreateOrUpdate", Model)
         </form>

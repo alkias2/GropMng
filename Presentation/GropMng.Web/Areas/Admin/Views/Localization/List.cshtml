@@ -9,6 +9,8 @@
     var titleText = (string)ViewData["Title"]!;
     var dashboardText = T("common.dashboard");
 
+    var createLangText = T("admin.localization.language.create");
+    var createLangUrl = Url.Action("Create", "Localization", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
         Title = titleText,
@@ -16,7 +18,9 @@
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
             new() { Text = titleText }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<a href=\"" + createLangUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + createLangText + "</a>")
     };
 }
 
@@ -24,14 +28,6 @@
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <a class="btn btn-primary" asp-area="Admin" asp-controller="Localization" asp-action="Create">
-            <i class="bx bx-plus me-1"></i> @T("admin.localization.language.create")
-        </a>
-    </div>
-</div>
 
 <div class="card mb-4">
     <div class="card-header d-flex align-items-center">

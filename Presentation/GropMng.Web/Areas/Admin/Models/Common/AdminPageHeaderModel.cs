@@ -14,6 +14,12 @@ public class AdminPageHeaderModel
     /// Gets or sets breadcrumb items.
     /// </summary>
     public IList<AdminBreadcrumbItemModel> Breadcrumbs { get; set; } = new List<AdminBreadcrumbItemModel>();
+
+    /// <summary>
+    /// Gets or sets optional action buttons HTML rendered to the right of the page title.
+    /// Use <see cref="Microsoft.AspNetCore.Html.HtmlString"/> to wrap pre-built HTML.
+    /// </summary>
+    public Microsoft.AspNetCore.Html.IHtmlContent? ActionButtons { get; set; }
 }
 
 /// <summary>

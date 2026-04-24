@@ -6,6 +6,8 @@
     ViewData["Title"] = T("admin.plant.title");
     GropHtml.SetActiveMenuItemSystemName("Plants");
 
+    var addPlantText = T("admin.plant.create");
+    var addPlantUrl = Url.Action("Create", "Plant", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
         Title = T("admin.plant.title"),
@@ -13,7 +15,9 @@
         {
             new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
             new() { Text = T("admin.plant.title") }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<a href=\"" + addPlantUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + addPlantText + "</a>")
     };
 }
 
@@ -21,12 +25,6 @@
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()
-
-<div class="d-flex justify-content-end mb-4">
-    <a class="btn btn-primary" asp-area="Admin" asp-controller="Plant" asp-action="Create">
-        <i class="bx bx-plus me-1"></i> @T("admin.plant.create")
-    </a>
-</div>
 
 <!-- Filter card -->
 <div class="card mb-4">

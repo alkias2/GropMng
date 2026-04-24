@@ -492,8 +492,10 @@
     <Name>admin.localization.language.delete.hasresources</Name>
     <Value>Η γλώσσα δεν μπορεί να διαγραφεί όσο υπάρχουν πόροι.</Value>
   </LocaleResource>
-  <LocaleResource>
-    <Name>admin.localization.language.fields.name</Name>
+  <LocaleResource>    <Name>admin.localization.language.delete.hint</Name>
+    <Value>Διαγράφει οριστικά αυτή τη γλώσσα και όλους τους πόρους της. Η ενέργεια αυτή δεν μπορεί να αναιρεθεί.</Value>
+  </LocaleResource>
+  <LocaleResource>    <Name>admin.localization.language.fields.name</Name>
     <Value>Όνομα</Value>
   </LocaleResource>
   <LocaleResource>
@@ -663,5 +665,25 @@
   <LocaleResource>
     <Name>common.confirm.delete.items</Name>
     <Value>Είστε βέβαιοι ότι θέλετε να διαγράψετε {0} στοιχεία;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.profile</Name>
+    <Value>Προφίλ</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.logout</Name>
+    <Value>Αποσύνδεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.login</Name>
+    <Value>Σύνδεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.register</Name>
+    <Value>Εγγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.user</Name>
+    <Value>Χρήστης</Value>
   </LocaleResource>
 </Language>

@@ -8,15 +8,21 @@
     ViewData["Title"] = titleText;
     GropHtml.SetActiveMenuItemSystemName("Plants");
 
+    var saveText = T("common.save");
+    var cancelText = T("common.cancel");
+    var listUrl = Url.Action("List", "Plant", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
         Title = titleText,
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = plantsText, Url = Url.Action("List", "Plant", new { area = "Admin" }) },
+            new() { Text = plantsText, Url = listUrl },
             new() { Text = createText }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<a href=\"" + listUrl + "\" class=\"btn btn-label-secondary\"><i class=\"bx bx-arrow-back me-1\"></i> " + cancelText + "</a>" +
+            " <button type=\"submit\" form=\"plantCreateForm\" class=\"btn btn-primary\"><i class=\"bx bx-save me-1\"></i> " + saveText + "</button>")
     };
 }
 
@@ -25,7 +31,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Plant" asp-action="Create" method="post">
+        <form id="plantCreateForm" asp-area="Admin" asp-controller="Plant" asp-action="Create" method="post">
             @Html.AntiForgeryToken()
             @await Html.PartialAsync("_CreateOrUpdate", Model)
         </form>

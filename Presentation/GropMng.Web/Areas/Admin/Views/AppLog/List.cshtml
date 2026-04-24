@@ -6,6 +6,8 @@
     ViewData["Title"] = T("admin.applog.title");
     GropHtml.SetActiveMenuItemSystemName("AppLogs");
 
+    var deleteSelectedText = T("admin.applog.delete.selected");
+    var deleteAllText = T("admin.applog.delete.all");
     var headerModel = new AdminPageHeaderModel
     {
         Title = T("admin.applog.title"),
@@ -13,7 +15,10 @@
         {
             new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
             new() { Text = T("admin.applog.breadcrumb") }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<button id=\"delete-selected\" type=\"button\" class=\"btn btn-label-danger\"><i class=\"bx bx-trash me-1\"></i> " + deleteSelectedText + "</button>" +
+            " <button id=\"clearall\" type=\"button\" class=\"btn btn-danger\"><i class=\"bx bx-trash me-1\"></i> " + deleteAllText + "</button>")
     };
 }
 
@@ -21,17 +26,8 @@
 
 @Html.AntiForgeryToken()
 
-<div class="d-flex justify-content-end gap-2 mb-4">
-    <button id="delete-selected" name="delete-selected" type="button" class="btn btn-danger">
-        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.selected")
-    </button>
-    <grop-action-confirmation asp-button-id="delete-selected" />
-
-    <button id="clearall" name="clearall" type="button" class="btn btn-danger">
-        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.all")
-    </button>
-    <grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
-</div>
+<grop-action-confirmation asp-button-id="delete-selected" />
+<grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
 
 <div class="card mb-4">
     <div class="card-header d-flex align-items-center">

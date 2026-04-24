@@ -3,15 +3,21 @@
     ViewData["Title"] = "Edit Owner";
     GropHtml.SetActiveMenuItemSystemName("Owners");
 
+    var saveText = T("common.save");
+    var cancelText = T("common.cancel");
+    var listUrl = Url.Action("List", "Owner", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
         Title = string.IsNullOrWhiteSpace(Model.DisplayName) ? "Edit Owner" : Model.DisplayName,
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
             new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Owners", Url = Url.Action("List", "Owner", new { area = "Admin" }) },
+            new() { Text = "Owners", Url = listUrl },
             new() { Text = "Edit Owner" }
-        }
+        },
+        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
+            "<a href=\"" + listUrl + "\" class=\"btn btn-label-secondary\"><i class=\"bx bx-arrow-back me-1\"></i> " + cancelText + "</a>" +
+            " <button type=\"submit\" form=\"ownerEditForm\" class=\"btn btn-primary\"><i class=\"bx bx-save me-1\"></i> " + saveText + "</button>")
     };
 }
 
@@ -20,7 +26,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Owner" asp-action="Edit" method="post">
+        <form id="ownerEditForm" asp-area="Admin" asp-controller="Owner" asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <input asp-for="OwnerId" type="hidden" />
             @await Html.PartialAsync("_CreateOrUpdate", Model)

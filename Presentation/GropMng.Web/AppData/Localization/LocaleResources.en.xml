@@ -493,6 +493,10 @@
     <Value>Language cannot be deleted while it has resources.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.language.delete.hint</Name>
+    <Value>Permanently deletes this language and all its locale resources. This action cannot be undone.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.localization.language.fields.name</Name>
     <Value>Name</Value>
   </LocaleResource>
@@ -663,5 +667,25 @@
   <LocaleResource>
     <Name>common.confirm.delete.items</Name>
     <Value>Are you sure you want to delete {0} items?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.profile</Name>
+    <Value>Profile</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.logout</Name>
+    <Value>Logout</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.login</Name>
+    <Value>Login</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.register</Name>
+    <Value>Register</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.user</Name>
+    <Value>User</Value>
   </LocaleResource>
 </Language>

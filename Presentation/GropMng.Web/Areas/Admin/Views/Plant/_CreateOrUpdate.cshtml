@@ -4,8 +4,6 @@
     var generalText = T("common.general");
     var growthEnvironmentText = T("admin.plant.growth.environment");
     var relatedText = T("common.related");
-    var saveText = T("common.save");
-    var cancelText = T("common.cancel");
     var noneText = T("common.none");
 
     var localizedCategories = Model.AvailableCategories
@@ -148,14 +146,5 @@
         <grop-editor asp-for="GeneralNotes" asp-template="RichEditor" />
         <span class="text-danger" asp-validation-for="GeneralNotes"></span>
     </div>
-</div>
-
-<div class="mt-4 d-flex gap-2">
-    <button type="submit" class="btn btn-primary">
-        <i class="bx bx-save me-1"></i> @saveText
-    </button>
-    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Plant" asp-action="Index">
-        @cancelText
-    </a>
 </div>
 
