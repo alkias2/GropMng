@@ -6,7 +6,6 @@
     ViewData["Title"] = T("admin.plant.title");
     GropHtml.SetActiveMenuItemSystemName("Plants");
 
-    var addPlantText = T("admin.plant.create");
     var addPlantUrl = Url.Action("Create", "Plant", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
@@ -17,7 +16,7 @@
             new() { Text = T("admin.plant.title") }
         },
         ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<a href=\"" + addPlantUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + addPlantText + "</a>")
+            "<a href=\"" + addPlantUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + T("admin.plant.create") + "</a>")
     };
 }
 

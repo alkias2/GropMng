@@ -3,20 +3,15 @@
     ViewData["Title"] = T("admin.localization.resource.edit");
     GropHtml.SetActiveMenuItemSystemName("Localization");
 
-    var titleText = (string)ViewData["Title"]!;
-    var dashboardText = T("common.dashboard");
-    var languagesText = T("admin.localization.languages.title");
-    var resourcesText = T("admin.localization.resources.title");
-
     var headerModel = new AdminPageHeaderModel
     {
-        Title = titleText,
+        Title = T("admin.localization.resource.edit"),
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
-            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("List", "Localization", new { area = "Admin" }) },
-            new() { Text = resourcesText, Url = Url.Action("Resources", "Localization", new { area = "Admin", languageId = Model.LanguageId }) },
-            new() { Text = titleText }
+            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = T("admin.localization.languages.title"), Url = Url.Action("List", "Localization", new { area = "Admin" }) },
+            new() { Text = T("admin.localization.resources.title"), Url = Url.Action("Resources", "Localization", new { area = "Admin", languageId = Model.LanguageId }) },
+            new() { Text = T("admin.localization.resource.edit") }
         }
     };
 }

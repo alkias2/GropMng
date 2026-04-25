@@ -6,8 +6,6 @@
     ViewData["Title"] = T("admin.applog.title");
     GropHtml.SetActiveMenuItemSystemName("AppLogs");
 
-    var deleteSelectedText = T("admin.applog.delete.selected");
-    var deleteAllText = T("admin.applog.delete.all");
     var headerModel = new AdminPageHeaderModel
     {
         Title = T("admin.applog.title"),
@@ -17,8 +15,8 @@
             new() { Text = T("admin.applog.breadcrumb") }
         },
         ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<button id=\"delete-selected\" type=\"button\" class=\"btn btn-label-danger\"><i class=\"bx bx-trash me-1\"></i> " + deleteSelectedText + "</button>" +
-            " <button id=\"clearall\" type=\"button\" class=\"btn btn-danger\"><i class=\"bx bx-trash me-1\"></i> " + deleteAllText + "</button>")
+            "<button id=\"delete-selected\" type=\"button\" class=\"btn btn-label-danger\"><i class=\"bx bx-trash me-1\"></i> " + T("admin.applog.delete.selected") + "</button>" +
+            " <button id=\"clearall\" type=\"button\" class=\"btn btn-danger\"><i class=\"bx bx-trash me-1\"></i> " + T("admin.applog.delete.all") + "</button>")
     };
 }
 

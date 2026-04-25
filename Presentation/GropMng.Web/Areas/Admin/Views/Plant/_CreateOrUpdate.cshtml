@@ -1,17 +1,12 @@
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 
 @{
-    var generalText = T("common.general");
-    var growthEnvironmentText = T("admin.plant.growth.environment");
-    var relatedText = T("common.related");
-    var noneText = T("common.none");
-
     var localizedCategories = Model.AvailableCategories
         .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.category.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -22,7 +17,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.growthtype.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -33,7 +28,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.sunrequirement.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -44,7 +39,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.waterrequirement.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -55,13 +50,13 @@
 
 <ul class="nav nav-pills flex-column flex-md-row mb-3">
     <li class="nav-item">
-        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> @generalText</a>
+        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> @T("common.general")</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> @growthEnvironmentText</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> @T("admin.plant.growth.environment")</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> @relatedText</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> @T("common.related")</a>
     </li>
 </ul>
 

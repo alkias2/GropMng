@@ -6,21 +6,17 @@
     ViewData["Title"] = T("admin.localization.languages.title");
     GropHtml.SetActiveMenuItemSystemName("Localization");
 
-    var titleText = (string)ViewData["Title"]!;
-    var dashboardText = T("common.dashboard");
-
-    var createLangText = T("admin.localization.language.create");
     var createLangUrl = Url.Action("Create", "Localization", new { area = "Admin" })!;
     var headerModel = new AdminPageHeaderModel
     {
-        Title = titleText,
+        Title = T("admin.localization.languages.title"),
         Breadcrumbs = new List<AdminBreadcrumbItemModel>
         {
-            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = titleText }
+            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+            new() { Text = T("admin.localization.languages.title") }
         },
         ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<a href=\"" + createLangUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + createLangText + "</a>")
+            "<a href=\"" + createLangUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + T("admin.localization.language.create") + "</a>")
     };
 }
 
