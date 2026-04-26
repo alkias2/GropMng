@@ -1,25 +1,31 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 @{
     ViewData["Title"] = T("admin.plant.edit");
     GropHtml.SetActiveMenuItemSystemName("Plants");
 
     var listUrl = Url.Action("List", "Plant", new { area = "Admin" })!;
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = $"{T("common.edit")}: {Model.CommonName}",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = T("admin.plant.title"), Url = listUrl },
-            new() { Text = T("common.edit") }
-        },
-        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<a href=\"" + listUrl + "\" class=\"btn btn-label-secondary\"><i class=\"bx bx-arrow-back me-1\"></i> " + T("common.cancel") + "</a>" +
-            " <button type=\"submit\" form=\"plantEditForm\" class=\"btn btn-primary\"><i class=\"bx bx-save me-1\"></i> " + T("common.save") + "</button>")
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@($"{T("common.edit")}: {Model.CommonName}")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.plant.title"), Url = listUrl },
+        new() { Text = T("common.edit") }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="plantEditForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 <div class="card">

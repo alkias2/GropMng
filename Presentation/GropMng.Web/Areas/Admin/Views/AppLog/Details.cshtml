@@ -1,19 +1,9 @@
 @using GropMng.Core.Domain.Logging
+@using GropMng.Web.Framework.TagHelpers.Admin
 @model AppLog
 @{
     ViewData["Title"] = "Log Entry Details";
     GropHtml.SetActiveMenuItemSystemName("AppLogs");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = "Log Entry Details",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "App Logs", Url = Url.Action("List", "AppLog", new { area = "Admin" }) },
-            new() { Text = $"Details #{Model.Id}" }
-        }
-    };
 
     var levelBadge = Model.Level switch
     {
@@ -27,7 +17,15 @@
     };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="Log Entry Details"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = "App Logs", Url = Url.Action("List", "AppLog", new { area = "Admin" }) },
+        new() { Text = $"Details #{Model.Id}" }
+    })">
+</grop-admin-page-header>
 
 <div class="d-flex justify-content-end gap-2 mb-4">
     <a class="btn btn-outline-secondary"

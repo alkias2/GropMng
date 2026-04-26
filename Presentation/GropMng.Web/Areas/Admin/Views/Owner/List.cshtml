@@ -1,23 +1,22 @@
 @model GropMng.Web.Areas.Admin.Models.Owner.OwnerSearchModel
 @using GropMng.Web.Areas.Admin.Models.Owner
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = "Owners";
     GropHtml.SetActiveMenuItemSystemName("Owners");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = "Owners",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Owners" }
-        }
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="Owners"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = "Owners" }
+    })">
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()

@@ -1,23 +1,22 @@
 @model GropMng.Web.Areas.Admin.Models.Roles.OwnerRoleSearchModel
 @using GropMng.Web.Areas.Admin.Models.Roles
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = "Roles & Permissions";
     GropHtml.SetActiveMenuItemSystemName("Roles");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = "Roles & Permissions",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Roles & Permissions" }
-        }
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="Roles & Permissions"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = "Roles & Permissions" }
+    })">
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()

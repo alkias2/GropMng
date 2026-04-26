@@ -1,26 +1,28 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LanguageSearchModel
 @using GropMng.Web.Areas.Admin.Models.Localization
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = T("admin.localization.languages.title");
     GropHtml.SetActiveMenuItemSystemName("Localization");
 
     var createLangUrl = Url.Action("Create", "Localization", new { area = "Admin" })!;
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = T("admin.localization.languages.title"),
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = T("admin.localization.languages.title") }
-        },
-        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<a href=\"" + createLangUrl + "\" class=\"btn btn-primary\"><i class=\"bx bx-plus me-1\"></i> " + T("admin.localization.language.create") + "</a>")
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@T("admin.localization.languages.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.localization.languages.title") }
+    })">
+    <grop-header-button href="@createLangUrl"
+                        text="@T("admin.localization.language.create")"
+                        icon="bx bx-plus"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()

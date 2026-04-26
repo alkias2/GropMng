@@ -1,26 +1,30 @@
 ﻿@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
 @using GropMng.Web.Areas.Admin.Models.Logging
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = T("admin.applog.title");
     GropHtml.SetActiveMenuItemSystemName("AppLogs");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = T("admin.applog.title"),
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = T("admin.applog.breadcrumb") }
-        },
-        ActionButtons = new Microsoft.AspNetCore.Html.HtmlString(
-            "<button id=\"delete-selected\" type=\"button\" class=\"btn btn-label-danger\"><i class=\"bx bx-trash me-1\"></i> " + T("admin.applog.delete.selected") + "</button>" +
-            " <button id=\"clearall\" type=\"button\" class=\"btn btn-danger\"><i class=\"bx bx-trash me-1\"></i> " + T("admin.applog.delete.all") + "</button>")
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@T("admin.applog.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel> {
+                     new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+                     new() { Text = T("admin.applog.breadcrumb") }
+                 })">
+
+    <grop-header-button id="delete-selected"
+                        text="@T("admin.applog.delete.selected")"
+                        icon="bx bx-trash"
+                        css-class="btn btn-label-danger"/>
+
+    <grop-header-button id="clearall"
+                        text="@T("admin.applog.delete.all")"
+                        icon="bx bx-trash"
+                        css-class="btn btn-danger"/>
+</grop-admin-page-header>
 
 @Html.AntiForgeryToken()
 

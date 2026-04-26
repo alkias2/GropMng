@@ -1,24 +1,23 @@
 @model GropMng.Web.Areas.Admin.Models.Localization.LocaleResourceSearchModel
 @using GropMng.Web.Areas.Admin.Models.Localization
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = T("admin.localization.resources.title");
     GropHtml.SetActiveMenuItemSystemName("Localization");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = string.IsNullOrWhiteSpace(Model.LanguageName) ? T("admin.localization.resources.title") : $"{T("admin.localization.resources.title")} - {Model.LanguageName}",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = T("admin.localization.languages.title"), Url = Url.Action("List", "Localization", new { area = "Admin" }) },
-            new() { Text = T("admin.localization.resources.title") }
-        }
-    };
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@(string.IsNullOrWhiteSpace(Model.LanguageName) ? T("admin.localization.resources.title") : $"{T("admin.localization.resources.title")} - {Model.LanguageName}")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.localization.languages.title"), Url = Url.Action("List", "Localization", new { area = "Admin" }) },
+        new() { Text = T("admin.localization.resources.title") }
+    })">
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 @Html.AntiForgeryToken()
