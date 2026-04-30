@@ -32,6 +32,11 @@ public partial class GropContext
     public DbSet<DiseasePhoto> DiseasePhotos => Set<DiseasePhoto>();
     public DbSet<AIQueryTemplate> AIQueryTemplates => Set<AIQueryTemplate>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+    public DbSet<SoilIngredient> SoilIngredients => Set<SoilIngredient>();
+    public DbSet<SoilMixIngredient> SoilMixIngredients => Set<SoilMixIngredient>();
+    public DbSet<WateringLog> WateringLogs => Set<WateringLog>();
+    public DbSet<FertilizingLog> FertilizingLogs => Set<FertilizingLog>();
+    public DbSet<RepottingLog> RepottingLogs => Set<RepottingLog>();
 
     partial void ConfigureGardenDomain(ModelBuilder modelBuilder)
     {
@@ -53,6 +58,11 @@ public partial class GropContext
         ConfigureDiseasePhoto(modelBuilder.Entity<DiseasePhoto>());
         ConfigureAiQueryTemplate(modelBuilder.Entity<AIQueryTemplate>());
         ConfigureUserPreference(modelBuilder.Entity<UserPreference>());
+        ConfigureSoilIngredient(modelBuilder.Entity<SoilIngredient>());
+        ConfigureSoilMixIngredient(modelBuilder.Entity<SoilMixIngredient>());
+        ConfigureWateringLog(modelBuilder.Entity<WateringLog>());
+        ConfigureFertilizingLog(modelBuilder.Entity<FertilizingLog>());
+        ConfigureRepottingLog(modelBuilder.Entity<RepottingLog>());
     }
 
     private static void ConfigureLocation(EntityTypeBuilder<Location> entity)
@@ -674,6 +684,158 @@ public partial class GropContext
         return isNullable
             ? $"[{columnName}] IS NULL OR {predicate}"
             : predicate;
+    }
+
+    private static void ConfigureSoilIngredient(EntityTypeBuilder<SoilIngredient> entity)
+    {
+        entity.ToTable("SoilIngredient");
+        entity.HasKey(e => e.Id).HasName("PK_SoilIngredient");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+        entity.Property(e => e.Description).HasMaxLength(500);
+
+        entity.HasIndex(e => e.Name)
+            .IsUnique()
+            .HasDatabaseName("UQ_SoilIngredient_Name")
+            .HasFilter("[IsDeleted] = 0");
+    }
+
+    private static void ConfigureSoilMixIngredient(EntityTypeBuilder<SoilMixIngredient> entity)
+    {
+        entity.ToTable("SoilMixIngredient", tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_SoilMixIngredient_Percentage", "[PercentageByVolume] BETWEEN 0 AND 100");
+        });
+
+        entity.HasKey(e => e.Id).HasName("PK_SoilMixIngredient");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.SoilMixId).IsRequired();
+        entity.Property(e => e.SoilIngredientId).IsRequired();
+        entity.Property(e => e.PercentageByVolume).HasPrecision(5, 2).IsRequired();
+        entity.Property(e => e.Notes).HasMaxLength(500);
+
+        entity.HasIndex(e => e.SoilMixId).HasDatabaseName("IX_SoilMixIngredient_SoilMixId");
+        entity.HasIndex(e => new { e.SoilMixId, e.SoilIngredientId })
+            .IsUnique()
+            .HasDatabaseName("UQ_SoilMixIngredient_Mix_Ingredient")
+            .HasFilter("[IsDeleted] = 0");
+
+        entity.HasOne(e => e.SoilMix)
+            .WithMany(e => e.Ingredients)
+            .HasForeignKey(e => e.SoilMixId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_SoilMixIngredient_SoilMix");
+
+        entity.HasOne(e => e.SoilIngredient)
+            .WithMany(e => e.SoilMixIngredients)
+            .HasForeignKey(e => e.SoilIngredientId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_SoilMixIngredient_SoilIngredient");
+    }
+
+    private static void ConfigureWateringLog(EntityTypeBuilder<WateringLog> entity)
+    {
+        entity.ToTable("WateringLog");
+        entity.HasKey(e => e.Id).HasName("PK_WateringLog");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.WateredAtUtc).HasColumnType("datetime2(7)").IsRequired();
+        entity.Property(e => e.WaterAmountL).HasPrecision(6, 2);
+        entity.Property(e => e.Notes).HasMaxLength(500);
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_WateringLog_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_WateringLog_InstanceId");
+        entity.HasIndex(e => e.WateredAtUtc).HasDatabaseName("IX_WateringLog_WateredAtUtc");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany(e => e.WateringLogs)
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_WateringLog_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_WateringLog_Owner");
+    }
+
+    private static void ConfigureFertilizingLog(EntityTypeBuilder<FertilizingLog> entity)
+    {
+        entity.ToTable("FertilizingLog", tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_FertilizingLog_Unit", BuildEnumConstraintSql<FertilizerQuantityUnit>("Unit", isNullable: true));
+            tableBuilder.HasCheckConstraint("CK_FertilizingLog_Quantity", "[Quantity] IS NULL OR [Quantity] >= 0");
+        });
+
+        entity.HasKey(e => e.Id).HasName("PK_FertilizingLog");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.AppliedAtUtc).HasColumnType("datetime2(7)").IsRequired();
+        entity.Property(e => e.Quantity).HasPrecision(8, 3);
+        entity.Property(e => e.Unit).HasMaxLength(10).HasNullableStorageEnumConversion();
+        entity.Property(e => e.Notes).HasMaxLength(500);
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_FertilizingLog_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_FertilizingLog_InstanceId");
+        entity.HasIndex(e => e.AppliedAtUtc).HasDatabaseName("IX_FertilizingLog_AppliedAtUtc");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany(e => e.FertilizingLogs)
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_FertilizingLog_PlantInstance");
+
+        entity.HasOne(e => e.Fertilizer)
+            .WithMany()
+            .HasForeignKey(e => e.FertilizerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_FertilizingLog_Fertilizer");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_FertilizingLog_Owner");
+    }
+
+    private static void ConfigureRepottingLog(EntityTypeBuilder<RepottingLog> entity)
+    {
+        entity.ToTable("RepottingLog");
+        entity.HasKey(e => e.Id).HasName("PK_RepottingLog");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.RepottedAtUtc).HasColumnType("datetime2(7)").IsRequired();
+        entity.Property(e => e.SoilMixChanged).HasDefaultValue(false);
+        entity.Property(e => e.ContainerChanged).HasDefaultValue(false);
+        entity.Property(e => e.Notes).HasMaxLength(500);
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_RepottingLog_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_RepottingLog_InstanceId");
+        entity.HasIndex(e => e.RepottedAtUtc).HasDatabaseName("IX_RepottingLog_RepottedAtUtc");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany(e => e.RepottingLogs)
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_RepottingLog_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_RepottingLog_Owner");
     }
 }
 

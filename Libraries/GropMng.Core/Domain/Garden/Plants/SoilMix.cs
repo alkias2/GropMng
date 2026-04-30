@@ -19,4 +19,6 @@ public partial class SoilMix : AuditableEntity
     public string? Notes { get; set; }
 
     public IList<PlantInstance> PlantInstances { get; set; } = new List<PlantInstance>();
+
+    public IList<SoilMixIngredient> Ingredients { get; set; } = new List<SoilMixIngredient>();
 }
