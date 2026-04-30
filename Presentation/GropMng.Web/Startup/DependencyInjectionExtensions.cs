@@ -180,6 +180,20 @@ public static class DependencyInjectionExtensions
         services.AddScoped<LocaleResourceSeeder>();
         services.AddScoped<EnumLocalizationSeeder>();
 
+        // Garden data seeders
+        services.AddScoped<SoilIngredientSeeder>();
+        services.AddScoped<PlantCatalogSeeder>();
+        services.AddScoped<FertilizerCatalogSeeder>();
+        services.AddScoped<DiseaseCatalogSeeder>();
+        services.AddScoped<LocationAndGardenSpotSeeder>();
+        services.AddScoped<SoilMixSeeder>();
+        services.AddScoped<ContainerSeeder>();
+        services.AddScoped<PlantInstanceSeeder>();
+        services.AddScoped<WateringScheduleSeeder>();
+        services.AddScoped<FertilizingScheduleSeeder>();
+        services.AddScoped<PlantDiseaseRecordSeeder>();
+        services.AddScoped<RepottingLogSeeder>();
+
         return services;
     }
 }
