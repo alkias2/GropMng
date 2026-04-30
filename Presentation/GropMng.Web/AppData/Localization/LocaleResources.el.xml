@@ -715,6 +715,160 @@
     <Value>Θεραπευτικό</Value>
   </LocaleResource>
 
+  <!-- ===== SoilMix ===== -->
+  <LocaleResource>
+    <Name>admin.soilmix.title</Name>
+    <Value>Μείγματα Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.create</Name>
+    <Value>Νέο Μείγμα Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.edit</Name>
+    <Value>Επεξεργασία Μείγματος Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.delete</Name>
+    <Value>Διαγραφή Μείγματος Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.delete.confirm</Name>
+    <Value>Το μείγμα χώματος θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.create.success</Name>
+    <Value>Το μείγμα χώματος δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.edit.success</Name>
+    <Value>Το μείγμα χώματος ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.delete.success</Name>
+    <Value>Το μείγμα χώματος διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.name</Name>
+    <Value>Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.composition</Name>
+    <Value>Σύνθεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phmin</Name>
+    <Value>pH Ελάχιστο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phmax</Name>
+    <Value>pH Μέγιστο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phrange</Name>
+    <Value>Εύρος pH</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.texture</Name>
+    <Value>Υφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.drainage</Name>
+    <Value>Στράγγιση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.sandy</Name>
+    <Value>Αμμώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.loamy</Name>
+    <Value>Αργιλοπηλώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.clay</Name>
+    <Value>Αργιλώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.silty</Name>
+    <Value>Ιλυώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.peaty</Name>
+    <Value>Τυρφώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.chalky</Name>
+    <Value>Ασβεστώδης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.poor</Name>
+    <Value>Κακή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.moderate</Name>
+    <Value>Μέτρια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.good</Name>
+    <Value>Καλή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.excellent</Name>
+    <Value>Άριστη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredients.title</Name>
+    <Value>Συστατικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add</Name>
+    <Value>Προσθήκη Συστατικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.soilingredient</Name>
+    <Value>Συστατικό Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.percentage</Name>
+    <Value>Ποσοστό (%)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.ingredientname</Name>
+    <Value>Όνομα Συστατικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.ingredientdescription</Name>
+    <Value>Περιγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add.existing</Name>
+    <Value>Επιλογή Υπάρχοντος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add.new</Name>
+    <Value>Δημιουργία Νέου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.noavailable</Name>
+    <Value>Όλα τα διαθέσιμα συστατικά έχουν ήδη προστεθεί σε αυτό το μείγμα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.notifications.update.success</Name>
+    <Value>Το συστατικό ενημερώθηκε επιτυχώς.</Value>
+  </LocaleResource>
+
   <LocaleResource>
     <Name>admin.applog.title</Name>
     <Value>Καταγραφές Εφαρμογής</Value>

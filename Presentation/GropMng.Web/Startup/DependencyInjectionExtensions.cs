@@ -33,6 +33,7 @@ using GropMng.Web.Areas.Admin.Factories.Localization;
 using GropMng.Web.Areas.Admin.Factories.Logging;
 using GropMng.Web.Areas.Admin.Factories.Pesticide;
 using GropMng.Web.Areas.Admin.Factories.Plant;
+using GropMng.Web.Areas.Admin.Factories.SoilMix;
 using GropMng.Web.Areas.Admin.Factories.Settings;
 using GropMng.Web.Areas.Admin.Factories.User;
 using GropMng.Web.Infrastructure.Navigation;
@@ -152,6 +153,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IDiseaseService, DiseaseService>();
         services.AddScoped<IFertilizerService, FertilizerService>();
         services.AddScoped<IPesticideService, PesticideService>();
+        services.AddScoped<ISoilMixService, SoilMixService>();
 
         services.AddScoped<IAIQueryTemplateService, AIQueryTemplateService>();
 
@@ -176,6 +178,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IFertilizerModelFactory, FertilizerModelFactory>();
         services.AddScoped<IPesticideModelFactory, PesticideModelFactory>();
         services.AddScoped<IDiseaseModelFactory, DiseaseModelFactory>();
+        services.AddScoped<ISoilMixModelFactory, SoilMixModelFactory>();
         services.AddScoped<ISettingModelFactory, SettingModelFactory>();
         services.AddScoped<IOwnerModelFactory, OwnerModelFactory>();
         services.AddScoped<IOwnerRoleModelFactory, OwnerRoleModelFactory>();

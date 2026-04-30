@@ -715,6 +715,160 @@
     <Value>Curative</Value>
   </LocaleResource>
 
+  <!-- ===== SoilMix ===== -->
+  <LocaleResource>
+    <Name>admin.soilmix.title</Name>
+    <Value>Soil Mixes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.create</Name>
+    <Value>New Soil Mix</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.edit</Name>
+    <Value>Edit Soil Mix</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.delete</Name>
+    <Value>Delete Soil Mix</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.delete.confirm</Name>
+    <Value>This soil mix will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.create.success</Name>
+    <Value>Soil mix was created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.edit.success</Name>
+    <Value>Soil mix was updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.notifications.delete.success</Name>
+    <Value>Soil mix was deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.name</Name>
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.composition</Name>
+    <Value>Composition</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phmin</Name>
+    <Value>pH Min</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phmax</Name>
+    <Value>pH Max</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.phrange</Name>
+    <Value>pH Range</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.texture</Name>
+    <Value>Texture</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.drainage</Name>
+    <Value>Drainage</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.sandy</Name>
+    <Value>Sandy</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.loamy</Name>
+    <Value>Loamy</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.clay</Name>
+    <Value>Clay</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.silty</Name>
+    <Value>Silty</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.peaty</Name>
+    <Value>Peaty</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.texture.chalky</Name>
+    <Value>Chalky</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.poor</Name>
+    <Value>Poor</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.moderate</Name>
+    <Value>Moderate</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.good</Name>
+    <Value>Good</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.drainage.excellent</Name>
+    <Value>Excellent</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredients.title</Name>
+    <Value>Ingredients</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add</Name>
+    <Value>Add Ingredient</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.soilingredient</Name>
+    <Value>Soil Ingredient</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.percentage</Name>
+    <Value>Percentage (%)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.ingredientname</Name>
+    <Value>Ingredient Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.fields.ingredientdescription</Name>
+    <Value>Description</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add.existing</Name>
+    <Value>Select Existing</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.add.new</Name>
+    <Value>Create New</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.noavailable</Name>
+    <Value>All available ingredients are already added to this mix.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.soilmix.ingredient.notifications.update.success</Name>
+    <Value>Ingredient updated successfully.</Value>
+  </LocaleResource>
+
   <LocaleResource>
     <Name>admin.applog.title</Name>
     <Value>Application Logs</Value>

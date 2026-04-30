@@ -1,0 +1,71 @@
+@model GropMng.Web.Areas.Admin.Models.SoilMix.SoilMixModel
+
+@{
+    var localizedTextures = Model.AvailableTextures
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? T("common.none")
+                : T($"admin.soilmix.texture.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+
+    var localizedDrainages = Model.AvailableDrainages
+        .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = item.Value,
+            Text = string.IsNullOrWhiteSpace(item.Value)
+                ? T("common.none")
+                : T($"admin.soilmix.drainage.{item.Value.ToLowerInvariant()}"),
+            Selected = item.Selected
+        })
+        .ToList();
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <grop-label asp-for="Name" />
+        <grop-editor asp-for="Name" asp-required="true" />
+        <span class="text-danger" asp-validation-for="Name"></span>
+    </div>
+
+    <div class="col-md-6">
+        <grop-label asp-for="Composition" />
+        <grop-editor asp-for="Composition" />
+        <span class="text-danger" asp-validation-for="Composition"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="PhMin" />
+        <grop-editor asp-for="PhMin" />
+        <span class="text-danger" asp-validation-for="PhMin"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="PhMax" />
+        <grop-editor asp-for="PhMax" />
+        <span class="text-danger" asp-validation-for="PhMax"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="Texture" />
+        <grop-select asp-for="Texture" asp-items="localizedTextures" />
+        <span class="text-danger" asp-validation-for="Texture"></span>
+    </div>
+
+    <div class="col-md-3">
+        <grop-label asp-for="Drainage" />
+        <grop-select asp-for="Drainage" asp-items="localizedDrainages" />
+        <span class="text-danger" asp-validation-for="Drainage"></span>
+    </div>
+
+    <div class="col-md-12">
+        <grop-label asp-for="Notes" />
+        <grop-textarea asp-for="Notes" asp-rows="3" />
+        <span class="text-danger" asp-validation-for="Notes"></span>
+    </div>
+</div>

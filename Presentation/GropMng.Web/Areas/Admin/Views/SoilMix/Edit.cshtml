@@ -1,0 +1,299 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
+@model GropMng.Web.Areas.Admin.Models.SoilMix.SoilMixModel
+@{
+    ViewData["Title"] = T("admin.soilmix.edit");
+    GropHtml.SetActiveMenuItemSystemName("SoilMixes");
+
+    var listUrl = Url.Action("List", "SoilMix", new { area = "Admin" })!;
+    var ingredientListUrl = Url.Action("IngredientList", "SoilMix", new { area = "Admin", soilMixId = Model.Id })!;
+    var addIngredientFormUrl = Url.Action("AddIngredientForm", "SoilMix", new { area = "Admin", soilMixId = Model.Id })!;
+    var updateIngredientUrl = Url.Action("UpdateIngredient", "SoilMix", new { area = "Admin" })!;
+    var deleteIngredientUrl = Url.Action("DeleteIngredient", "SoilMix", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@($"{T("common.edit")}: {Model.Name}")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.soilmix.title"), Url = listUrl },
+        new() { Text = T("common.edit") }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="soilMixEditForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form id="soilMixEditForm" asp-area="Admin" asp-controller="SoilMix" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("admin.soilmix.ingredients.title")</h5>
+        <button type="button" class="btn btn-primary btn-sm" id="btnAddIngredient">
+            <i class="bx bx-plus me-1"></i> @T("admin.soilmix.ingredient.add")
+        </button>
+    </div>
+    <div class="card-body">
+        <table id="soilMixIngredientsTable" class="table table-hover dt-responsive w-100">
+            <thead>
+                <tr>
+                    <th>@T("admin.soilmix.ingredient.fields.soilingredient")</th>
+                    <th style="width:120px">@T("admin.soilmix.ingredient.fields.percentage")</th>
+                    <th>@T("admin.soilmix.ingredient.fields.notes")</th>
+                    <th class="text-center" style="width:100px">@T("common.actions")</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="ingredientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@T("admin.soilmix.ingredient.add")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="ingredientFormContainer">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 border-danger">
+    <div class="card-header">
+        <h5 class="card-title text-danger mb-0">@T("common.dangerzone")</h5>
+    </div>
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <p class="mb-0">@T("admin.soilmix.delete.confirm") @T("common.delete.cannotundo")</p>
+        <form asp-area="Admin"
+              asp-controller="SoilMix"
+              asp-action="Delete"
+              method="post"
+              data-grop-delete="true">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bx bx-trash me-1"></i> @T("admin.soilmix.delete")
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+}
+
+@section Scripts {
+<script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+<script>
+    (function () {
+        'use strict';
+
+        const soilMixId = @Model.Id;
+        const ingredientListUrl = '@Html.Raw(ingredientListUrl)';
+        const addIngredientFormUrl = '@Html.Raw(addIngredientFormUrl)';
+        const updateIngredientUrl = '@Html.Raw(updateIngredientUrl)';
+        const deleteIngredientUrl = '@Html.Raw(deleteIngredientUrl)';
+        const antiForgeryToken = $('input[name="__RequestVerificationToken"]').first().val();
+        const msgDeleteConfirm = '@T("common.delete.confirm")';
+
+        const ingredientTable = $('#soilMixIngredientsTable').DataTable({
+            ajax: { url: ingredientListUrl, type: 'GET', dataSrc: 'data' },
+            columns: [
+                { data: 'soilIngredientName' },
+                {
+                    data: 'percentageByVolume',
+                    render: function (value) { return value != null ? `${value}%` : ''; }
+                },
+                { data: 'notes', defaultContent: '' },
+                {
+                    data: null,
+                    className: 'text-center',
+                    orderable: false,
+                    render: function (_, __, row) {
+                        return `<button type="button" class="btn btn-sm btn-icon btn-label-primary me-1 btn-edit-ingredient"
+                                        data-id="${row.id}" data-soil-mix-id="${row.soilMixId}"
+                                        data-pct="${row.percentageByVolume}" data-notes="${(row.notes || '').replace(/"/g, '&quot;')}">
+                                    <i class="bx bx-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-icon btn-label-danger btn-delete-ingredient"
+                                        data-id="${row.id}" data-soil-mix-id="${row.soilMixId}">
+                                    <i class="bx bx-trash"></i>
+                                </button>`;
+                    }
+                }
+            ],
+            paging: false,
+            searching: false,
+            info: false
+        });
+
+        // ── Inline Edit ──────────────────────────────────────────────
+        $(document).on('click', '.btn-edit-ingredient', function () {
+            const btn = $(this);
+            const row = ingredientTable.row(btn.closest('tr'));
+            const tr = $(row.node());
+
+            // Prevent multiple edit rows at once
+            if (tr.hasClass('editing')) return;
+            tr.addClass('editing');
+
+            const id = btn.data('id');
+            const mixId = btn.data('soil-mix-id');
+            const pct = btn.data('pct');
+            const notes = btn.data('notes');
+
+            const cells = tr.find('td');
+
+            // Col 1 – percentage input
+            cells.eq(1).data('original', cells.eq(1).html())
+                .html(`<input type="number" class="form-control form-control-sm edit-pct" min="0.01" max="100" step="0.01" value="${pct}" style="width:90px">`);
+
+            // Col 2 – notes input
+            cells.eq(2).data('original', cells.eq(2).html())
+                .html(`<input type="text" class="form-control form-control-sm edit-notes" value="${notes.replace(/&quot;/g, '"')}">`);
+
+            // Col 3 – save/cancel buttons
+            cells.eq(3).data('original', cells.eq(3).html())
+                .html(`<button type="button" class="btn btn-sm btn-icon btn-success me-1 btn-save-ingredient"
+                               data-id="${id}" data-soil-mix-id="${mixId}">
+                            <i class="bx bx-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-icon btn-label-secondary btn-cancel-edit">
+                            <i class="bx bx-x"></i>
+                        </button>`);
+        });
+
+        $(document).on('click', '.btn-cancel-edit', function () {
+            const tr = $(this).closest('tr');
+            const cells = tr.find('td');
+            cells.eq(1).html(cells.eq(1).data('original'));
+            cells.eq(2).html(cells.eq(2).data('original'));
+            cells.eq(3).html(cells.eq(3).data('original'));
+            tr.removeClass('editing');
+        });
+
+        $(document).on('click', '.btn-save-ingredient', function () {
+            const btn = $(this);
+            const tr = btn.closest('tr');
+            const id = btn.data('id');
+            const mixId = btn.data('soil-mix-id');
+            const pct = parseFloat(tr.find('.edit-pct').val());
+            const notes = tr.find('.edit-notes').val();
+
+            if (!pct || pct <= 0) {
+                alert('Percentage must be greater than 0.');
+                return;
+            }
+
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+            $.ajax({
+                url: updateIngredientUrl,
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: antiForgeryToken,
+                    id: id,
+                    soilMixId: mixId,
+                    percentageByVolume: pct,
+                    notes: notes
+                },
+                success: function (result) {
+                    if (result.success) {
+                        ingredientTable.ajax.reload(null, false);
+                    } else {
+                        alert(result.message || 'Failed to save.');
+                        btn.prop('disabled', false).html('<i class="bx bx-check"></i>');
+                    }
+                },
+                error: function () {
+                    alert('An error occurred.');
+                    btn.prop('disabled', false).html('<i class="bx bx-check"></i>');
+                }
+            });
+        });
+
+        // ── Delete ───────────────────────────────────────────────────
+        $(document).on('click', '.btn-delete-ingredient', function () {
+            if (!confirm(msgDeleteConfirm)) return;
+
+            const btn = $(this);
+            const id = btn.data('id');
+            const mixId = btn.data('soil-mix-id');
+
+            $.ajax({
+                url: deleteIngredientUrl,
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: antiForgeryToken,
+                    id: id,
+                    soilMixId: mixId
+                },
+                success: function () {
+                    ingredientTable.ajax.reload(null, false);
+                },
+                error: function () {
+                    alert('Failed to delete ingredient.');
+                }
+            });
+        });
+
+        // ── Add Ingredient Modal ─────────────────────────────────────
+        $('#btnAddIngredient').on('click', function () {
+            $('#ingredientFormContainer').load(addIngredientFormUrl, function () {
+                $('#ingredientModal').modal('show');
+            });
+        });
+
+        $(document).on('submit', '#addIngredientForm', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const errorDiv = form.find('#addIngredientError');
+            errorDiv.addClass('d-none').text('');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        $('#ingredientModal').modal('hide');
+                        ingredientTable.ajax.reload(null, false);
+                    } else {
+                        errorDiv.removeClass('d-none').text(result.message || 'Error adding ingredient.');
+                    }
+                },
+                error: function () {
+                    errorDiv.removeClass('d-none').text('An error occurred.');
+                }
+            });
+        });
+
+        // Convert delete form submit to AJAX to avoid page redirect
+        $(document).on('submit', '.form-delete-ingredient', function (e) {
+            e.preventDefault();
+        });
+    })();
+</script>
+}
