@@ -1,0 +1,38 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
+@model GropMng.Web.Areas.Admin.Models.Pesticide.PesticideModel
+@{
+    ViewData["Title"] = T("admin.pesticide.create");
+    GropHtml.SetActiveMenuItemSystemName("Pesticides");
+
+    var listUrl = Url.Action("List", "Pesticide", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@T("admin.pesticide.create")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.pesticide.title"), Url = listUrl },
+        new() { Text = T("common.create") }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="pesticideCreateForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form id="pesticideCreateForm" asp-area="Admin" asp-controller="Pesticide" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>

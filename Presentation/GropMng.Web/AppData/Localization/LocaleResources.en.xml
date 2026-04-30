@@ -360,6 +360,361 @@
     <Name>admin.plant.growth.environment</Name>
     <Value>Growth and Environment</Value>
   </LocaleResource>
+
+  <!-- ===== Fertilizer ===== -->
+  <LocaleResource>
+    <Name>admin.fertilizer.title</Name>
+    <Value>Fertilizers</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.create</Name>
+    <Value>New Fertilizer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.edit</Name>
+    <Value>Edit Fertilizer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.delete</Name>
+    <Value>Delete Fertilizer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.delete.confirm</Name>
+    <Value>This fertilizer will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.create.success</Name>
+    <Value>Fertilizer was created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.edit.success</Name>
+    <Value>Fertilizer was updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.delete.success</Name>
+    <Value>Fertilizer was deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.name</Name>
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.brand</Name>
+    <Value>Brand</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.fertilizertype</Name>
+    <Value>Fertilizer Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.npkratio</Name>
+    <Value>NPK Ratio</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.applicationmethod</Name>
+    <Value>Application Method</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.isorganic</Name>
+    <Value>Organic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.organic</Name>
+    <Value>Organic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.chemical</Name>
+    <Value>Chemical</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.mineral</Name>
+    <Value>Mineral</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.liquid</Name>
+    <Value>Liquid</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.granular</Name>
+    <Value>Granular</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.slowrelease</Name>
+    <Value>Slow Release</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.soil</Name>
+    <Value>Soil</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.foliar</Name>
+    <Value>Foliar Spray</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.drip</Name>
+    <Value>Drip</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.diluted</Name>
+    <Value>Diluted Solution</Value>
+  </LocaleResource>
+
+  <!-- ===== Pesticide ===== -->
+  <LocaleResource>
+    <Name>admin.pesticide.title</Name>
+    <Value>Pesticides</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.create</Name>
+    <Value>New Pesticide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.edit</Name>
+    <Value>Edit Pesticide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.delete</Name>
+    <Value>Delete Pesticide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.delete.confirm</Name>
+    <Value>This pesticide will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.create.success</Name>
+    <Value>Pesticide was created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.edit.success</Name>
+    <Value>Pesticide was updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.delete.success</Name>
+    <Value>Pesticide was deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.name</Name>
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.brand</Name>
+    <Value>Brand</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.activeingredient</Name>
+    <Value>Active Ingredient</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.pesticidetype</Name>
+    <Value>Pesticide Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.applicationmethod</Name>
+    <Value>Application Method</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.isorganic</Name>
+    <Value>Organic</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.withholdingdays</Name>
+    <Value>Withholding Days</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.safetynotes</Name>
+    <Value>Safety Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.fungicide</Name>
+    <Value>Fungicide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.insecticide</Name>
+    <Value>Insecticide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.herbicide</Name>
+    <Value>Herbicide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.acaricide</Name>
+    <Value>Acaricide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.bactericide</Name>
+    <Value>Bactericide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.biostimulant</Name>
+    <Value>Biostimulant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.other</Name>
+    <Value>Other</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.spray</Name>
+    <Value>Spray</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.soil</Name>
+    <Value>Soil Application</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.drench</Name>
+    <Value>Drench</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.granule</Name>
+    <Value>Granule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.systemic</Name>
+    <Value>Systemic</Value>
+  </LocaleResource>
+
+  <!-- ===== Disease ===== -->
+  <LocaleResource>
+    <Name>admin.disease.title</Name>
+    <Value>Diseases &amp; Pests</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.create</Name>
+    <Value>New Disease / Pest</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.edit</Name>
+    <Value>Edit Disease / Pest</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.delete</Name>
+    <Value>Delete</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.delete.confirm</Name>
+    <Value>This disease / pest entry will be permanently deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.create.success</Name>
+    <Value>Disease / pest was created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.edit.success</Name>
+    <Value>Disease / pest was updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.delete.success</Name>
+    <Value>Disease / pest was deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.name</Name>
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.diseasetype</Name>
+    <Value>Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.symptoms</Name>
+    <Value>Symptoms</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.affectedparts</Name>
+    <Value>Affected Parts</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.preventionnotes</Name>
+    <Value>Prevention Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.fungal</Name>
+    <Value>Fungal</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.bacterial</Name>
+    <Value>Bacterial</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.viral</Name>
+    <Value>Viral</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.pest</Name>
+    <Value>Pest</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.deficiency</Name>
+    <Value>Nutrient Deficiency</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.physiological</Name>
+    <Value>Physiological</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.other</Name>
+    <Value>Other</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylinks.title</Name>
+    <Value>Recommended Pesticides</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.add</Name>
+    <Value>Add Pesticide Link</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.pesticide</Name>
+    <Value>Pesticide</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.treatmenttype</Name>
+    <Value>Treatment Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.dosage</Name>
+    <Value>Dosage</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.frequency</Name>
+    <Value>Frequency</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.treatmenttype.preventive</Name>
+    <Value>Preventive</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.treatmenttype.curative</Name>
+    <Value>Curative</Value>
+  </LocaleResource>
+
   <LocaleResource>
     <Name>admin.applog.title</Name>
     <Value>Application Logs</Value>

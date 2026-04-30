@@ -22,6 +22,7 @@ public static class GropMngPermissions
     {
         public const string AccessOwnerWorkspace = "Garden.AccessOwnerWorkspace";
         public const string ManagePlants = "Garden.ManagePlants";
+        public const string ManageReferenceData = "Garden.ManageReferenceData";
     }
 
     public static class Configuration
@@ -73,6 +74,7 @@ public static class GropMngPermissionProvider
         new("Manage Owner Roles", GropMngPermissions.Owners.ManageRoles, "Owners"),
         new("Access Owner Workspace", GropMngPermissions.Garden.AccessOwnerWorkspace, "Garden", AssignToRegisteredOwnerByDefault: true),
         new("Manage Plants", GropMngPermissions.Garden.ManagePlants, "Garden"),
+        new("Manage Reference Data", GropMngPermissions.Garden.ManageReferenceData, "Garden"),
         new("Manage Settings", GropMngPermissions.Configuration.ManageSettings, "Configuration"),
         new("Manage App Logs", GropMngPermissions.Logging.ManageAppLogs, "Logging"),
         new("Manage Localization", GropMngPermissions.Localization.ManageLocalization, "Localization")

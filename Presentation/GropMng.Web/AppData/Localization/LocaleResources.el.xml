@@ -360,6 +360,361 @@
     <Name>admin.plant.growth.environment</Name>
     <Value>Ανάπτυξη και Περιβάλλον</Value>
   </LocaleResource>
+
+  <!-- ===== Fertilizer ===== -->
+  <LocaleResource>
+    <Name>admin.fertilizer.title</Name>
+    <Value>Λιπάσματα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.create</Name>
+    <Value>Νέο Λίπασμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.edit</Name>
+    <Value>Επεξεργασία Λιπάσματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.delete</Name>
+    <Value>Διαγραφή Λιπάσματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.delete.confirm</Name>
+    <Value>Το λίπασμα θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.create.success</Name>
+    <Value>Το λίπασμα δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.edit.success</Name>
+    <Value>Το λίπασμα ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.notifications.delete.success</Name>
+    <Value>Το λίπασμα διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.name</Name>
+    <Value>Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.brand</Name>
+    <Value>Μάρκα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.fertilizertype</Name>
+    <Value>Τύπος Λιπάσματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.npkratio</Name>
+    <Value>Αναλογία NPK</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.applicationmethod</Name>
+    <Value>Μέθοδος Εφαρμογής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.isorganic</Name>
+    <Value>Βιολογικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.organic</Name>
+    <Value>Οργανικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.chemical</Name>
+    <Value>Χημικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.mineral</Name>
+    <Value>Ανόργανο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.liquid</Name>
+    <Value>Υγρό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.granular</Name>
+    <Value>Κοκκώδες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.fertilizertype.slowrelease</Name>
+    <Value>Βραδείας Αποδέσμευσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.soil</Name>
+    <Value>Έδαφος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.foliar</Name>
+    <Value>Φυλλοβολία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.drip</Name>
+    <Value>Στάγδην</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.fertilizer.applicationmethod.diluted</Name>
+    <Value>Αραιωμένο Διάλυμα</Value>
+  </LocaleResource>
+
+  <!-- ===== Pesticide ===== -->
+  <LocaleResource>
+    <Name>admin.pesticide.title</Name>
+    <Value>Φυτοπροστατευτικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.create</Name>
+    <Value>Νέο Φυτοπροστατευτικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.edit</Name>
+    <Value>Επεξεργασία Φυτοπροστατευτικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.delete</Name>
+    <Value>Διαγραφή Φυτοπροστατευτικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.delete.confirm</Name>
+    <Value>Το φυτοπροστατευτικό θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.create.success</Name>
+    <Value>Το φυτοπροστατευτικό δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.edit.success</Name>
+    <Value>Το φυτοπροστατευτικό ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.notifications.delete.success</Name>
+    <Value>Το φυτοπροστατευτικό διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.name</Name>
+    <Value>Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.brand</Name>
+    <Value>Μάρκα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.activeingredient</Name>
+    <Value>Δραστική Ουσία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.pesticidetype</Name>
+    <Value>Τύπος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.applicationmethod</Name>
+    <Value>Μέθοδος Εφαρμογής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.isorganic</Name>
+    <Value>Βιολογικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.withholdingdays</Name>
+    <Value>Ημέρες Αναμονής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.safetynotes</Name>
+    <Value>Οδηγίες Ασφαλείας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.fungicide</Name>
+    <Value>Μυκητοκτόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.insecticide</Name>
+    <Value>Εντομοκτόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.herbicide</Name>
+    <Value>Ζιζανιοκτόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.acaricide</Name>
+    <Value>Ακαρεοκτόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.bactericide</Name>
+    <Value>Βακτηριοκτόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.biostimulant</Name>
+    <Value>Βιοδιεγέρτης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.pesticidetype.other</Name>
+    <Value>Άλλο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.spray</Name>
+    <Value>Ψεκασμός</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.soil</Name>
+    <Value>Εδαφική Εφαρμογή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.drench</Name>
+    <Value>Ποτίσματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.granule</Name>
+    <Value>Κοκκώδες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.pesticide.applicationmethod.systemic</Name>
+    <Value>Συστηματικό</Value>
+  </LocaleResource>
+
+  <!-- ===== Disease ===== -->
+  <LocaleResource>
+    <Name>admin.disease.title</Name>
+    <Value>Ασθένειες &amp; Παράσιτα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.create</Name>
+    <Value>Νέα Ασθένεια / Παράσιτο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.edit</Name>
+    <Value>Επεξεργασία Ασθένειας / Παράσιτου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.delete</Name>
+    <Value>Διαγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.delete.confirm</Name>
+    <Value>Η καταχώρηση θα διαγραφεί οριστικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.create.success</Name>
+    <Value>Η ασθένεια / παράσιτο δημιουργήθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.edit.success</Name>
+    <Value>Η ασθένεια / παράσιτο ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.notifications.delete.success</Name>
+    <Value>Η ασθένεια / παράσιτο διαγράφηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.name</Name>
+    <Value>Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.diseasetype</Name>
+    <Value>Τύπος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.symptoms</Name>
+    <Value>Συμπτώματα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.affectedparts</Name>
+    <Value>Προσβαλλόμενα Μέρη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.preventionnotes</Name>
+    <Value>Πρόληψη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.fungal</Name>
+    <Value>Μυκητολογικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.bacterial</Name>
+    <Value>Βακτηριακό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.viral</Name>
+    <Value>Ιικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.pest</Name>
+    <Value>Παράσιτο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.deficiency</Name>
+    <Value>Ανεπάρκεια Θρεπτικών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.physiological</Name>
+    <Value>Φυσιολογικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.diseasetype.other</Name>
+    <Value>Άλλο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylinks.title</Name>
+    <Value>Προτεινόμενα Φυτοπροστατευτικά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.add</Name>
+    <Value>Προσθήκη Φυτοπροστατευτικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.pesticide</Name>
+    <Value>Φυτοπροστατευτικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.treatmenttype</Name>
+    <Value>Τύπος Αγωγής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.dosage</Name>
+    <Value>Δοσολογία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.frequency</Name>
+    <Value>Συχνότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.remedylink.fields.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.treatmenttype.preventive</Name>
+    <Value>Προληπτικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.disease.treatmenttype.curative</Name>
+    <Value>Θεραπευτικό</Value>
+  </LocaleResource>
+
   <LocaleResource>
     <Name>admin.applog.title</Name>
     <Value>Καταγραφές Εφαρμογής</Value>

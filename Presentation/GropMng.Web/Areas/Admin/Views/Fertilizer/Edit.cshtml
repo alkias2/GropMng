@@ -1,0 +1,59 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
+@model GropMng.Web.Areas.Admin.Models.Fertilizer.FertilizerModel
+@{
+    ViewData["Title"] = T("admin.fertilizer.edit");
+    GropHtml.SetActiveMenuItemSystemName("Fertilizers");
+
+    var listUrl = Url.Action("List", "Fertilizer", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@($"{T("common.edit")}: {Model.Name}")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.fertilizer.title"), Url = listUrl },
+        new() { Text = T("common.edit") }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="fertilizerEditForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form id="fertilizerEditForm" asp-area="Admin" asp-controller="Fertilizer" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4 border-danger">
+    <div class="card-header">
+        <h5 class="card-title text-danger mb-0">@T("common.dangerzone")</h5>
+    </div>
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <p class="mb-0">@T("admin.fertilizer.delete.confirm") @T("common.delete.cannotundo")</p>
+        <form asp-area="Admin"
+              asp-controller="Fertilizer"
+              asp-action="Delete"
+              method="post"
+              data-grop-delete="true">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bx bx-trash me-1"></i> @T("admin.fertilizer.delete")
+            </button>
+        </form>
+    </div>
+</div>

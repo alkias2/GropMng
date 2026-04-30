@@ -1,0 +1,113 @@
+@model GropMng.Web.Areas.Admin.Models.Disease.DiseaseSearchModel
+@using GropMng.Web.Areas.Admin.Models.Disease
+@using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using Microsoft.AspNetCore.Routing
+@{
+    ViewData["Title"] = T("admin.disease.title");
+    GropHtml.SetActiveMenuItemSystemName("Diseases");
+
+    var addDiseaseUrl = Url.Action("Create", "Disease", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@T("admin.disease.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("admin.disease.title") }
+    })">
+    <grop-header-button href="@addDiseaseUrl"
+                        text="@T("admin.disease.create")"
+                        icon="bx bx-plus"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+@Html.AntiForgeryToken()
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("common.filters")</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> @T("common.clear")
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <grop-label asp-for="SearchTerm" />
+                <grop-editor asp-for="SearchTerm" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "diseasesTable",
+    UrlRead = new GropDataUrl("DiseaseList", "Disease", new RouteValueDictionary(new { area = "Admin" })),
+    UrlDelete = new GropDataUrl("Delete", "Disease", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(DiseaseSearchModel.SearchTerm))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("id")
+        {
+            Title = T("admin.disease.grid.id"),
+            Width = "60px"
+        },
+        new GropColumnProperty("name")
+        {
+            Title = T("admin.disease.fields.name")
+        },
+        new GropColumnProperty("diseaseTypeLocalized")
+        {
+            Title = T("admin.disease.fields.diseasetype"),
+            Width = "120px",
+            ClassName = GropColumnClassDefaults.NoWrap,
+            Render = new RenderBadge("badge bg-label-danger")
+        },
+        new GropColumnProperty("affectedParts")
+        {
+            Title = T("admin.disease.fields.affectedparts")
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.edit"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonEdit(new GropDataUrl("Edit", "Disease", new RouteValueDictionary(new { area = "Admin" })))
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.delete"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonRemove(new GropDataUrl("Delete", "Disease", new RouteValueDictionary(new { area = "Admin" })))
+        }
+    ]
+})
+
+@section Vendors {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+}
+
+@section Scripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+}
