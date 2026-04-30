@@ -688,4 +688,94 @@
     <Name>common.user</Name>
     <Value>User</Value>
   </LocaleResource>
+  <!-- Landing Page -->
+  <LocaleResource>
+    <Name>landing.page.title</Name>
+    <Value>Garden Manager — Manage Your Garden</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.nav.home</Name>
+    <Value>Home</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.nav.features</Name>
+    <Value>Features</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.title</Name>
+    <Value>Manage your garden, every day.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.subtitle</Name>
+    <Value>Track plants, schedule care, and log daily actions — all in one place.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.cta.start</Name>
+    <Value>Get Started Free</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.badge</Name>
+    <Value>Features</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.title</Name>
+    <Value>Everything your garden needs</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.subtitle</Name>
+    <Value>Simple, fast and reliable tools for daily plant care.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.track.title</Name>
+    <Value>Plant Tracking</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.track.desc</Name>
+    <Value>Keep a record for each plant — location, container, soil mix and care history.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.schedule.title</Name>
+    <Value>Care Scheduling</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.schedule.desc</Name>
+    <Value>Watering, fertilizing and repotting with a clear action history.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.health.title</Name>
+    <Value>Plant Health</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.health.desc</Name>
+    <Value>Log diseases, manage treatments and track recovery progress.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.cta.title</Name>
+    <Value>Start today</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.cta.subtitle</Name>
+    <Value>Register and start managing your garden right away.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.tagline</Name>
+    <Value>Your digital base for a healthy garden.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.links</Name>
+    <Value>Links</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.rights</Name>
+    <Value>All rights reserved.</Value>
+  </LocaleResource>
+  <!-- Dashboard placeholder -->
+  <LocaleResource>
+    <Name>dashboard.welcome</Name>
+    <Value>Welcome to your garden!</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.coming.soon</Name>
+    <Value>Your dashboard is coming in the next milestone.</Value>
+  </LocaleResource>
 </Language>

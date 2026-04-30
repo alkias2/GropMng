@@ -6,7 +6,7 @@
 @import 'support';
 
 // ============================================================
-// GropMng — Views/shared/_Layout.cshtml
+// GropMng — Views/shared/_Layout.cshtml (admin sidebar)
 // ============================================================
 .app-brand {
   .app-brand-logo {
@@ -16,6 +16,26 @@
   .app-brand-text {
     font-size: 1.3rem;
     margin-top: 16px;
+  }
+}
+
+// ============================================================
+// GropMng — Views/shared/_LandingLayout.cshtml (public navbar)
+// Scoped to .landing-navbar — does NOT affect admin sidebar
+// ============================================================
+.landing-navbar {
+  .app-brand-logo {
+    width: auto;
+    height: auto;
+
+    img {
+      height: 26px;
+      width: auto;
+    }
+  }
+
+  .app-brand-text {
+    margin-top: 0;
   }
 }
 

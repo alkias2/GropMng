@@ -686,4 +686,94 @@
     <Name>common.user</Name>
     <Value>Χρήστης</Value>
   </LocaleResource>
+  <!-- Landing Page -->
+  <LocaleResource>
+    <Name>landing.page.title</Name>
+    <Value>Garden Manager — Διαχείριση Κήπου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.nav.home</Name>
+    <Value>Αρχική</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.nav.features</Name>
+    <Value>Λειτουργίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.title</Name>
+    <Value>Διαχειρίσου τον κήπο σου, κάθε μέρα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.subtitle</Name>
+    <Value>Παρακολούθησε φυτά, πρόγραμμα φροντίδας και ιστορικό ενεργειών — όλα σε ένα μέρος.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.hero.cta.start</Name>
+    <Value>Ξεκίνα Δωρεάν</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.badge</Name>
+    <Value>Λειτουργίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.title</Name>
+    <Value>Ό,τι χρειάζεσαι για τον κήπο σου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.subtitle</Name>
+    <Value>Εργαλεία για την καθημερινή φροντίδα — απλά, γρήγορα και αξιόπιστα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.track.title</Name>
+    <Value>Παρακολούθηση Φυτών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.track.desc</Name>
+    <Value>Κρατά αρχείο για κάθε φυτό — τοποθεσία, γλάστρα, χώμα και ιστορικό φροντίδας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.schedule.title</Name>
+    <Value>Πρόγραμμα Φροντίδας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.schedule.desc</Name>
+    <Value>Ποτίσματα, λιπάσματα και μεταφυτεύσεις με σαφές ιστορικό ενεργειών.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.health.title</Name>
+    <Value>Υγεία Φυτών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.features.health.desc</Name>
+    <Value>Κατάγραψε ασθένειες, αντιμετώπισε προβλήματα και παρακολούθησε την πρόοδο.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.cta.title</Name>
+    <Value>Ξεκίνα σήμερα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.cta.subtitle</Name>
+    <Value>Εγγράψου και ξεκίνα να διαχειρίζεσαι τον κήπο σου αμέσως.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.tagline</Name>
+    <Value>Η ψηφιακή σου βάση για έναν υγιή κήπο.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.links</Name>
+    <Value>Σύνδεσμοι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>landing.footer.rights</Name>
+    <Value>Με επιφύλαξη παντός δικαιώματος.</Value>
+  </LocaleResource>
+  <!-- Dashboard placeholder -->
+  <LocaleResource>
+    <Name>dashboard.welcome</Name>
+    <Value>Καλώς ήρθες στον κήπο σου!</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.coming.soon</Name>
+    <Value>Το dashboard φορτώνεται σύντομα στο επόμενο milestone.</Value>
+  </LocaleResource>
 </Language>

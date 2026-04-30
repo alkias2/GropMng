@@ -1,38 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Controllers
 {
-    /// <summary>
-    /// Represents the HomeController component.
-    /// Defines responsibilities and data relevant to its role in the GropMng solution.
-    /// </summary>
     public class HomeController : Controller
     {
-        #region Fields
-
-        private readonly ILogger<HomeController> _logger;
-
-        #endregion
-
-        #region Ctor
-
-        /// <summary>
-        /// Initializes a new instance of the HomeController class.
-        /// </summary>
-        /// <param name="logger">Logger used for diagnostics and runtime telemetry.</param>
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        #endregion
-
         #region Methods
 
         /// <summary>
-        /// Dashboard placeholder - to be implemented
+        /// Public landing page. Authenticated owners are redirected to their dashboard.
         /// </summary>
+        [AllowAnonymous]
         public IActionResult Index()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction(nameof(Dashboard));
+
+            return View();
+        }
+
+        /// <summary>
+        /// Placeholder owner dashboard — will be replaced in feature/owner-dashboard-core.
+        /// </summary>
+        [Authorize]
+        public IActionResult Dashboard()
         {
             return View();
         }

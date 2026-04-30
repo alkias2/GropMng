@@ -19195,6 +19195,18 @@ html:not(.layout-footer-fixed) .content-wrapper {
   margin-top: 16px;
 }
 
+.landing-navbar .app-brand-logo {
+  width: auto;
+  height: auto;
+}
+.landing-navbar .app-brand-logo img {
+  height: 26px;
+  width: auto;
+}
+.landing-navbar .app-brand-text {
+  margin-top: 0;
+}
+
 .money-manager .quick-date-filter button {
   padding: 0;
   border: 0;

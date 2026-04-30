@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="el"
+      class="dark-style layout-navbar-fixed layout-wide"
+      dir="ltr"
+      data-theme="theme-grop-mng"
+      data-assets-path="@Url.Content("~/")"
+      data-template="front-pages">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>@ViewData["Title"] - GropMng</title>
+
+    @await Html.PartialAsync("_logoIco")
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="~/vendor/fonts/fontawesome.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="~/vendor/css/core-dark.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="~/vendor/css/theme-grop-mng-dark.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="~/css/demo.css" />
+
+    <!-- Front Page CSS -->
+    <link rel="stylesheet" href="~/vendor/css/pages/front-page.css" />
+    <link rel="stylesheet" href="~/vendor/css/pages/front-page-landing.css" />
+
+    <!-- Helpers -->
+    <script src="~/vendor/js/helpers.js"></script>
+    <script src="~/vendor/js/template-customizer.js"></script>
+    <script src="~/js/config.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Vendors", required: false)
+</head>
+<body>
+    <script src="~/vendor/js/dropdown-hover.js"></script>
+    <script src="~/vendor/js/mega-dropdown.js"></script>
+
+    <!-- Navbar: Start -->
+    <nav class="layout-navbar shadow-none py-0">
+        <div class="container">
+            <div class="navbar navbar-expand-lg landing-navbar px-3 px-md-4">
+                <!-- Logo + mobile toggle: Start -->
+                <div class="navbar-brand app-brand demo d-flex py-0 me-4">
+                    <button class="navbar-toggler border-0 px-0 me-2"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#landingNavbar"
+                            aria-controls="landingNavbar"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <i class="tf-icons bx bx-menu bx-sm align-middle"></i>
+                    </button>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="app-brand-link text-decoration-none">
+                        <span class="app-brand-logo">
+                            <img src="~/grop-mng-logo.svg" alt="GropMng Logo" />
+                        </span>
+                        <span class="app-brand-text menu-text fw-bold ms-2 ps-1">Garden Mng</span>
+                    </a>
+                </div>
+                <!-- Logo + mobile toggle: End -->
+
+                <!-- Nav links: Start -->
+                <div class="collapse navbar-collapse landing-nav-menu" id="landingNavbar">
+                    <button class="navbar-toggler border-0 text-heading position-absolute end-0 top-0"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#landingNavbar"
+                            aria-controls="landingNavbar"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <i class="tf-icons bx bx-x bx-sm"></i>
+                    </button>
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="#landingHero">@T("landing.nav.home")</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="#landingFeatures">@T("landing.nav.features")</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="landing-menu-overlay d-lg-none"></div>
+                <!-- Nav links: End -->
+
+                <!-- Auth CTA: Start -->
+                <ul class="navbar-nav flex-row align-items-center ms-auto gap-2">
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="btn btn-outline-primary btn-sm">
+                            @T("common.login")
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="btn btn-primary btn-sm">
+                            @T("common.register")
+                        </a>
+                    </li>
+                </ul>
+                <!-- Auth CTA: End -->
+            </div>
+        </div>
+    </nav>
+    <!-- Navbar: End -->
+
+    <!-- Page Content -->
+    @RenderBody()
+    <!-- / Page Content -->
+
+    <!-- Footer: Start -->
+    <footer class="landing-footer bg-body footer-text">
+        <div class="footer-top">
+            <div class="container">
+                <div class="row gx-0 gy-4 g-md-5 justify-content-between">
+                    <div class="col-lg-5">
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="app-brand-link text-decoration-none mb-4 d-inline-flex">
+                            <span class="app-brand-logo">
+                                <img src="~/grop-mng-logo.svg" alt="GropMng Logo" />
+                            </span>
+                            <span class="app-brand-text menu-text fw-bold ms-2">Garden Mng</span>
+                        </a>
+                        <p class="footer-text mb-3">@T("landing.footer.tagline")</p>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <h6 class="footer-title mb-4">@T("landing.footer.links")</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="footer-link">@T("common.login")</a>
+                            </li>
+                            <li class="mb-2">
+                                <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="footer-link">@T("common.register")</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom py-3">
+            <div class="container d-flex flex-wrap justify-content-between gap-2">
+                <div class="mb-2 mb-md-0">
+                    &copy; @DateTime.Now.Year Garden Manager. @T("landing.footer.rights")
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Footer: End -->
+
+    <!-- Core JS -->
+    <script src="~/vendor/libs/jquery/jquery.js"></script>
+    <script src="~/vendor/libs/popper/popper.js"></script>
+    <script src="~/vendor/js/bootstrap.js"></script>
+    <script src="~/vendor/js/menu.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/js/admin/grop-swal.js" asp-append-version="true"></script>
+
+    <!-- Landing page script -->
+    <script src="~/js-custom/landing.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
