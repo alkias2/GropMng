@@ -71,4 +71,10 @@ public partial class PlantInstance : AuditableEntity
     public IList<FertilizingSchedule> FertilizingSchedules { get; set; } = new List<FertilizingSchedule>();
 
     public IList<PlantDiseaseRecord> DiseaseRecords { get; set; } = new List<PlantDiseaseRecord>();
+
+    public IList<Care.WateringLog> WateringLogs { get; set; } = new List<Care.WateringLog>();
+
+    public IList<Care.FertilizingLog> FertilizingLogs { get; set; } = new List<Care.FertilizingLog>();
+
+    public IList<Care.RepottingLog> RepottingLogs { get; set; } = new List<Care.RepottingLog>();
 }
