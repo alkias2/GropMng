@@ -3,6 +3,12 @@ using System.Runtime.Serialization;
 
 namespace GropMng.Core.Domain.Garden.Enums;
 
+public enum ActionSkipType : byte
+{
+    Watering = 0,
+    Fertilizing = 1
+}
+
 public enum GardenSeason
 {
     Spring,

@@ -25,6 +25,7 @@ namespace GropMng.Web.Controllers
         private readonly IRepository<RepottingLog> _repottingLogRepository;
         private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
         private readonly IRepository<Fertilizer> _fertilizerRepository;
+        private readonly IRepository<ActionSkip> _actionSkipRepository;
 
         public HomeController(
             ICurrentOwnerProvider currentOwnerProvider,
@@ -38,7 +39,8 @@ namespace GropMng.Web.Controllers
             IRepository<FertilizingLog> fertilizingLogRepository,
             IRepository<RepottingLog> repottingLogRepository,
             IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
-            IRepository<Fertilizer> fertilizerRepository)
+            IRepository<Fertilizer> fertilizerRepository,
+            IRepository<ActionSkip> actionSkipRepository)
         {
             _currentOwnerProvider = currentOwnerProvider;
             _plantInstanceRepository = plantInstanceRepository;
@@ -52,6 +54,7 @@ namespace GropMng.Web.Controllers
             _repottingLogRepository = repottingLogRepository;
             _plantDiseaseRecordRepository = plantDiseaseRecordRepository;
             _fertilizerRepository = fertilizerRepository;
+            _actionSkipRepository = actionSkipRepository;
         }
 
         #region Methods
@@ -181,9 +184,21 @@ namespace GropMng.Web.Controllers
             // ActionsTodayCount = only due today (not overdue) — matches the "Today" badge in the list
             model.ActionsTodayCount = actionRows.Count(a => a.DueStatus == DashboardDueStatus.Today);
 
+            // Load active skips for this owner and filter them out of the displayed list
+            var activeSkips = await _actionSkipRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
+                cancellationToken: cancellationToken);
+
+            var skipSet = activeSkips
+                .Select(s => (s.PlantInstanceId, s.ActionType))
+                .ToHashSet();
+
             // Show all actions that need attention (overdue + today), no cap — totals match KPIs exactly
             model.TodayActions = actionRows
                 .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
+                .Where(a => !skipSet.Contains((a.PlantInstanceId, a.ActionType == DashboardActionType.Watering
+                    ? ActionSkipType.Watering
+                    : ActionSkipType.Fertilizing)))
                 .OrderBy(a => a.DueStatus)
                 .ThenBy(a => a.DueDate)
                 .ThenBy(a => a.PlantName)

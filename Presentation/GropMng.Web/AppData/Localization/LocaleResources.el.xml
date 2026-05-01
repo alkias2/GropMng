@@ -1342,6 +1342,30 @@
     <Value>Λίπανση</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>dashboard.owner.action.done</Name>
+    <Value>Έγινε</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.skip</Name>
+    <Value>Παράλειψη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.title</Name>
+    <Value>Παράλειψη ενέργειας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.prompt</Name>
+    <Value>Τι θέλετε να κάνετε με την ενέργεια:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.today</Name>
+    <Value>Παράλειψη για σήμερα — υπενθύμισέ με αύριο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.next</Name>
+    <Value>Ειδοποίηση στην επόμενη προγραμματισμένη ενέργεια</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>dashboard.owner.status.overdue</Name>
     <Value>Σε Καθυστέρηση</Value>
   </LocaleResource>
