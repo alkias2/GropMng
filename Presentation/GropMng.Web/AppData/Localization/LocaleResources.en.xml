@@ -1287,6 +1287,82 @@
     <Name>dashboard.coming.soon</Name>
     <Value>Your dashboard is coming in the next milestone.</Value>
   </LocaleResource>
+  <LocaleResource>
+    <Name>common.viewall</Name>
+    <Value>View All</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.title</Name>
+    <Value>Owner Dashboard</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.subtitle</Name>
+    <Value>Your daily care cockpit for plants and garden routines.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.myplants</Name>
+    <Value>My Plants</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.activeplants</Name>
+    <Value>Active Plants</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.actionstoday</Name>
+    <Value>Due Today</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.overdue</Name>
+    <Value>Overdue Actions</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.activecases</Name>
+    <Value>Active Disease Cases</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.todayactions</Name>
+    <Value>Overdue &amp; Today Actions</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.todayactions.empty</Name>
+    <Value>No overdue or due-today actions. Great job!</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.recentactivity</Name>
+    <Value>Recent Activity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.recentactivity.empty</Name>
+    <Value>No activity recorded yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.watering</Name>
+    <Value>Watering</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.fertilizing</Name>
+    <Value>Fertilizing</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.overdue</Name>
+    <Value>Overdue</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.today</Name>
+    <Value>Today</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.upcoming</Name>
+    <Value>Upcoming</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.frequency</Name>
+    <Value>Frequency:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.days</Name>
+    <Value>days</Value>
+  </LocaleResource>
   <!-- My Garden -->
   <LocaleResource>
     <Name>mygarden.menu.title</Name>

@@ -1285,6 +1285,82 @@
     <Name>dashboard.coming.soon</Name>
     <Value>Το dashboard φορτώνεται σύντομα στο επόμενο milestone.</Value>
   </LocaleResource>
+  <LocaleResource>
+    <Name>common.viewall</Name>
+    <Value>Προβολή Όλων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.title</Name>
+    <Value>Πίνακας Ελέγχου Καλλιεργητή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.subtitle</Name>
+    <Value>Η καθημερινή εικόνα φροντίδας για τα φυτά και τον κήπο σου.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.myplants</Name>
+    <Value>Τα Φυτά μου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.activeplants</Name>
+    <Value>Ενεργά Φυτά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.actionstoday</Name>
+    <Value>Σήμερα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.overdue</Name>
+    <Value>Σε Καθυστέρηση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.kpi.activecases</Name>
+    <Value>Ενεργά Περιστατικά Ασθενειών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.todayactions</Name>
+    <Value>Εκκρεμείς &amp; Σημερινές Ενέργειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.todayactions.empty</Name>
+    <Value>Δεν υπάρχουν εκκρεμείς ή σημερινές ενέργειες. Μπράβο!</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.recentactivity</Name>
+    <Value>Πρόσφατη Δραστηριότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.recentactivity.empty</Name>
+    <Value>Δεν έχει καταγραφεί δραστηριότητα ακόμη.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.watering</Name>
+    <Value>Πότισμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.fertilizing</Name>
+    <Value>Λίπανση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.overdue</Name>
+    <Value>Σε Καθυστέρηση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.today</Name>
+    <Value>Σήμερα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.status.upcoming</Name>
+    <Value>Επερχόμενο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.frequency</Name>
+    <Value>Συχνότητα:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.days</Name>
+    <Value>ημέρες</Value>
+  </LocaleResource>
   <!-- My Garden -->
   <LocaleResource>
     <Name>mygarden.menu.title</Name>
