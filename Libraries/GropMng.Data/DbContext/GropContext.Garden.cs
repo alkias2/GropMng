@@ -37,6 +37,7 @@ public partial class GropContext
     public DbSet<WateringLog> WateringLogs => Set<WateringLog>();
     public DbSet<FertilizingLog> FertilizingLogs => Set<FertilizingLog>();
     public DbSet<RepottingLog> RepottingLogs => Set<RepottingLog>();
+    public DbSet<ActionSkip> ActionSkips => Set<ActionSkip>();
 
     partial void ConfigureGardenDomain(ModelBuilder modelBuilder)
     {
@@ -63,6 +64,7 @@ public partial class GropContext
         ConfigureWateringLog(modelBuilder.Entity<WateringLog>());
         ConfigureFertilizingLog(modelBuilder.Entity<FertilizingLog>());
         ConfigureRepottingLog(modelBuilder.Entity<RepottingLog>());
+        ConfigureActionSkip(modelBuilder.Entity<ActionSkip>());
     }
 
     private static void ConfigureLocation(EntityTypeBuilder<Location> entity)
@@ -836,6 +838,42 @@ public partial class GropContext
             .HasPrincipalKey(e => e.OwnerId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_RepottingLog_Owner");
+    }
+
+    private static void ConfigureActionSkip(EntityTypeBuilder<ActionSkip> entity)
+    {
+        entity.ToTable("ActionSkip", tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_ActionSkip_ActionType", "[ActionType] IN (0, 1)");
+        });
+
+        entity.HasKey(e => e.Id).HasName("PK_ActionSkip");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.ActionType).IsRequired();
+        entity.Property(e => e.SkippedAtUtc).HasColumnType("datetime2(7)").IsRequired();
+        entity.Property(e => e.ActiveUntilDate).HasColumnType("date").IsRequired();
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_ActionSkip_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_ActionSkip_InstanceId");
+        entity.HasIndex(e => e.ActiveUntilDate).HasDatabaseName("IX_ActionSkip_ActiveUntilDate");
+        entity.HasIndex(new[] { nameof(ActionSkip.OwnerId), nameof(ActionSkip.PlantInstanceId), nameof(ActionSkip.ActionType), nameof(ActionSkip.ActiveUntilDate) })
+              .HasDatabaseName("IX_ActionSkip_Owner_Instance_Type_Until");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany()
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_ActionSkip_PlantInstance");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_ActionSkip_Owner");
     }
 }
 

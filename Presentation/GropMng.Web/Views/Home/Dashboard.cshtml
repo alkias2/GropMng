@@ -58,7 +58,8 @@
                     <h5 class="card-title mb-0">@T("dashboard.owner.todayactions")</h5>
                     <a href="@Url.Action("List", "PlantInstance")" class="btn btn-sm btn-outline-primary">@T("common.viewall")</a>
                 </div>
-                <div class="card-body">
+                <div class="card-body" id="dashboard-today-actions"
+                     data-empty-text="@T("dashboard.owner.todayactions.empty")">
                     @if (!Model.TodayActions.Any())
                     {
                         <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
@@ -75,7 +76,15 @@
                                     _ => "info"
                                 };
 
-                                <div class="list-group-item px-0">
+                                var actionTypeStr = action.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
+                                var skipKey = $"{action.PlantInstanceId}:{actionTypeStr}";
+                                var plantDisplayName = string.IsNullOrWhiteSpace(action.Nickname) ? action.PlantName : $"{action.PlantName} ({action.Nickname})";
+
+                                var logUrl = action.ActionType == DashboardActionType.Watering
+                                    ? Url.Action("LogWatering", "ActionLog")
+                                    : Url.Action("LogFertilizing", "ActionLog");
+
+                                <div class="list-group-item px-0" data-skip-key="@skipKey">
                                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                         <div>
                                             <h6 class="mb-1">@action.PlantName @(string.IsNullOrWhiteSpace(action.Nickname) ? string.Empty : $"({action.Nickname})")</h6>
@@ -94,7 +103,25 @@
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="text-muted small">@action.DueDate.ToString("yyyy-MM-dd")</span>
-                                            <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-primary">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success btn-action-done"
+                                                    data-url="@logUrl"
+                                                    data-plant-instance-id="@action.PlantInstanceId"
+                                                    data-action-type="@actionTypeStr"
+                                                    data-label-done="@T("dashboard.owner.action.done")"
+                                                    title="@T("dashboard.owner.action.done")">
+                                                <i class="bx bx-check"></i> @T("dashboard.owner.action.done")
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-warning btn-action-skip"
+                                                    data-plant-instance-id="@action.PlantInstanceId"
+                                                    data-action-type="@actionTypeStr"
+                                                    data-plant-name="@plantDisplayName"
+                                                    data-frequency-days="@action.FrequencyDays"
+                                                    title="@T("dashboard.owner.action.skip")">
+                                                <i class="bx bx-skip-next"></i> @T("dashboard.owner.action.skip")
+                                            </button>
+                                            <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
                                                 @T("common.details")
                                             </a>
                                         </div>
@@ -150,3 +177,36 @@
         </div>
     </div>
 </div>
+
+<!-- Skip Action Modal -->
+<div class="modal fade" id="skipActionModal" tabindex="-1" aria-labelledby="skipActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="skipActionModalLabel">
+                    <i class="bx bx-skip-next me-1"></i>@T("dashboard.owner.skip.title")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">@T("dashboard.owner.skip.prompt")</p>
+                <p class="fw-semibold skip-plant-name mb-3"></p>
+                <div class="d-grid gap-2">
+                    <button type="button" id="btnSkipToday" class="btn btn-warning">
+                        <i class="bx bx-calendar-x me-1"></i>@T("dashboard.owner.skip.today")
+                    </button>
+                    <button type="button" id="btnSkipNext" class="btn btn-outline-secondary">
+                        <i class="bx bx-bell me-1"></i>@T("dashboard.owner.skip.next")
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js-custom/dashboard-action-log.js"></script>
+}

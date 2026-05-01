@@ -1344,6 +1344,30 @@
     <Value>Fertilizing</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>dashboard.owner.action.done</Name>
+    <Value>Done</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.action.skip</Name>
+    <Value>Skip</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.title</Name>
+    <Value>Skip this action</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.prompt</Name>
+    <Value>What would you like to do with:</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.today</Name>
+    <Value>Skip for today — remind me tomorrow</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.skip.next</Name>
+    <Value>Notify at next scheduled date</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>dashboard.owner.status.overdue</Name>
     <Value>Overdue</Value>
   </LocaleResource>
