@@ -61,20 +61,26 @@ public class PlantInstanceController : Controller
         // Load related data
         var plants = await _plantService.GetPlantsAsync(cancellationToken: cancellationToken);
         var locations = await _locationService.GetLocationsAsync(ownerId, cancellationToken: cancellationToken);
-        var gardenSpots = locations.SelectMany(l => l.GardenSpots).ToList();
+        var gardenSpots = new List<GropMng.Core.Domain.Garden.Locations.GardenSpot>();
+        foreach (var location in locations)
+        {
+            var spots = await _locationService.GetGardenSpotsAsync(location.Id, ownerId, cancellationToken);
+            gardenSpots.AddRange(spots);
+        }
 
         var plantMap = plants.ToDictionary(p => p.Id);
         var spotMap = gardenSpots.ToDictionary(s => s.Id);
+        var locationMap = locations.ToDictionary(l => l.Id);
 
         var rows = plantInstances
             .Where(p => plantMap.ContainsKey(p.PlantId) && spotMap.ContainsKey(p.GardenSpotId))
             .Select(p => new PlantInstanceListRowModel
         {
             Id = p.Id,
-            PlantName = plantMap[p.PlantId].CommonName,
+            PlantName = plantMap[p.PlantId].ScientificName,
             Nickname = p.Nickname,
             GardenSpotName = spotMap[p.GardenSpotId].Name,
-            LocationName = locations.FirstOrDefault(l => l.GardenSpots.Any(s => s.Id == p.GardenSpotId))?.Name ?? "—",
+            LocationName = locationMap.TryGetValue(spotMap[p.GardenSpotId].LocationId, out var location) ? location.Name : "—",
             ContainerInfo = p.Container != null ? $"{p.Container.ContainerType}" : null,
             HealthStatus = p.HealthStatus,
             AgeYears = p.AgeYears,
@@ -90,7 +96,7 @@ public class PlantInstanceController : Controller
             AvailablePlants = plants.Select(p => new SelectListItem
             {
                 Value = p.Id.ToString(),
-                Text = p.CommonName,
+                Text = p.ScientificName,
                 Selected = p.Id == plantId
             }).ToList(),
             AvailableLocations = locations.Select(l => new SelectListItem
@@ -169,14 +175,28 @@ public class PlantInstanceController : Controller
         if (instance is null)
             return RedirectToAction(nameof(List));
 
+        var plants = await _plantService.GetPlantsAsync(cancellationToken: cancellationToken);
+        var locations = await _locationService.GetLocationsAsync(ownerId, cancellationToken: cancellationToken);
+        var gardenSpots = new List<GropMng.Core.Domain.Garden.Locations.GardenSpot>();
+        foreach (var location in locations)
+        {
+            var spots = await _locationService.GetGardenSpotsAsync(location.Id, ownerId, cancellationToken);
+            gardenSpots.AddRange(spots);
+        }
+
+        var locationMap = locations.ToDictionary(l => l.Id);
+        var gardenSpot = gardenSpots.FirstOrDefault(s => s.Id == instance.GardenSpotId);
+
         var model = new PlantInstanceModel
         {
             Id = instance.Id,
             PlantId = instance.PlantId,
-            PlantName = instance.Plant.CommonName,
+            PlantName = plants.FirstOrDefault(p => p.Id == instance.PlantId)?.ScientificName ?? "—",
             GardenSpotId = instance.GardenSpotId,
-            GardenSpotName = instance.GardenSpot.Name,
-            LocationName = instance.GardenSpot.Location.Name,
+            GardenSpotName = gardenSpot?.Name ?? "—",
+            LocationName = gardenSpot != null && locationMap.TryGetValue(gardenSpot.LocationId, out var selectedLocation)
+                ? selectedLocation.Name
+                : "—",
             ContainerId = instance.ContainerId,
             ContainerInfo = instance.Container?.ContainerType.ToString(),
             SoilMixId = instance.SoilMixId,
@@ -265,21 +285,28 @@ public class PlantInstanceController : Controller
     {
         var plants = await _plantService.GetPlantsAsync(cancellationToken: cancellationToken);
         var locations = await _locationService.GetLocationsAsync(ownerId, cancellationToken: cancellationToken);
+        var gardenSpots = new List<GropMng.Core.Domain.Garden.Locations.GardenSpot>();
+        foreach (var location in locations)
+        {
+            var spots = await _locationService.GetGardenSpotsAsync(location.Id, ownerId, cancellationToken);
+            gardenSpots.AddRange(spots);
+        }
+        var locationMap = locations.ToDictionary(l => l.Id);
 
         model.AvailablePlants = plants.Select(p => new SelectListItem
         {
             Value = p.Id.ToString(),
-            Text = p.CommonName,
+            Text = p.ScientificName,
             Selected = model.PlantId == p.Id
         }).ToList();
 
-        model.AvailableGardenSpots = locations
-            .SelectMany(l => l.GardenSpots.Select(s => new SelectListItem
+        model.AvailableGardenSpots = gardenSpots
+            .Select(s => new SelectListItem
             {
                 Value = s.Id.ToString(),
-                Text = $"{l.Name} - {s.Name}",
+                Text = locationMap.TryGetValue(s.LocationId, out var location) ? $"{location.Name} - {s.Name}" : s.Name,
                 Selected = model.GardenSpotId == s.Id
-            }))
+            })
             .ToList();
 
         var containers = await _plantInstanceService.GetContainersAsync(ownerId, cancellationToken);

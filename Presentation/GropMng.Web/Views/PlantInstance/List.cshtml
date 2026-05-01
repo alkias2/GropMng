@@ -93,7 +93,7 @@
                 </div>
             </div>
             <div class="col-md-1 d-flex align-items-end">
-                <button type="submit" class="btn btn-sm btn-primary w-100">@T("common.filter")</button>
+                <button type="submit" class="btn btn-sm btn-primary w-100">@T("common.filters")</button>
             </div>
         </form>
     </div>
@@ -121,7 +121,7 @@
                             <th>@T("mygarden.plantinstance.field.gardenspot")</th>
                             <th>@T("mygarden.plantinstance.field.age")</th>
                             <th>@T("mygarden.plantinstance.field.health")</th>
-                            <th>@T("common.status")</th>
+                            <th>@T("mygarden.plantinstance.field.active")</th>
                             <th class="text-end">@T("common.actions")</th>
                         </tr>
                     </thead>
@@ -135,7 +135,16 @@
                                 <td>@row.GardenSpotName</td>
                                 <td>@(row.AgeYears.HasValue ? $"{row.AgeYears} y" : "—")</td>
                                 <td><span class="badge bg-label-@(row.HealthStatus switch { GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Excellent => "success", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Good => "info", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Fair => "warning", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Poor or GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Critical => "danger", _ => "secondary" })">@row.HealthStatus</span></td>
-                                <td>@(row.IsActive ? "<i class='bx bx-check text-success'></i>" : "<i class='bx bx-x text-muted'></i>") @Html.Raw(row.IsActive ? "" : "")</td>
+                                <td>
+                                    @if (row.IsActive)
+                                    {
+                                        <i class="bx bx-check text-success" aria-label="active"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-x text-muted" aria-label="inactive"></i>
+                                    }
+                                </td>
                                 <td class="text-end">
                                     <a href="@Url.Action("Edit", "PlantInstance", new { id = row.Id })" class="btn btn-sm btn-icon btn-outline-primary" title="@T("common.edit")">
                                         <i class="bx bx-edit"></i>
