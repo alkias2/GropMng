@@ -1285,4 +1285,102 @@
     <Name>dashboard.coming.soon</Name>
     <Value>Το dashboard φορτώνεται σύντομα στο επόμενο milestone.</Value>
   </LocaleResource>
+  <!-- My Garden -->
+  <LocaleResource>
+    <Name>mygarden.menu.title</Name>
+    <Value>Ο Κήπος μου</Value>
+  </LocaleResource>
+  <!-- Plant Instances -->
+  <LocaleResource>
+    <Name>mygarden.plantinstance.list.title</Name>
+    <Value>Τα Φυτά μου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.add</Name>
+    <Value>Προσθήκη Φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.create.title</Name>
+    <Value>Νέο Φυτό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.edit.title</Name>
+    <Value>Επεξεργασία Φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.edit.details</Name>
+    <Value>Στοιχεία Φυτού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.list.empty</Name>
+    <Value>Δεν υπάρχουν φυτά. Προσθέστε το πρώτο σας φυτό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.plant</Name>
+    <Value>Φυτό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.location</Name>
+    <Value>Τοποθεσία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.gardenspot</Name>
+    <Value>Σημείο Κήπου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.container</Name>
+    <Value>Δοχείο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.soilmix</Name>
+    <Value>Μίγμα Εδάφους</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.nickname</Name>
+    <Value>Επώνυμο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.planteddate</Name>
+    <Value>Ημερομηνία Φύτευσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.age</Name>
+    <Value>Ηλικία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.size</Name>
+    <Value>Κατηγορία Μεγέθους</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.height</Name>
+    <Value>Ύψος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.spread</Name>
+    <Value>Διάπλατο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.health</Name>
+    <Value>Κατάσταση Υγείας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.field.active</Name>
+    <Value>Ενεργό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.filter.plant</Name>
+    <Value>Φυτό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.filter.location</Name>
+    <Value>Τοποθεσία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.filter.gardenspot</Name>
+    <Value>Σημείο Κήπου</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.filter.activeonly</Name>
+    <Value>Μόνο Ενεργά Φυτά</Value>
+  </LocaleResource>
 </Language>
