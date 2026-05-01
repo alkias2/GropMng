@@ -1,18 +1,152 @@
+@model GropMng.Web.Models.Dashboard.OwnerDashboardModel
+@using GropMng.Web.Models.Dashboard
 @{
     ViewData["Title"] = T("common.dashboard").ToString();
-    // TODO: Replace this placeholder view in feature/owner-dashboard-core
+    GropHtml.SetActiveMenuItemSystemName("Dashboard");
 }
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 text-center py-5">
-            <div class="avatar avatar-xl mx-auto mb-4">
-                <span class="avatar-initial rounded bg-label-success">
-                    <i class="bx bx-leaf fs-1"></i>
-                </span>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">@T("dashboard.owner.title")</h4>
+            <p class="text-muted mb-0">@T("dashboard.owner.subtitle")</p>
+        </div>
+        <a href="@Url.Action("List", "PlantInstance")" class="btn btn-primary">
+            <i class="bx bx-leaf me-1"></i>@T("dashboard.owner.cta.myplants")
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <span class="fw-medium d-block mb-1">@T("dashboard.owner.kpi.activeplants")</span>
+                    <h3 class="card-title mb-0">@Model.ActivePlantsCount</h3>
+                </div>
             </div>
-            <h4 class="mb-2">@T("dashboard.welcome")</h4>
-            <p class="text-muted mb-4">@T("dashboard.coming.soon")</p>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <span class="fw-medium d-block mb-1">@T("dashboard.owner.kpi.actionstoday")</span>
+                    <h3 class="card-title mb-0">@Model.ActionsTodayCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <span class="fw-medium d-block mb-1">@T("dashboard.owner.kpi.overdue")</span>
+                    <h3 class="card-title mb-0">@Model.OverdueActionsCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <span class="fw-medium d-block mb-1">@T("dashboard.owner.kpi.activecases")</span>
+                    <h3 class="card-title mb-0">@Model.ActiveDiseaseCasesCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">@T("dashboard.owner.todayactions")</h5>
+                    <a href="@Url.Action("List", "PlantInstance")" class="btn btn-sm btn-outline-primary">@T("common.viewall")</a>
+                </div>
+                <div class="card-body">
+                    @if (!Model.TodayActions.Any())
+                    {
+                        <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var action in Model.TodayActions)
+                            {
+                                var badgeClass = action.DueStatus switch
+                                {
+                                    DashboardDueStatus.Overdue => "danger",
+                                    DashboardDueStatus.Today => "warning",
+                                    _ => "info"
+                                };
+
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                        <div>
+                                            <h6 class="mb-1">@action.PlantName @(string.IsNullOrWhiteSpace(action.Nickname) ? string.Empty : $"({action.Nickname})")</h6>
+                                            <div class="text-muted small mb-1">@action.LocationName • @action.GardenSpotName</div>
+                                            <div class="small">
+                                                <span class="badge bg-label-secondary me-1">@(action.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
+                                                <span class="badge bg-label-@badgeClass me-1">
+                                                    @(action.DueStatus == DashboardDueStatus.Overdue
+                                                        ? T("dashboard.owner.status.overdue")
+                                                        : action.DueStatus == DashboardDueStatus.Today
+                                                            ? T("dashboard.owner.status.today")
+                                                            : T("dashboard.owner.status.upcoming"))
+                                                </span>
+                                                <span class="text-muted">@T("dashboard.owner.frequency") @action.FrequencyDays @T("dashboard.owner.days")</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted small">@action.DueDate.ToString("yyyy-MM-dd")</span>
+                                            <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-primary">
+                                                @T("common.details")
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">@T("dashboard.owner.recentactivity")</h5>
+                </div>
+                <div class="card-body">
+                    @if (!Model.RecentActivity.Any())
+                    {
+                        <p class="text-muted mb-0">@T("dashboard.owner.recentactivity.empty")</p>
+                    }
+                    else
+                    {
+                        <ul class="timeline mb-0">
+                            @foreach (var activity in Model.RecentActivity)
+                            {
+                                var iconClass = activity.ActivityType switch
+                                {
+                                    DashboardActivityType.Watering => "bx bx-droplet text-info",
+                                    DashboardActivityType.Fertilizing => "bx bx-flask text-success",
+                                    _ => "bx bx-refresh text-warning"
+                                };
+
+                                <li class="timeline-item timeline-item-transparent">
+                                    <span class="timeline-point timeline-point-primary"></span>
+                                    <div class="timeline-event">
+                                        <div class="timeline-header mb-1">
+                                            <h6 class="mb-0">
+                                                <i class="@iconClass me-1"></i>
+                                                @activity.PlantName @(string.IsNullOrWhiteSpace(activity.Nickname) ? string.Empty : $"({activity.Nickname})")
+                                            </h6>
+                                            <small class="text-muted">@activity.OccurredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
+                                        </div>
+                                        <p class="mb-0 text-muted">@activity.Summary</p>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>
