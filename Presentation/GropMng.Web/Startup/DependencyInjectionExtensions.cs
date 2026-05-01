@@ -148,6 +148,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IAppLogService, AppLogService>();
 
         services.AddScoped<ILocationService, LocationService>();
+        services.AddScoped<IContainerService, ContainerService>();
         services.AddScoped<IPlantService, PlantService>();
         services.AddScoped<IPlantInstanceService, PlantInstanceService>();
         services.AddScoped<IDiseaseService, DiseaseService>();

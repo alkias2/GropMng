@@ -1,0 +1,74 @@
+@model GropMng.Web.Models.Garden.GardenSpotModel
+
+@{
+    GropHtml.SetActiveMenuItemSystemName("Locations");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@Model.Name</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">@T("common.dashboard")</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("List", "Location")">@T("mygarden.location.list.title")</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Edit", "Location", new { id = Model.LocationId })">@Model.LocationName</a></li>
+                <li class="breadcrumb-item active">@T("mygarden.gardenspot.edit.title")</li>
+            </ol>
+        </nav>
+    </div>
+    <form method="post" action="@Url.Action("Delete", "GardenSpot", new { locationId = Model.LocationId, spotId = Model.Id })" data-grop-confirm="@T("common.delete.confirm")">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-danger">
+            <i class="bx bx-trash me-1"></i>@T("common.delete")
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Edit" asp-controller="GardenSpot" asp-route-locationId="@Model.LocationId" asp-route-spotId="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label">@T("mygarden.gardenspot.field.name") <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Orientation" class="form-label">@T("mygarden.gardenspot.field.orientation")</label>
+                    <select asp-for="Orientation" asp-items="Model.AvailableOrientations" class="form-select"></select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="CoverType" class="form-label">@T("mygarden.gardenspot.field.covertype")</label>
+                    <select asp-for="CoverType" asp-items="Model.AvailableCoverTypes" class="form-select"></select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SunHoursPerDay" class="form-label">@T("mygarden.gardenspot.field.sunhours")</label>
+                    <input asp-for="SunHoursPerDay" class="form-control" type="number" min="0" max="24" />
+                    <span asp-validation-for="SunHoursPerDay" class="text-danger small"></span>
+                </div>
+                <div class="col-md-9">
+                    <label asp-for="Surroundings" class="form-label">@T("mygarden.gardenspot.field.surroundings")</label>
+                    <input asp-for="Surroundings" class="form-control" />
+                    <span asp-validation-for="Surroundings" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label">@T("common.notes")</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@T("common.save")</button>
+                <a href="@Url.Action("Edit", "Location", new { id = Model.LocationId })" class="btn btn-outline-secondary">@T("common.cancel")</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
