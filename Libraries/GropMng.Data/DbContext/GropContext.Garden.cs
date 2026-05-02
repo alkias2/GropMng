@@ -116,6 +116,7 @@ public partial class GropContext
         entity.Property(e => e.CoverType).HasMaxLength(50).HasNullableStorageEnumConversion();
         entity.Property(e => e.Surroundings).HasMaxLength(500);
         entity.Property(e => e.Notes);
+        entity.Property(e => e.PictureId).HasDefaultValue(0);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_GardenSpot_OwnerId");
         entity.HasIndex(e => e.LocationId).HasDatabaseName("IX_GardenSpot_LocationId");
@@ -158,6 +159,7 @@ public partial class GropContext
         entity.Property(e => e.IsMedicinal).HasDefaultValue(false);
         entity.Property(e => e.IsToxic).HasDefaultValue(false);
         entity.Property(e => e.GeneralNotes);
+        entity.Property(e => e.PictureId).HasDefaultValue(0);
 
         entity.HasIndex(e => e.CommonName).HasDatabaseName("IX_Plant_CommonName");
         entity.HasIndex(e => e.ScientificName).HasDatabaseName("IX_Plant_ScientificName");
@@ -399,14 +401,14 @@ public partial class GropContext
 
         entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
-        entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
-        entity.Property(e => e.ThumbnailPath).HasMaxLength(500);
+        entity.Property(e => e.PictureId).HasDefaultValue(0);
         entity.Property(e => e.TakenDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
         entity.Property(e => e.Caption).HasMaxLength(500);
-        entity.Property(e => e.SortOrder).HasDefaultValue(0);
+        entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_PlantPhoto_OwnerId");
         entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_PlantPhoto_InstanceId");
+        entity.HasIndex(e => e.PictureId).HasDatabaseName("IX_PlantPhoto_PictureId");
 
         entity.HasOne(e => e.PlantInstance)
             .WithMany(e => e.Photos)
@@ -585,13 +587,14 @@ public partial class GropContext
 
         entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.PlantDiseaseRecordId).HasColumnName("RecordId");
-        entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
-        entity.Property(e => e.ThumbnailPath).HasMaxLength(500);
+        entity.Property(e => e.PictureId).HasDefaultValue(0);
         entity.Property(e => e.TakenDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
         entity.Property(e => e.Notes).HasMaxLength(500);
+        entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_DiseasePhoto_OwnerId");
         entity.HasIndex(e => e.PlantDiseaseRecordId).HasDatabaseName("IX_DiseasePhoto_RecordId");
+        entity.HasIndex(e => e.PictureId).HasDatabaseName("IX_DiseasePhoto_PictureId");
 
         entity.HasOne(e => e.PlantDiseaseRecord)
             .WithMany(e => e.Photos)

@@ -26,6 +26,10 @@
             <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
 
             <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">@T("mygarden.gardenspot.field.picture")</label>
+                    @Html.EditorFor(m => m.PictureId, additionalViewData: new { PictureEntityType = "gardenspot" })
+                </div>
                 <div class="col-md-6">
                     <label asp-for="Name" class="form-label">@T("mygarden.gardenspot.field.name") <span class="text-danger">*</span></label>
                     <input asp-for="Name" class="form-control" />

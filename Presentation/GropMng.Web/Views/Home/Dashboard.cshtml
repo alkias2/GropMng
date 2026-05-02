@@ -86,19 +86,35 @@
 
                                 <div class="list-group-item px-0" data-skip-key="@skipKey">
                                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                                        <div>
-                                            <h6 class="mb-1">@action.PlantName @(string.IsNullOrWhiteSpace(action.Nickname) ? string.Empty : $"({action.Nickname})")</h6>
-                                            <div class="text-muted small mb-1">@action.LocationName • @action.GardenSpotName</div>
-                                            <div class="small">
-                                                <span class="badge bg-label-secondary me-1">@(action.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
-                                                <span class="badge bg-label-@badgeClass me-1">
-                                                    @(action.DueStatus == DashboardDueStatus.Overdue
-                                                        ? T("dashboard.owner.status.overdue")
-                                                        : action.DueStatus == DashboardDueStatus.Today
-                                                            ? T("dashboard.owner.status.today")
-                                                            : T("dashboard.owner.status.upcoming"))
-                                                </span>
-                                                <span class="text-muted">@T("dashboard.owner.frequency") @action.FrequencyDays @T("dashboard.owner.days")</span>
+                                        <div class="d-flex align-items-start gap-3">
+                                            @if (!string.IsNullOrEmpty(action.PlantMainImageUrl))
+                                            {
+                                                <img src="@action.PlantMainImageUrl"
+                                                     alt="@action.PlantName"
+                                                     class="rounded"
+                                                     style="width:48px;height:48px;object-fit:cover;flex-shrink:0;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                                     style="width:48px;height:48px;flex-shrink:0;">
+                                                    <i class="bx bx-leaf text-muted fs-4"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <h6 class="mb-1">@action.PlantName @(string.IsNullOrWhiteSpace(action.Nickname) ? string.Empty : $"({action.Nickname})")</h6>
+                                                <div class="text-muted small mb-1">@action.LocationName • @action.GardenSpotName</div>
+                                                <div class="small">
+                                                    <span class="badge bg-label-secondary me-1">@(action.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
+                                                    <span class="badge bg-label-@badgeClass me-1">
+                                                        @(action.DueStatus == DashboardDueStatus.Overdue
+                                                            ? T("dashboard.owner.status.overdue")
+                                                            : action.DueStatus == DashboardDueStatus.Today
+                                                                ? T("dashboard.owner.status.today")
+                                                                : T("dashboard.owner.status.upcoming"))
+                                                    </span>
+                                                    <span class="text-muted">@T("dashboard.owner.frequency") @action.FrequencyDays @T("dashboard.owner.days")</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
@@ -119,7 +135,7 @@
                                                     data-plant-name="@plantDisplayName"
                                                     data-frequency-days="@action.FrequencyDays"
                                                     title="@T("dashboard.owner.action.skip")">
-                                                <i class="bx bx-skip-next"></i> @T("dashboard.owner.action.skip")
+                                                <i class="bx bxs-bell-ring"></i> @T("dashboard.owner.action.skip")
                                             </button>
                                             <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
                                                 @T("common.details")

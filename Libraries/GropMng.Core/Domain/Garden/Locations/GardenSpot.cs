@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Plants;
 
@@ -20,6 +21,9 @@ public partial class GardenSpot : AuditableEntity
     public string? Surroundings { get; set; }
 
     public string? Notes { get; set; }
+
+    [UIHint("Picture")]
+    public int PictureId { get; set; }
 
     public Location Location { get; set; } = null!;
 

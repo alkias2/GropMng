@@ -1485,4 +1485,80 @@
     <Name>mygarden.plantinstance.filter.activeonly</Name>
     <Value>Active Plants Only</Value>
   </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.upload</Name>
+    <Value>Upload Image</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.remove</Name>
+    <Value>Remove</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.preview.alt</Name>
+    <Value>Picture preview</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.uploading</Name>
+    <Value>Uploading…</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.error</Name>
+    <Value>Upload failed. Please try again.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.picture</Name>
+    <Value>Picture</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.gardenspot.field.picture</Name>
+    <Value>Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.title</Name>
+    <Value>Photos</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.add</Name>
+    <Value>Add Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.empty</Name>
+    <Value>No photos yet. Upload the first one below.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.caption</Name>
+    <Value>Caption</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.takendate</Name>
+    <Value>Taken Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.displayorder</Name>
+    <Value>Display Order</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.thumbnail</Name>
+    <Value>Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.confirm</Name>
+    <Value>Are you sure you want to delete this photo?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.add.success</Name>
+    <Value>Photo added successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.success</Name>
+    <Value>Photo deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.update.success</Name>
+    <Value>Photo updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.image</Name>
+    <Value>Image</Value>
+  </LocaleResource>
 </Language>

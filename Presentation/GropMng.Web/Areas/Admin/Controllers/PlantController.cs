@@ -6,6 +6,7 @@ using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Areas.Admin.Factories.Plant;
 using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
 
@@ -88,6 +89,8 @@ public class PlantController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(PlantModel model, CancellationToken cancellationToken)
     {
+        HydratePictureIdFromForm(model);
+
         var validation = await _plantValidator.ValidateAsync(model, cancellationToken);
         if (!validation.IsValid)
         {
@@ -137,6 +140,8 @@ public class PlantController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(PlantModel model, CancellationToken cancellationToken)
     {
+        HydratePictureIdFromForm(model);
+
         var validation = await _plantValidator.ValidateAsync(model, cancellationToken);
         if (!validation.IsValid)
         {
@@ -203,6 +208,7 @@ public class PlantController : Controller
     private static void MergePostedValues(PlantModel target, PlantModel source)
     {
         target.Id = source.Id;
+        target.PictureId = source.PictureId;
         target.CommonName = source.CommonName;
         target.ScientificName = source.ScientificName;
         target.Family = source.Family;
@@ -216,6 +222,48 @@ public class PlantController : Controller
         target.IsMedicinal = source.IsMedicinal;
         target.IsToxic = source.IsToxic;
         target.GeneralNotes = source.GeneralNotes;
+    }
+
+    private void HydratePictureIdFromForm(PlantModel model)
+    {
+        if (model.PictureId > 0)
+            return;
+
+        if (!TryGetPictureIdFromForm(Request.Form, out var pictureId))
+            return;
+
+        model.PictureId = pictureId;
+    }
+
+    private static bool TryGetPictureIdFromForm(IFormCollection form, out int pictureId)
+    {
+        pictureId = 0;
+
+        if (TryParsePictureId(form, "PictureId", out pictureId))
+            return true;
+
+        // Defensive fallback for prefixed form keys (e.g. "Model.PictureId").
+        foreach (var key in form.Keys)
+        {
+            if (!key.EndsWith(".PictureId", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (TryParsePictureId(form, key, out pictureId))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryParsePictureId(IFormCollection form, string key, out int pictureId)
+    {
+        pictureId = 0;
+
+        if (!form.TryGetValue(key, out StringValues values))
+            return false;
+
+        var raw = values.ToString();
+        return int.TryParse(raw, out pictureId) && pictureId > 0;
     }
 
     #endregion

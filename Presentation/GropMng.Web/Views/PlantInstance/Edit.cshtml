@@ -137,6 +137,29 @@
     </div>
 </div>
 
+@* ── Plant Photos ─────────────────────────────────────────────────── *@
+@await Html.PartialAsync("_PlantPhotos", Model.Id)
+
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" asp-append-version="true" />
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-instance-photos.js" asp-append-version="true"></script>
+    <script>
+        GropPlantPhotos.init({
+            plantInstanceId  : @Model.Id,
+            tableId          : 'plant-photos-table-@Model.Id',
+            addFormId        : 'plant-photos-add-@Model.Id',
+            addUploadId      : 'plant-photos-upload-@Model.Id',
+            editModalId      : 'plant-photos-edit-modal-@Model.Id',
+            listUrl          : '@Url.Action("PlantPhotoList",   "PlantInstance", new { id = Model.Id })',
+            addUrl           : '@Url.Action("PlantPhotoAdd",    "PlantInstance", new { id = Model.Id })',
+            updateUrl        : '@Url.Action("PlantPhotoUpdate", "PlantInstance", new { id = Model.Id })',
+            deleteUrl        : '@Url.Action("PlantPhotoDelete", "PlantInstance", new { id = Model.Id })',
+            uploadUrl        : '@Url.Action("AsyncUpload", "Picture")',
+            deleteConfirm    : '@T("mygarden.plantinstance.photo.delete.confirm")',
+            msgUploading     : '@T("admin.picture.status.uploading")',
+            msgUploadError   : '@T("admin.picture.status.error")'
+        });
+    </script>
 }

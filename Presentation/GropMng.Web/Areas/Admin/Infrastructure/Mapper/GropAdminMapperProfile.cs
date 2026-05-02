@@ -26,7 +26,8 @@ public class GropAdminMapperProfile : Profile
         CreateMap<LocaleStringResource, LocaleResourceRowModel>();
 
         CreateMap<Plant, PlantRowModel>()
-            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()));
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.ToString()))
+            .ForMember(dest => dest.PictureThumbnailUrl, opt => opt.Ignore());
 
         CreateMap<Plant, PlantModel>();
         CreateMap<PlantModel, Plant>()

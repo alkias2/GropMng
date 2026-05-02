@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using GropMng.Core.Domain.Garden.Enums;
 
 namespace GropMng.Core.Domain.Garden.Plants;
@@ -29,6 +30,9 @@ public partial class Plant : AuditableEntity
     public bool IsToxic { get; set; }
 
     public string? GeneralNotes { get; set; }
+
+    [UIHint("Picture")]
+    public int PictureId { get; set; }
 
     public IList<PlantInstance> PlantInstances { get; set; } = new List<PlantInstance>();
 }

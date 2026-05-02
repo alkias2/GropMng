@@ -16,6 +16,9 @@ public class GardenSpotModel
     /// <summary>Parent location name, shown in breadcrumbs.</summary>
     public string LocationName { get; set; } = string.Empty;
 
+    [UIHint("Picture")]
+    public int PictureId { get; set; }
+
     [Required]
     [MaxLength(200)]
     public string Name { get; set; } = string.Empty;

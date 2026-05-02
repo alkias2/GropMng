@@ -1,0 +1,126 @@
+@model int
+@* Model: plantInstanceId. Scripts are injected by the parent Edit.cshtml view. *@
+@{
+    var plantInstanceId = Model;
+    var clientSuffix    = plantInstanceId.ToString();
+    var tableId         = "plant-photos-table-" + clientSuffix;
+    var addFormId       = "plant-photos-add-"   + clientSuffix;
+    var addUploadId     = "plant-photos-upload-" + clientSuffix;
+    var editModalId     = "plant-photos-edit-modal-" + clientSuffix;
+}
+
+<div class="card mt-4" id="plant-photos-section-@clientSuffix">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("mygarden.plantinstance.photos.title")</h5>
+    </div>
+    <div class="card-body">
+
+        @* ── Photo DataTable ──────────────────────────────────────── *@
+        <div class="table-responsive mb-4">
+            <table id="@tableId" class="table table-bordered table-hover w-100 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:80px">@T("mygarden.plantinstance.photo.field.thumbnail")</th>
+                        <th>@T("mygarden.plantinstance.photo.field.caption")</th>
+                        <th style="width:130px">@T("mygarden.plantinstance.photo.field.takendate")</th>
+                        <th style="width:100px; text-align:center">@T("mygarden.plantinstance.photo.field.displayorder")</th>
+                        <th style="width:110px; text-align:right">@T("common.actions")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        @* ── Add Photo Form ───────────────────────────────────────── *@
+        <hr class="my-3" />
+        <h6 class="mb-3">@T("mygarden.plantinstance.photos.add")</h6>
+        <form id="@addFormId" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="PlantInstanceId" value="@plantInstanceId" />
+
+            <div class="row g-3 align-items-end">
+
+                @* -- Mini upload widget (standalone, no EditorTemplate needed) -- *@
+                <div class="col-md-2">
+                    <label class="form-label">@T("mygarden.plantinstance.photo.field.image") <span class="text-danger">*</span></label>
+                    <div class="grop-picture-editor" id="@addUploadId">
+                        <input type="hidden" id="@(addUploadId)-hidden" name="PictureId" value="0" />
+                        <div class="grop-picture-preview mb-2">
+                            <img id="@(addUploadId)-preview"
+                                 src="" alt="@T("admin.picture.preview.alt")"
+                                 class="rounded border"
+                                 style="width:80px;height:80px;object-fit:cover;display:none" />
+                            <div id="@(addUploadId)-placeholder"
+                                 class="rounded border d-flex align-items-center justify-content-center bg-light text-muted"
+                                 style="width:80px;height:80px">
+                                <i class="bx bx-image fs-3"></i>
+                            </div>
+                        </div>
+                        <label for="@(addUploadId)-file" class="btn btn-sm btn-outline-primary d-block mb-1">
+                            <i class="bx bx-upload me-1"></i>@T("admin.picture.upload")
+                        </label>
+                        <input type="file" id="@(addUploadId)-file"
+                               accept="image/jpeg,image/png,image/gif,image/webp"
+                               class="d-none" />
+                        <span id="@(addUploadId)-status" class="text-muted small"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="@(addFormId)-caption">@T("mygarden.plantinstance.photo.field.caption")</label>
+                    <input type="text" id="@(addFormId)-caption" name="Caption"
+                           class="form-control" maxlength="200" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="@(addFormId)-takendate">@T("mygarden.plantinstance.photo.field.takendate")</label>
+                    <input type="date" id="@(addFormId)-takendate" name="TakenDate"
+                           class="form-control"
+                           value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="@(addFormId)-displayorder">@T("mygarden.plantinstance.photo.field.displayorder")</label>
+                    <input type="number" id="@(addFormId)-displayorder" name="DisplayOrder"
+                           class="form-control" value="0" min="0" max="9999" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100" title="@T("mygarden.plantinstance.photos.add")">
+                        <i class="bx bx-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="@(addFormId)-error" class="text-danger small mt-2 d-none"></div>
+        </form>
+    </div>
+</div>
+
+@* ── Edit Modal ────────────────────────────────────────────────── *@
+<div class="modal fade" id="@editModalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@T("common.edit") — @T("mygarden.plantinstance.photo.field.thumbnail")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="@(editModalId)-photo-id" value="0" />
+                <div class="mb-3">
+                    <label class="form-label">@T("mygarden.plantinstance.photo.field.caption")</label>
+                    <input type="text" id="@(editModalId)-caption" class="form-control" maxlength="200" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">@T("mygarden.plantinstance.photo.field.takendate")</label>
+                    <input type="date" id="@(editModalId)-takendate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">@T("mygarden.plantinstance.photo.field.displayorder")</label>
+                    <input type="number" id="@(editModalId)-displayorder" class="form-control" value="0" min="0" max="9999" />
+                </div>
+                <div id="@(editModalId)-error" class="text-danger small d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(editModalId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

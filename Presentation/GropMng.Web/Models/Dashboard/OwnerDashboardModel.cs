@@ -38,6 +38,8 @@ public class DashboardActionModel
     public byte FrequencyDays { get; set; }
 
     public GardenSeason Season { get; set; }
+
+    public string PlantMainImageUrl { get; set; } = string.Empty;
 }
 
 public class DashboardActivityModel

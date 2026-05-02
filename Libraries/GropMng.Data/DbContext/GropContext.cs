@@ -2,6 +2,7 @@
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Localization;
 using GropMng.Core.Domain.Logging;
+using GropMng.Core.Domain.Media;
 using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Domain.Security;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<PermissionRecord> PermissionRecords => Set<PermissionRecord>();
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<LocaleStringResource> LocaleStringResources => Set<LocaleStringResource>();
+    public DbSet<Picture> Pictures => Set<Picture>();
 
     partial void ConfigureGardenDomain(ModelBuilder modelBuilder);
 
@@ -230,5 +232,22 @@ public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
                 });
 
         ConfigureGardenDomain(modelBuilder);
+
+        modelBuilder.Entity<Picture>(entity =>
+        {
+            entity.ToTable("Picture");
+            entity.HasKey(e => e.Id).HasName("PK_Picture");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.MimeType).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.SeoFilename).HasMaxLength(300);
+            entity.Property(e => e.AltAttribute).HasMaxLength(300);
+            entity.Property(e => e.TitleAttribute).HasMaxLength(300);
+            entity.Property(e => e.IsNew).HasDefaultValue(true);
+            entity.Property(e => e.VirtualPath).HasMaxLength(2000);
+            entity.Property(e => e.CreatedAtUtc)
+                .HasColumnType("datetime2(7)")
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+        });
     }
 }

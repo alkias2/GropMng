@@ -1483,4 +1483,80 @@
     <Name>mygarden.plantinstance.filter.activeonly</Name>
     <Value>Μόνο Ενεργά Φυτά</Value>
   </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.upload</Name>
+    <Value>Μεταφόρτωση Εικόνας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.remove</Name>
+    <Value>Αφαίρεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.preview.alt</Name>
+    <Value>Προεπισκόπηση εικόνας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.uploading</Name>
+    <Value>Γίνεται μεταφόρτωση…</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.error</Name>
+    <Value>Η μεταφόρτωση απέτυχε. Δοκιμάστε ξανά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.picture</Name>
+    <Value>Εικόνα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.gardenspot.field.picture</Name>
+    <Value>Φωτογραφία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.title</Name>
+    <Value>Φωτογραφίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.add</Name>
+    <Value>Προσθήκη Φωτογραφίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.empty</Name>
+    <Value>Δεν υπάρχουν φωτογραφίες. Ανεβάστε την πρώτη παρακάτω.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.caption</Name>
+    <Value>Λεζάντα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.takendate</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.displayorder</Name>
+    <Value>Σειρά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.thumbnail</Name>
+    <Value>Φωτογραφία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.confirm</Name>
+    <Value>Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη φωτογραφία;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.add.success</Name>
+    <Value>Η φωτογραφία προστέθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.success</Name>
+    <Value>Η φωτογραφία διαγράφηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.update.success</Name>
+    <Value>Η φωτογραφία ενημερώθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.image</Name>
+    <Value>Εικόνα</Value>
+  </LocaleResource>
 </Language>

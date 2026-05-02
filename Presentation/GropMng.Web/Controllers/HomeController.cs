@@ -4,6 +4,7 @@ using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Models.Dashboard;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +27,8 @@ namespace GropMng.Web.Controllers
         private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
         private readonly IRepository<Fertilizer> _fertilizerRepository;
         private readonly IRepository<ActionSkip> _actionSkipRepository;
+        private readonly IRepository<PlantPhoto> _plantPhotoRepository;
+        private readonly IPictureService _pictureService;
 
         public HomeController(
             ICurrentOwnerProvider currentOwnerProvider,
@@ -40,7 +43,9 @@ namespace GropMng.Web.Controllers
             IRepository<RepottingLog> repottingLogRepository,
             IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
             IRepository<Fertilizer> fertilizerRepository,
-            IRepository<ActionSkip> actionSkipRepository)
+            IRepository<ActionSkip> actionSkipRepository,
+            IRepository<PlantPhoto> plantPhotoRepository,
+            IPictureService pictureService)
         {
             _currentOwnerProvider = currentOwnerProvider;
             _plantInstanceRepository = plantInstanceRepository;
@@ -55,6 +60,8 @@ namespace GropMng.Web.Controllers
             _plantDiseaseRecordRepository = plantDiseaseRecordRepository;
             _fertilizerRepository = fertilizerRepository;
             _actionSkipRepository = actionSkipRepository;
+            _plantPhotoRepository = plantPhotoRepository;
+            _pictureService = pictureService;
         }
 
         #region Methods
@@ -203,6 +210,30 @@ namespace GropMng.Web.Controllers
                 .ThenBy(a => a.DueDate)
                 .ThenBy(a => a.PlantName)
                 .ToList();
+
+            // Batch-load main plant photos for dashboard action cards (500px thumb)
+            if (model.TodayActions.Count > 0)
+            {
+                var actionInstanceIds = model.TodayActions
+                    .Select(a => a.PlantInstanceId)
+                    .Distinct()
+                    .ToHashSet();
+
+                var mainPhotos = await _plantPhotoRepository.GetAllAsync(
+                    query => query
+                        .Where(p => p.OwnerId == ownerId && actionInstanceIds.Contains(p.PlantInstanceId))
+                        .GroupBy(p => p.PlantInstanceId)
+                        .Select(g => g.OrderBy(p => p.DisplayOrder).First()),
+                    cancellationToken: cancellationToken);
+
+                var mainPhotoPictureIdByInstance = mainPhotos.ToDictionary(p => p.PlantInstanceId, p => p.PictureId);
+
+                foreach (var action in model.TodayActions)
+                {
+                    if (mainPhotoPictureIdByInstance.TryGetValue(action.PlantInstanceId, out var picId))
+                        action.PlantMainImageUrl = await _pictureService.GetPictureUrlAsync(picId, targetSize: 500);
+                }
+            }
 
             var fertilizerIds = fertilizingLogs.Select(f => f.FertilizerId).Distinct().ToList();
             var fertilizers = fertilizerIds.Count > 0

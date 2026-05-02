@@ -111,6 +111,7 @@ public class PlantService : IPlantService
         existingPlant.IsEdible = plant.IsEdible;
         existingPlant.IsMedicinal = plant.IsMedicinal;
         existingPlant.IsToxic = plant.IsToxic;
+        existingPlant.PictureId = plant.PictureId;
         existingPlant.GeneralNotes = plant.GeneralNotes?.Trim();
         StampForUpdate(existingPlant);
 

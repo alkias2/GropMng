@@ -19,6 +19,7 @@ internal sealed class StartupSeeder : IStartupSeeder
     private readonly SoilMixSeeder _soilMixSeeder;
     private readonly ContainerSeeder _containerSeeder;
     private readonly PlantInstanceSeeder _plantInstanceSeeder;
+    private readonly PlantPhotoSeeder _plantPhotoSeeder;
     private readonly WateringScheduleSeeder _wateringScheduleSeeder;
     private readonly FertilizingScheduleSeeder _fertilizingScheduleSeeder;
     private readonly PlantDiseaseRecordSeeder _plantDiseaseRecordSeeder;
@@ -37,6 +38,7 @@ internal sealed class StartupSeeder : IStartupSeeder
         SoilMixSeeder soilMixSeeder,
         ContainerSeeder containerSeeder,
         PlantInstanceSeeder plantInstanceSeeder,
+        PlantPhotoSeeder plantPhotoSeeder,
         WateringScheduleSeeder wateringScheduleSeeder,
         FertilizingScheduleSeeder fertilizingScheduleSeeder,
         PlantDiseaseRecordSeeder plantDiseaseRecordSeeder,
@@ -54,6 +56,7 @@ internal sealed class StartupSeeder : IStartupSeeder
         _soilMixSeeder = soilMixSeeder;
         _containerSeeder = containerSeeder;
         _plantInstanceSeeder = plantInstanceSeeder;
+        _plantPhotoSeeder = plantPhotoSeeder;
         _wateringScheduleSeeder = wateringScheduleSeeder;
         _fertilizingScheduleSeeder = fertilizingScheduleSeeder;
         _plantDiseaseRecordSeeder = plantDiseaseRecordSeeder;
@@ -100,7 +103,10 @@ internal sealed class StartupSeeder : IStartupSeeder
             soilMixIds,
             cancellationToken);
 
-        // 7. Care schedules + history (depend on plant instance IDs)
+        // 7. Plant instance photos (depend on plant instance IDs)
+        await _plantPhotoSeeder.SeedAsync(instanceIds, cancellationToken);
+
+        // 8. Care schedules + history (depend on plant instance IDs)
         await _wateringScheduleSeeder.SeedAsync(instanceIds, cancellationToken);
         await _fertilizingScheduleSeeder.SeedAsync(instanceIds, fertilizerIds, cancellationToken);
         await _plantDiseaseRecordSeeder.SeedAsync(instanceIds, diseaseIds, cancellationToken);

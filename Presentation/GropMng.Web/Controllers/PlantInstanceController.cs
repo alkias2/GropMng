@@ -3,6 +3,7 @@ using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Garden.Locations;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Models.Garden;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +25,7 @@ public class PlantInstanceController : Controller
     private readonly IPlantService _plantService;
     private readonly ILocationService _locationService;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
+    private readonly IPictureService _pictureService;
 
     #endregion
 
@@ -33,12 +35,14 @@ public class PlantInstanceController : Controller
         IPlantInstanceService plantInstanceService,
         IPlantService plantService,
         ILocationService locationService,
-        ICurrentOwnerProvider currentOwnerProvider)
+        ICurrentOwnerProvider currentOwnerProvider,
+        IPictureService pictureService)
     {
         _plantInstanceService = plantInstanceService ?? throw new ArgumentNullException(nameof(plantInstanceService));
         _plantService = plantService ?? throw new ArgumentNullException(nameof(plantService));
         _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
+        _pictureService = pictureService ?? throw new ArgumentNullException(nameof(pictureService));
     }
 
     #endregion
@@ -86,6 +90,14 @@ public class PlantInstanceController : Controller
             AgeYears = p.AgeYears,
             IsActive = p.IsActive
         }).ToList();
+
+        // Load main photo thumbnail URL (500px) for each plant instance row
+        foreach (var row in rows)
+        {
+            var mainPhoto = await _plantInstanceService.GetMainPlantPhotoAsync(row.Id, ownerId, cancellationToken);
+            if (mainPhoto != null)
+                row.MainImageUrl = await _pictureService.GetPictureUrlAsync(mainPhoto.PictureId, targetSize: 500);
+        }
 
         var filterModel = new PlantInstanceListFilterModel
         {
@@ -346,6 +358,148 @@ public class PlantInstanceController : Controller
         }).ToList();
 
         return model;
+    }
+
+    #endregion
+
+    #region Plant Photo Actions
+
+    [HttpGet("{id:int}/photos")]
+    public async Task<IActionResult> PlantPhotoList(int id, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return Json(new { data = Array.Empty<object>() });
+
+        var photos = await _plantInstanceService.GetPlantPhotosAsync(id, ownerId, cancellationToken);
+
+        var rows = new List<PlantInstancePhotoRowModel>();
+        foreach (var photo in photos)
+        {
+            var thumbUrl = await _pictureService.GetPictureUrlAsync(photo.PictureId, targetSize: 100);
+            rows.Add(new PlantInstancePhotoRowModel
+            {
+                Id = photo.Id,
+                PictureId = photo.PictureId,
+                ThumbnailUrl = thumbUrl,
+                Caption = photo.Caption,
+                TakenDate = photo.TakenDate.ToString("yyyy-MM-dd"),
+                DisplayOrder = photo.DisplayOrder
+            });
+        }
+
+        return Json(new { data = rows });
+    }
+
+    [HttpPost("{id:int}/photos/add")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlantPhotoAdd(int id, PlantInstancePhotoModel model, CancellationToken cancellationToken)
+    {
+        if (model.PictureId <= 0)
+            return Json(new { success = false, message = "Please upload an image first." });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var photo = new PlantPhoto
+            {
+                OwnerId = ownerId,
+                PictureId = model.PictureId,
+                Caption = model.Caption,
+                TakenDate = model.TakenDate,
+                DisplayOrder = model.DisplayOrder
+            };
+
+            var created = await _plantInstanceService.AddPlantPhotoAsync(id, photo, cancellationToken);
+            var thumbUrl = await _pictureService.GetPictureUrlAsync(created.PictureId, targetSize: 100);
+
+            return Json(new
+            {
+                success = true,
+                data = new PlantInstancePhotoRowModel
+                {
+                    Id = created.Id,
+                    PictureId = created.PictureId,
+                    ThumbnailUrl = thumbUrl,
+                    Caption = created.Caption,
+                    TakenDate = created.TakenDate.ToString("yyyy-MM-dd"),
+                    DisplayOrder = created.DisplayOrder
+                }
+            });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/photos/{photoId:int}/update")]
+    [HttpPost("{id:int}/photos/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlantPhotoUpdate(int id, int photoId, PlantInstancePhotoModel model, CancellationToken cancellationToken)
+    {
+        var effectivePhotoId = photoId;
+        if (effectivePhotoId <= 0 && Request.HasFormContentType)
+        {
+            var formPhotoId = Request.Form["photoId"].FirstOrDefault();
+            if (int.TryParse(formPhotoId, out var parsedPhotoId))
+                effectivePhotoId = parsedPhotoId;
+        }
+
+        if (effectivePhotoId <= 0)
+            return Json(new { success = false, message = "Photo not found." });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var existing = await _plantInstanceService.GetPlantPhotoByIdAsync(id, effectivePhotoId, ownerId, cancellationToken);
+            if (existing is null)
+                return Json(new { success = false, message = "Photo not found." });
+
+            existing.Caption = model.Caption;
+            existing.TakenDate = model.TakenDate;
+            existing.DisplayOrder = model.DisplayOrder;
+
+            await _plantInstanceService.UpdatePlantPhotoAsync(id, existing, cancellationToken);
+
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/photos/{photoId:int}/delete")]
+    [HttpPost("{id:int}/photos/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlantPhotoDelete(int id, int photoId, CancellationToken cancellationToken)
+    {
+        if (photoId <= 0 && Request.HasFormContentType)
+        {
+            var formPhotoId = Request.Form["photoId"].FirstOrDefault();
+            if (int.TryParse(formPhotoId, out var parsedPhotoId))
+                photoId = parsedPhotoId;
+        }
+
+        if (photoId <= 0)
+            return Json(new { success = false, message = "Photo not found." });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeletePlantPhotoAsync(id, photoId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
     }
 
     #endregion

@@ -228,6 +228,25 @@ public interface IPlantInstanceService
     Task DeletePlantPhotoAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieves a single photo by its identifier.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="photoId">The identifier of the photo to retrieve.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The matching photo when found; otherwise, <see langword="null" />.</returns>
+    Task<PlantPhoto?> GetPlantPhotoByIdAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the main (primary) photo for a plant instance — the one with the lowest DisplayOrder.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the plant instance.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The primary photo when one exists; otherwise, <see langword="null" />.</returns>
+    Task<PlantPhoto?> GetMainPlantPhotoAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Retrieves all notes for a plant instance.
     /// </summary>
     /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
