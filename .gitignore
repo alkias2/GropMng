@@ -104,13 +104,13 @@ Presentation/GropMng.Web/docs/
 # ==============================
 Presentation/GropMng.Web/wwwroot/images/catalog/*
 Presentation/GropMng.Web/wwwroot/images/gardenspots/*
-Presentation/GropMng.Web/wwwroot/images/gardenspots/placeholder.txt
+!Presentation/GropMng.Web/wwwroot/images/gardenspots/placeholder.txt
 Presentation/GropMng.Web/wwwroot/images/plants/*
-Presentation/GropMng.Web/wwwroot/images/plants/placeholder.txt
+!Presentation/GropMng.Web/wwwroot/images/plants/placeholder.txt
 Presentation/GropMng.Web/wwwroot/images/thumbs/*
-Presentation/GropMng.Web/wwwroot/images/thumbs/placeholder.txt
+!Presentation/GropMng.Web/wwwroot/images/thumbs/placeholder.txt
 Presentation/GropMng.Web/wwwroot/images/uploads/*
-Presentation/GropMng.Web/wwwroot/images/uploads/placeholder.txt
+!Presentation/GropMng.Web/wwwroot/images/uploads/placeholder.txt
 
 # ==============================
 # App settings with local secrets
