@@ -19331,6 +19331,57 @@ html:not(.layout-footer-fixed) .content-wrapper {
   display: none;
 }
 
+.dashboard-today-actions {
+  background-color: transparent !important;
+  border: 0 !important;
+}
+.dashboard-today-actions .nav-tabs .nav-link {
+  border: 0 !important;
+}
+.dashboard-today-actions > .card-header {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.dashboard-today-actions > .tab-content {
+  padding-top: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.dashboard-today-actions .dashboard-action-card {
+  border: 0 !important;
+}
+
+.dashboard-actions-grid .list-group-item {
+  background: transparent;
+}
+
+.dashboard-action-card__media {
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard-action-card__image {
+  width: 100%;
+  /* max-width: 220px; */
+  /* height: 140px; */
+  max-height: 350px !important;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+.dashboard-action-card__fallback {
+  width: 100%;
+  max-width: 220px;
+  height: 140px;
+  border-radius: 0.5rem;
+  background: rgba(var(--bs-primary-rgb), 0.16);
+  color: var(--bs-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
 .app-brand {
   display: flex;
   flex-grow: 0;

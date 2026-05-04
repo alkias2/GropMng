@@ -187,10 +187,6 @@ namespace GropMng.Web.Controllers
                     locationMap));
             }
 
-            model.OverdueActionsCount = actionRows.Count(a => a.DueStatus == DashboardDueStatus.Overdue);
-            // ActionsTodayCount = only due today (not overdue) — matches the "Today" badge in the list
-            model.ActionsTodayCount = actionRows.Count(a => a.DueStatus == DashboardDueStatus.Today);
-
             // Load active skips for this owner and filter them out of the displayed list
             var activeSkips = await _actionSkipRepository.GetAllAsync(
                 query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
@@ -200,12 +196,19 @@ namespace GropMng.Web.Controllers
                 .Select(s => (s.PlantInstanceId, s.ActionType))
                 .ToHashSet();
 
-            // Show all actions that need attention (overdue + today), no cap — totals match KPIs exactly
-            model.TodayActions = actionRows
+            // Keep only actionable rows shown to the owner (overdue + today, excluding active skips)
+            var actionableRows = actionRows
                 .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
                 .Where(a => !skipSet.Contains((a.PlantInstanceId, a.ActionType == DashboardActionType.Watering
                     ? ActionSkipType.Watering
                     : ActionSkipType.Fertilizing)))
+                .ToList();
+
+            // KPIs are based on visible actionable rows so cards always match the list below.
+            model.OverdueActionsCount = actionableRows.Count(a => a.DueStatus == DashboardDueStatus.Overdue);
+            model.ActionsTodayCount = actionableRows.Count(a => a.DueStatus == DashboardDueStatus.Today);
+
+            model.TodayActions = actionableRows
                 .OrderBy(a => a.DueStatus)
                 .ThenBy(a => a.DueDate)
                 .ThenBy(a => a.PlantName)

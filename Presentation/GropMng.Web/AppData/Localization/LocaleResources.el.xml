@@ -1307,11 +1307,11 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.actionstoday</Name>
-    <Value>Σήμερα</Value>
+    <Value>Λήγουν Σήμερα</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.overdue</Name>
-    <Value>Σε Καθυστέρηση</Value>
+    <Value>Εκκρεμούν από Πριν</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.activecases</Name>

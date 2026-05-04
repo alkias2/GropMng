@@ -1313,7 +1313,7 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.overdue</Name>
-    <Value>Overdue Actions</Value>
+    <Value>Overdue</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.activecases</Name>
