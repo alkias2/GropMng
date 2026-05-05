@@ -156,7 +156,6 @@ public class PlantInstanceService : IPlantInstanceService
 
         existingPlantInstance.PlantId = plantInstance.PlantId;
         existingPlantInstance.GardenSpotId = plantInstance.GardenSpotId;
-        existingPlantInstance.ContainerId = plantInstance.ContainerId;
         existingPlantInstance.SoilMixId = plantInstance.SoilMixId;
         existingPlantInstance.Nickname = plantInstance.Nickname?.Trim();
         existingPlantInstance.PlantedDate = plantInstance.PlantedDate;
@@ -208,8 +207,9 @@ public class PlantInstanceService : IPlantInstanceService
         existingContainer.Material = container.Material?.Trim();
         existingContainer.LengthCm = container.LengthCm;
         existingContainer.WidthCm = container.WidthCm;
-        existingContainer.DepthCm = container.DepthCm;
-        existingContainer.DiameterCm = container.DiameterCm;
+        existingContainer.BaseCircumferenceCm = container.BaseCircumferenceCm;
+        existingContainer.RimCircumferenceCm = container.RimCircumferenceCm;
+        existingContainer.HeightCm = container.HeightCm;
         existingContainer.VolumeL = container.VolumeL;
         existingContainer.Color = container.Color?.Trim();
         existingContainer.HasDrainageHole = container.HasDrainageHole;
@@ -399,7 +399,7 @@ public class PlantInstanceService : IPlantInstanceService
         return await _plantPhotoRepository.GetAllAsync(
             query => query
                 .Where(photo => photo.PlantInstanceId == plantInstanceId && photo.OwnerId == ownerId)
-                .OrderBy(photo => photo.SortOrder)
+                .OrderBy(photo => photo.DisplayOrder)
                 .ThenBy(photo => photo.Id),
             cancellationToken: cancellationToken);
     }
@@ -408,13 +408,10 @@ public class PlantInstanceService : IPlantInstanceService
     public async Task<PlantPhoto> AddPlantPhotoAsync(int plantInstanceId, PlantPhoto photo, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(photo);
-        ValidateRequired(photo.FilePath, nameof(photo.FilePath));
 
         var plantInstance = await EnsurePlantInstanceOwnedAsync(plantInstanceId, photo.OwnerId, cancellationToken);
         photo.PlantInstanceId = plantInstanceId;
         photo.OwnerId = plantInstance.OwnerId;
-        photo.FilePath = photo.FilePath.Trim();
-        photo.ThumbnailPath = photo.ThumbnailPath?.Trim();
         photo.Caption = photo.Caption?.Trim();
         StampForCreate(photo);
 
@@ -425,15 +422,13 @@ public class PlantInstanceService : IPlantInstanceService
     public async Task<PlantPhoto> UpdatePlantPhotoAsync(int plantInstanceId, PlantPhoto photo, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(photo);
-        ValidateRequired(photo.FilePath, nameof(photo.FilePath));
 
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, photo.OwnerId, cancellationToken);
         var existingPhoto = await EnsurePlantPhotoOwnedAsync(plantInstanceId, photo.Id, photo.OwnerId, cancellationToken);
-        existingPhoto.FilePath = photo.FilePath.Trim();
-        existingPhoto.ThumbnailPath = photo.ThumbnailPath?.Trim();
+        existingPhoto.PictureId = photo.PictureId;
         existingPhoto.TakenDate = photo.TakenDate;
         existingPhoto.Caption = photo.Caption?.Trim();
-        existingPhoto.SortOrder = photo.SortOrder;
+        existingPhoto.DisplayOrder = photo.DisplayOrder;
         StampForUpdate(existingPhoto);
 
         return await _plantPhotoRepository.UpdateAsync(existingPhoto, cancellationToken: cancellationToken);
@@ -445,6 +440,32 @@ public class PlantInstanceService : IPlantInstanceService
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var photo = await EnsurePlantPhotoOwnedAsync(plantInstanceId, photoId, ownerId, cancellationToken);
         await _plantPhotoRepository.DeleteAsync(photo, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<PlantPhoto?> GetPlantPhotoByIdAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+
+        return await _plantPhotoRepository.FirstOrDefaultAsync(
+            entity => entity.Id == photoId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
+            cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<PlantPhoto?> GetMainPlantPhotoAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+
+        var photos = await _plantPhotoRepository.GetAllAsync(
+            query => query
+                .Where(p => p.PlantInstanceId == plantInstanceId && p.OwnerId == ownerId)
+                .OrderBy(p => p.DisplayOrder)
+                .ThenBy(p => p.Id)
+                .Take(1),
+            cancellationToken: cancellationToken);
+
+        return photos.FirstOrDefault();
     }
 
     /// <inheritdoc />
@@ -580,13 +601,10 @@ public class PlantInstanceService : IPlantInstanceService
     public async Task<DiseasePhoto> AddDiseasePhotoAsync(int plantInstanceId, int recordId, DiseasePhoto photo, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(photo);
-        ValidateRequired(photo.FilePath, nameof(photo.FilePath));
 
         var record = await EnsureDiseaseRecordOwnedAsync(plantInstanceId, recordId, photo.OwnerId, cancellationToken);
         photo.PlantDiseaseRecordId = record.Id;
         photo.OwnerId = record.OwnerId;
-        photo.FilePath = photo.FilePath.Trim();
-        photo.ThumbnailPath = photo.ThumbnailPath?.Trim();
         photo.Notes = photo.Notes?.Trim();
         StampForCreate(photo);
 
@@ -597,14 +615,13 @@ public class PlantInstanceService : IPlantInstanceService
     public async Task<DiseasePhoto> UpdateDiseasePhotoAsync(int plantInstanceId, int recordId, DiseasePhoto photo, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(photo);
-        ValidateRequired(photo.FilePath, nameof(photo.FilePath));
 
         await EnsureDiseaseRecordOwnedAsync(plantInstanceId, recordId, photo.OwnerId, cancellationToken);
         var existingPhoto = await EnsureDiseasePhotoOwnedAsync(recordId, photo.Id, photo.OwnerId, cancellationToken);
-        existingPhoto.FilePath = photo.FilePath.Trim();
-        existingPhoto.ThumbnailPath = photo.ThumbnailPath?.Trim();
+        existingPhoto.PictureId = photo.PictureId;
         existingPhoto.TakenDate = photo.TakenDate;
         existingPhoto.Notes = photo.Notes?.Trim();
+        existingPhoto.DisplayOrder = photo.DisplayOrder;
         StampForUpdate(existingPhoto);
 
         return await _diseasePhotoRepository.UpdateAsync(existingPhoto, cancellationToken: cancellationToken);

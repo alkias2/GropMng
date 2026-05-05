@@ -41,6 +41,30 @@
                 </div>
 
                 <div class="col-md-3">
+                    <label asp-for="BaseCircumferenceCm" class="form-label">@T("mygarden.container.field.base")</label>
+                    <div class="input-group">
+                        <input asp-for="BaseCircumferenceCm" class="form-control" type="number" step="0.1" min="0" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="BaseCircumferenceCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="RimCircumferenceCm" class="form-label">@T("mygarden.container.field.rim")</label>
+                    <div class="input-group">
+                        <input asp-for="RimCircumferenceCm" class="form-control" type="number" step="0.1" min="0" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="RimCircumferenceCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="HeightCm" class="form-label">@T("mygarden.container.field.height")</label>
+                    <div class="input-group">
+                        <input asp-for="HeightCm" class="form-control" type="number" step="0.1" min="0" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="HeightCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
                     <label asp-for="LengthCm" class="form-label">@T("mygarden.container.field.length")</label>
                     <div class="input-group">
                         <input asp-for="LengthCm" class="form-control" type="number" step="0.1" min="0" />
@@ -55,22 +79,6 @@
                         <span class="input-group-text">cm</span>
                     </div>
                     <span asp-validation-for="WidthCm" class="text-danger small"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="DepthCm" class="form-label">@T("mygarden.container.field.depth")</label>
-                    <div class="input-group">
-                        <input asp-for="DepthCm" class="form-control" type="number" step="0.1" min="0" />
-                        <span class="input-group-text">cm</span>
-                    </div>
-                    <span asp-validation-for="DepthCm" class="text-danger small"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="DiameterCm" class="form-label">@T("mygarden.container.field.diameter")</label>
-                    <div class="input-group">
-                        <input asp-for="DiameterCm" class="form-control" type="number" step="0.1" min="0" />
-                        <span class="input-group-text">cm</span>
-                    </div>
-                    <span asp-validation-for="DiameterCm" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-3">

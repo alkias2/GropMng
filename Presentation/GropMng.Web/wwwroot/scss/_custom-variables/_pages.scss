@@ -208,3 +208,63 @@
 #appLogsTable_processing.dataTables_processing {
   display: none;
 }
+
+// ============================================================
+// Dashboard — Views/Home/Dashboard.cshtml
+// ============================================================
+.dashboard-today-actions{
+   background-color: transparent !important;
+   border: 0 !important;
+
+  .nav-tabs .nav-link{
+    border: 0 !important;
+  }
+  >.card-header{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+   >.tab-content {
+    padding-top: 0;
+     padding-left: 0 !important;
+    padding-right: 0 !important;
+   }
+   .dashboard-action-card{
+    border: 0 !important;
+   }
+}
+.dashboard-actions-grid {
+  .list-group-item {
+    background: transparent;
+  }
+}
+
+.dashboard-action-card {
+  &__media {
+    min-height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__image {
+    width: 100%;
+    /* max-width: 220px; */
+    /* height: 140px; */
+    max-height: 350px !important;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+
+  &__fallback {
+    width: 100%;
+    max-width: 220px;
+    height: 140px;
+    border-radius: 0.5rem;
+    background: rgba(var(--bs-primary-rgb), 0.16);
+    color: var(--bs-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+}

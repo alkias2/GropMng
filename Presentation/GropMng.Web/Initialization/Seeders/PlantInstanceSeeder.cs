@@ -71,7 +71,6 @@ internal sealed class PlantInstanceSeeder
     public async Task<IReadOnlyList<int>> SeedAsync(
         IReadOnlyDictionary<string, int> plantIdsByScientificName,
         IReadOnlyDictionary<string, int> gardenSpotIdsByName,
-        IReadOnlyList<int> containerIdsOrderedByTempId,     // index 0 = TempId 1
         IReadOnlyList<int> soilMixIdsOrderedByMixIndex,     // index = SoilMixSeeder.TempIdToMixIndex
         CancellationToken cancellationToken = default)
     {
@@ -93,7 +92,7 @@ internal sealed class PlantInstanceSeeder
         var now = DateTime.UtcNow;
         foreach (var inst in Instances)
         {
-            var tempIdx = inst.TempId - 1; // 0-based
+            var tempIdx = inst.TempId - 1; // 0-based (kept for future use)
 
             if (!plantIdsByScientificName.TryGetValue(inst.ScientificName, out var plantId))
                 continue;
@@ -101,8 +100,6 @@ internal sealed class PlantInstanceSeeder
             var spotName = SpotKeyMap[inst.ZoneKey];
             if (!gardenSpotIdsByName.TryGetValue(spotName, out var spotId))
                 continue;
-
-            int? containerId = inst.groundPlanted ? null : containerIdsOrderedByTempId[tempIdx];
 
             var mixIdx = SoilMixSeeder.TempIdToMixIndex[inst.TempId];
             int? soilMixId = mixIdx >= 0 && mixIdx < soilMixIdsOrderedByMixIndex.Count
@@ -114,7 +111,6 @@ internal sealed class PlantInstanceSeeder
                 OwnerId = DemoOwnerBusinessId,
                 PlantId = plantId,
                 GardenSpotId = spotId,
-                ContainerId = containerId,
                 SoilMixId = soilMixId,
                 Nickname = inst.CommonName,
                 HealthStatus = PlantHealthStatus.Good,

@@ -2,6 +2,7 @@ using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Interfaces.Services.Garden.Locations;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Models.Garden;
 using Microsoft.AspNetCore.Authorization;
@@ -21,15 +22,20 @@ public class GardenSpotController : Controller
 
     private readonly ILocationService _locationService;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
+    private readonly IPictureService _pictureService;
 
     #endregion
 
     #region Ctor
 
-    public GardenSpotController(ILocationService locationService, ICurrentOwnerProvider currentOwnerProvider)
+    public GardenSpotController(
+        ILocationService locationService,
+        ICurrentOwnerProvider currentOwnerProvider,
+        IPictureService pictureService)
     {
         _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
+        _pictureService = pictureService ?? throw new ArgumentNullException(nameof(pictureService));
     }
 
     #endregion
@@ -72,7 +78,8 @@ public class GardenSpotController : Controller
                 CoverType = model.CoverType,
                 SunHoursPerDay = model.SunHoursPerDay,
                 Surroundings = model.Surroundings,
-                Notes = model.Notes
+                Notes = model.Notes,
+                PictureId = model.PictureId
             }, cancellationToken);
 
             TempData["SuccessMessage"] = "Garden spot created successfully.";
@@ -107,7 +114,8 @@ public class GardenSpotController : Controller
             CoverType = spot.CoverType,
             SunHoursPerDay = spot.SunHoursPerDay,
             Surroundings = spot.Surroundings,
-            Notes = spot.Notes
+            Notes = spot.Notes,
+            PictureId = spot.PictureId
         }));
     }
 
@@ -122,6 +130,10 @@ public class GardenSpotController : Controller
 
         try
         {
+            var spots = await _locationService.GetGardenSpotsAsync(locationId, ownerId, cancellationToken);
+            var existing = spots.FirstOrDefault(s => s.Id == spotId);
+            var previousPictureId = existing?.PictureId ?? 0;
+
             await _locationService.UpdateGardenSpotAsync(locationId, new GardenSpot
             {
                 Id = spotId,
@@ -132,8 +144,17 @@ public class GardenSpotController : Controller
                 CoverType = model.CoverType,
                 SunHoursPerDay = model.SunHoursPerDay,
                 Surroundings = model.Surroundings,
-                Notes = model.Notes
+                Notes = model.Notes,
+                PictureId = model.PictureId
             }, cancellationToken);
+
+            // Delete old picture when replaced or removed
+            if (previousPictureId > 0 && previousPictureId != model.PictureId)
+            {
+                var oldPicture = await _pictureService.GetPictureByIdAsync(previousPictureId);
+                if (oldPicture != null)
+                    await _pictureService.DeletePictureAsync(oldPicture);
+            }
 
             TempData["SuccessMessage"] = "Garden spot updated successfully.";
             return RedirectToAction(nameof(Edit), new { locationId, spotId });

@@ -68,6 +68,14 @@
     ],
     ColumnCollection =
     [
+        new GropColumnProperty("pictureThumbnailUrl")
+        {
+            Title = T("admin.plant.fields.picture"),
+            Width = "70px",
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderPicture { MaxWidth = 50, MaxHeight = 50 },
+        },
         new GropColumnProperty("id")
         {
             Title = T("admin.plant.grid.id"),

@@ -1,0 +1,126 @@
+@model int
+@inject GropMng.Core.Interfaces.Services.Media.IPictureService PictureService
+@{
+    var clientId   = "pic_" + Guid.NewGuid().ToString("N")[..8];
+    var fieldName  = ViewData.TemplateInfo.GetFullHtmlFieldName(string.Empty);
+    if (string.IsNullOrWhiteSpace(fieldName))
+        fieldName = ViewData.ModelMetadata.PropertyName ?? "PictureId";
+
+    var fieldId    = Html.Id(fieldName);
+
+    var previewUrl = await PictureService.GetPictureUrlAsync(Model, targetSize: 100);
+    var hasImage   = Model > 0;
+}
+
+<div class="grop-picture-editor" id="@(clientId)-wrapper">
+
+    <input type="hidden" id="@fieldId" name="@fieldName" value="@Model" />
+
+    <div class="grop-picture-preview mb-2">
+        <img id="@(clientId)-preview"
+             src="@previewUrl"
+             alt="@T("admin.picture.preview.alt")"
+             class="rounded border"
+             style="width:100px; height:100px; object-fit:cover; @(hasImage ? "" : "display:none;")" />
+        <div id="@(clientId)-placeholder"
+             class="rounded border d-flex align-items-center justify-content-center bg-light text-muted"
+             style="width:100px; height:100px; @(hasImage ? "display:none;" : "")">
+            <i class="bx bx-image fs-3"></i>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <label for="@(clientId)-file" class="btn btn-sm btn-primary" id="@(clientId)-upload-btn">
+            <i class="bx bx-upload me-1"></i>@T("admin.picture.upload")
+        </label>
+        <input type="file"
+               id="@(clientId)-file"
+               accept="image/jpeg,image/png,image/gif,image/webp"
+               class="d-none"
+               aria-label="@T("admin.picture.upload")" />
+
+        <button type="button"
+                class="btn btn-sm btn-outline-danger @(hasImage ? "" : "d-none")"
+                id="@(clientId)-remove-btn">
+            <i class="bx bx-trash me-1"></i>@T("admin.picture.remove")
+        </button>
+
+        <span id="@(clientId)-status" class="text-muted small ms-1"></span>
+    </div>
+</div>
+
+<script>
+(function () {
+    const wrapperId   = '@(clientId)-wrapper';
+    const fileInputId  = '@(clientId)-file';
+    const previewId    = '@(clientId)-preview';
+    const placeholId   = '@(clientId)-placeholder';
+    const removeId     = '@(clientId)-remove-btn';
+    const statusId     = '@(clientId)-status';
+    const hiddenId     = '@fieldId';
+    const hiddenName   = '@fieldName';
+    const uploadUrl    = '@Url.Action("AsyncUpload", "Picture")';
+        const entityType   = '@(ViewData["PictureEntityType"]?.ToString() ?? string.Empty)';
+    const msgUploading = '@T("admin.picture.status.uploading")';
+    const msgError     = '@T("admin.picture.status.error")';
+
+    const fileInput   = document.getElementById(fileInputId);
+    const preview     = document.getElementById(previewId);
+    const placeholder = document.getElementById(placeholId);
+    const removeBtn   = document.getElementById(removeId);
+    const statusEl    = document.getElementById(statusId);
+    const wrapperEl   = document.getElementById(wrapperId);
+    const hiddenInput = document.getElementById(hiddenId)
+        || (wrapperEl ? wrapperEl.querySelector(`input[type="hidden"][name="${hiddenName}"]`) : null);
+
+    if (!fileInput || !hiddenInput) return;
+
+    fileInput.addEventListener('change', async function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        statusEl.textContent = msgUploading;
+        fileInput.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('qqfilename', file.name);
+    if (entityType) formData.append('entityType', entityType);
+
+        try {
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const json = await response.json();
+
+            if (json.success) {
+                hiddenInput.value = json.pictureId;
+                preview.src = json.imageUrl;
+                preview.style.display = '';
+                placeholder.style.display = 'none';
+                removeBtn.classList.remove('d-none');
+                statusEl.textContent = '';
+            } else {
+                statusEl.textContent = json.message || msgError;
+            }
+        } catch (e) {
+            statusEl.textContent = msgError;
+        } finally {
+            fileInput.disabled = false;
+            fileInput.value = '';
+        }
+    });
+
+    removeBtn.addEventListener('click', function () {
+        hiddenInput.value = '0';
+        preview.src = '';
+        preview.style.display = 'none';
+        placeholder.style.display = '';
+        removeBtn.classList.add('d-none');
+        statusEl.textContent = '';
+    });
+})();
+</script>

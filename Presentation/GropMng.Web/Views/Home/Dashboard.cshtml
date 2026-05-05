@@ -51,128 +51,191 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-xl-7">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">@T("dashboard.owner.todayactions")</h5>
-                    <a href="@Url.Action("List", "PlantInstance")" class="btn btn-sm btn-outline-primary">@T("common.viewall")</a>
-                </div>
-                <div class="card-body" id="dashboard-today-actions"
-                     data-empty-text="@T("dashboard.owner.todayactions.empty")">
+    <div class="card dashboard-today-actions">
+        <div class="card-header pb-0">
+            <div class="nav-align-top">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button
+                            type="button"
+                            class="nav-link active"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#dashboard-tab-actions"
+                            aria-controls="dashboard-tab-actions"
+                            aria-selected="true">
+                            @T("dashboard.owner.todayactions")
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button
+                            type="button"
+                            class="nav-link"
+                            role="tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#dashboard-tab-activity"
+                            aria-controls="dashboard-tab-activity"
+                            aria-selected="false">
+                            @T("dashboard.owner.recentactivity")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="dashboard-tab-actions" role="tabpanel">
+                <div id="dashboard-today-actions" data-empty-text="@T("dashboard.owner.todayactions.empty")">
                     @if (!Model.TodayActions.Any())
                     {
                         <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
                     }
                     else
                     {
-                        <div class="list-group list-group-flush">
-                            @foreach (var action in Model.TodayActions)
-                            {
-                                var badgeClass = action.DueStatus switch
+                        <div class="list-group list-group-flush dashboard-actions-grid">
+                            <div class="row">
+                                @foreach (var action in Model.TodayActions)
                                 {
-                                    DashboardDueStatus.Overdue => "danger",
-                                    DashboardDueStatus.Today => "warning",
-                                    _ => "info"
-                                };
+                                    var badgeClass = action.DueStatus switch
+                                    {
+                                        DashboardDueStatus.Overdue => "danger",
+                                        DashboardDueStatus.Today => "warning",
+                                        _ => "info"
+                                    };
 
-                                var actionTypeStr = action.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
-                                var skipKey = $"{action.PlantInstanceId}:{actionTypeStr}";
-                                var plantDisplayName = string.IsNullOrWhiteSpace(action.Nickname) ? action.PlantName : $"{action.PlantName} ({action.Nickname})";
+                                    var actionTypeStr = action.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
+                                    var skipKey = $"{action.PlantInstanceId}:{actionTypeStr}";
+                                    var plantDisplayName = string.IsNullOrWhiteSpace(action.Nickname) ? action.PlantName : $"{action.PlantName} ({action.Nickname})";
+                                    var overdueDays = action.DueStatus == DashboardDueStatus.Overdue
+                                        ? DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - action.DueDate.DayNumber
+                                        : 0;
 
-                                var logUrl = action.ActionType == DashboardActionType.Watering
-                                    ? Url.Action("LogWatering", "ActionLog")
-                                    : Url.Action("LogFertilizing", "ActionLog");
+                                    var logUrl = action.ActionType == DashboardActionType.Watering
+                                        ? Url.Action("LogWatering", "ActionLog")
+                                        : Url.Action("LogFertilizing", "ActionLog");
 
-                                <div class="list-group-item px-0" data-skip-key="@skipKey">
-                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                                        <div>
-                                            <h6 class="mb-1">@action.PlantName @(string.IsNullOrWhiteSpace(action.Nickname) ? string.Empty : $"({action.Nickname})")</h6>
-                                            <div class="text-muted small mb-1">@action.LocationName • @action.GardenSpotName</div>
-                                            <div class="small">
-                                                <span class="badge bg-label-secondary me-1">@(action.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
-                                                <span class="badge bg-label-@badgeClass me-1">
-                                                    @(action.DueStatus == DashboardDueStatus.Overdue
-                                                        ? T("dashboard.owner.status.overdue")
-                                                        : action.DueStatus == DashboardDueStatus.Today
-                                                            ? T("dashboard.owner.status.today")
-                                                            : T("dashboard.owner.status.upcoming"))
-                                                </span>
-                                                <span class="text-muted">@T("dashboard.owner.frequency") @action.FrequencyDays @T("dashboard.owner.days")</span>
+                                    <div class="col-md-6 col-lg-4 col-xl-4 mb-4" data-dashboard-action-item="true" data-skip-key="@skipKey">
+                                        <div class="card h-100 dashboard-action-card">
+                                            <div class="card-body">
+                                                <div class="rounded-3 text-center mb-3 pt-3 pb-2 dashboard-action-card__media">
+                                                    @if (!string.IsNullOrEmpty(action.PlantMainImageUrl))
+                                                    {
+                                                        <img src="@action.PlantMainImageUrl" alt="@action.PlantName" class="img-fluid dashboard-action-card__image" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="dashboard-action-card__fallback"><i class="bx bx-leaf"></i></div>
+                                                    }
+                                                </div>
+
+                                                <h5 class="mb-1">@action.PlantName</h5>
+                                                <p class="text-muted mb-1">@action.LocationName</p>
+                                                <p class="text-muted mb-3">@action.GardenSpotName</p>
+
+                                                <div class="row mb-3 g-2">
+                                                    <div class="col-6">
+                                                        <div class="d-flex">
+                                                            <div class="avatar flex-shrink-0 me-2">
+                                                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-calendar-exclamation"></i></span>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0 text-nowrap">@action.DueDate.ToString("yyyy-MM-dd")</h6>
+                                                                <small>@T("dashboard.owner.status.today")</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="d-flex">
+                                                            <div class="avatar flex-shrink-0 me-2">
+                                                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-time-five"></i></span>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0 text-nowrap">@action.FrequencyDays @T("dashboard.owner.days")</h6>
+                                                                <small>@T("dashboard.owner.frequency")</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <span class="badge bg-label-secondary me-1">@(action.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
+                                                    <span class="badge bg-label-@badgeClass me-1">
+                                                        @(action.DueStatus == DashboardDueStatus.Overdue
+                                                            ? T("dashboard.owner.status.overdue")
+                                                            : action.DueStatus == DashboardDueStatus.Today
+                                                                ? T("dashboard.owner.status.today")
+                                                                : T("dashboard.owner.status.upcoming"))
+                                                    </span>
+                                                    @if (action.DueStatus == DashboardDueStatus.Overdue)
+                                                    {
+                                                        <span class="text-danger small">@overdueDays @T("dashboard.owner.days")</span>
+                                                    }
+                                                </div>
+
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-success btn-action-done"
+                                                            data-url="@logUrl"
+                                                            data-plant-instance-id="@action.PlantInstanceId"
+                                                            data-action-type="@actionTypeStr"
+                                                            data-label-done="@T("dashboard.owner.action.done")"
+                                                            title="@T("dashboard.owner.action.done")">
+                                                        <i class="bx bx-check"></i> @T("dashboard.owner.action.done")
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-warning btn-action-skip"
+                                                            data-plant-instance-id="@action.PlantInstanceId"
+                                                            data-action-type="@actionTypeStr"
+                                                            data-plant-name="@plantDisplayName"
+                                                            data-frequency-days="@action.FrequencyDays"
+                                                            title="@T("dashboard.owner.action.skip")">
+                                                        <i class="bx bxs-bell-ring"></i> @T("dashboard.owner.action.skip")
+                                                    </button>
+                                                    <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
+                                                        @T("common.details")
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="text-muted small">@action.DueDate.ToString("yyyy-MM-dd")</span>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-success btn-action-done"
-                                                    data-url="@logUrl"
-                                                    data-plant-instance-id="@action.PlantInstanceId"
-                                                    data-action-type="@actionTypeStr"
-                                                    data-label-done="@T("dashboard.owner.action.done")"
-                                                    title="@T("dashboard.owner.action.done")">
-                                                <i class="bx bx-check"></i> @T("dashboard.owner.action.done")
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-warning btn-action-skip"
-                                                    data-plant-instance-id="@action.PlantInstanceId"
-                                                    data-action-type="@actionTypeStr"
-                                                    data-plant-name="@plantDisplayName"
-                                                    data-frequency-days="@action.FrequencyDays"
-                                                    title="@T("dashboard.owner.action.skip")">
-                                                <i class="bx bx-skip-next"></i> @T("dashboard.owner.action.skip")
-                                            </button>
-                                            <a href="@Url.Action("Edit", "PlantInstance", new { id = action.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
-                                                @T("common.details")
-                                            </a>
-                                        </div>
                                     </div>
-                                </div>
-                            }
+                                }
+                            </div>
                         </div>
                     }
                 </div>
             </div>
-        </div>
-
-        <div class="col-xl-5">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">@T("dashboard.owner.recentactivity")</h5>
-                </div>
-                <div class="card-body">
-                    @if (!Model.RecentActivity.Any())
-                    {
-                        <p class="text-muted mb-0">@T("dashboard.owner.recentactivity.empty")</p>
-                    }
-                    else
-                    {
-                        <ul class="timeline mb-0">
-                            @foreach (var activity in Model.RecentActivity)
+            <div class="tab-pane fade" id="dashboard-tab-activity" role="tabpanel">
+                @if (!Model.RecentActivity.Any())
+                {
+                    <p class="text-muted mb-0">@T("dashboard.owner.recentactivity.empty")</p>
+                }
+                else
+                {
+                    <ul class="timeline mb-0">
+                        @foreach (var activity in Model.RecentActivity)
+                        {
+                            var iconClass = activity.ActivityType switch
                             {
-                                var iconClass = activity.ActivityType switch
-                                {
-                                    DashboardActivityType.Watering => "bx bx-droplet text-info",
-                                    DashboardActivityType.Fertilizing => "bx bx-flask text-success",
-                                    _ => "bx bx-refresh text-warning"
-                                };
+                                DashboardActivityType.Watering => "bx bx-droplet text-info",
+                                DashboardActivityType.Fertilizing => "bx bx-flask text-success",
+                                _ => "bx bx-refresh text-warning"
+                            };
 
-                                <li class="timeline-item timeline-item-transparent">
-                                    <span class="timeline-point timeline-point-primary"></span>
-                                    <div class="timeline-event">
-                                        <div class="timeline-header mb-1">
-                                            <h6 class="mb-0">
-                                                <i class="@iconClass me-1"></i>
-                                                @activity.PlantName @(string.IsNullOrWhiteSpace(activity.Nickname) ? string.Empty : $"({activity.Nickname})")
-                                            </h6>
-                                            <small class="text-muted">@activity.OccurredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
-                                        </div>
-                                        <p class="mb-0 text-muted">@activity.Summary</p>
+                            <li class="timeline-item timeline-item-transparent">
+                                <span class="timeline-point timeline-point-primary"></span>
+                                <div class="timeline-event">
+                                    <div class="timeline-header mb-1">
+                                        <h6 class="mb-0">
+                                            <i class="@iconClass me-1"></i>
+                                            @activity.PlantName @(string.IsNullOrWhiteSpace(activity.Nickname) ? string.Empty : $"({activity.Nickname})")
+                                        </h6>
+                                        <small class="text-muted">@activity.OccurredAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
                                     </div>
-                                </li>
-                            }
-                        </ul>
-                    }
-                </div>
+                                    <p class="mb-0 text-muted">@activity.Summary</p>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
             </div>
         </div>
     </div>

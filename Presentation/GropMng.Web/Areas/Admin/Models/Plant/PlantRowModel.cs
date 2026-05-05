@@ -6,6 +6,8 @@ namespace GropMng.Web.Areas.Admin.Models.Plant;
 public class PlantRowModel
 {
     public int Id { get; set; }
+    public int PictureId { get; set; }
+    public string PictureThumbnailUrl { get; set; } = string.Empty;
     public string CommonName { get; set; } = string.Empty;
     public string ScientificName { get; set; } = string.Empty;
     public string? Family { get; set; }

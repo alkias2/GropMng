@@ -6,13 +6,13 @@ public partial class DiseasePhoto : AuditableEntity
 
     public int PlantDiseaseRecordId { get; set; }
 
-    public required string FilePath { get; set; }
-
-    public string? ThumbnailPath { get; set; }
+    public int PictureId { get; set; }
 
     public DateOnly TakenDate { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
 
     public string? Notes { get; set; }
+
+    public int DisplayOrder { get; set; }
 
     public PlantDiseaseRecord PlantDiseaseRecord { get; set; } = null!;
 }

@@ -704,10 +704,10 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -721,6 +721,11 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("PlantDiseaseRecordId")
                         .HasColumnType("int")
                         .HasColumnName("RecordId");
@@ -729,10 +734,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-
-                    b.Property<string>("ThumbnailPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -744,6 +745,9 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_DiseasePhoto_OwnerId");
+
+                    b.HasIndex("PictureId")
+                        .HasDatabaseName("IX_DiseasePhoto_PictureId");
 
                     b.HasIndex("PlantDiseaseRecordId")
                         .HasDatabaseName("IX_DiseasePhoto_RecordId");
@@ -1022,6 +1026,11 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<byte?>("SunHoursPerDay")
                         .HasColumnType("tinyint");
@@ -1327,6 +1336,10 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("BaseCircumferenceCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
                     b.Property<string>("Color")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -1346,18 +1359,14 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<decimal?>("DepthCm")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("decimal(8,2)");
-
-                    b.Property<decimal?>("DiameterCm")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("decimal(8,2)");
-
                     b.Property<bool>("HasDrainageHole")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<decimal?>("HeightCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1379,6 +1388,13 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("PlantInstanceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("RimCircumferenceCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2(7)")
@@ -1398,11 +1414,16 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_Container_OwnerId");
 
+                    b.HasIndex("PlantInstanceId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Container_PlantInstanceId")
+                        .HasFilter("[PlantInstanceId] IS NOT NULL");
+
                     b.ToTable("Container", null, t =>
                         {
                             t.HasCheckConstraint("CK_Container_ContainerType", "[ContainerType] IN (N'Pot', N'Bed', N'HangingBasket', N'WindowBox', N'RaisedBed', N'Other')");
 
-                            t.HasCheckConstraint("CK_Container_Dimensions", "[DiameterCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [DepthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
+                            t.HasCheckConstraint("CK_Container_Dimensions", "[BaseCircumferenceCm] IS NOT NULL OR [RimCircumferenceCm] IS NOT NULL OR [HeightCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
                         });
                 });
 
@@ -1473,6 +1494,11 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasPrecision(5, 1)
                         .HasColumnType("decimal(5,1)");
 
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("ScientificName")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -1521,9 +1547,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ContainerId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -1592,8 +1615,6 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.HasKey("Id")
                         .HasName("PK_PlantInstance");
-
-                    b.HasIndex("ContainerId");
 
                     b.HasIndex("GardenSpotId")
                         .HasDatabaseName("IX_PlantInstance_SpotId");
@@ -1694,10 +1715,10 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1707,23 +1728,19 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("PlantInstanceId")
-                        .HasColumnType("int")
-                        .HasColumnName("InstanceId");
-
-                    b.Property<int>("SortOrder")
+                    b.Property<int>("PictureId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
 
                     b.Property<DateOnly>("TakenDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-
-                    b.Property<string>("ThumbnailPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -1735,6 +1752,9 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_PlantPhoto_OwnerId");
+
+                    b.HasIndex("PictureId")
+                        .HasDatabaseName("IX_PlantPhoto_PictureId");
 
                     b.HasIndex("PlantInstanceId")
                         .HasDatabaseName("IX_PlantPhoto_InstanceId");
@@ -2147,6 +2167,52 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.ToTable("AppLog", (string)null);
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Media.Picture", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AltAttribute")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<bool>("IsNew")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("SeoFilename")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("TitleAttribute")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("VirtualPath")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_Picture");
+
+                    b.ToTable("Picture", (string)null);
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Security.PermissionRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -2473,16 +2539,18 @@ namespace GropMng.Data.Migrations.SqlServer
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Container_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithOne("Container")
+                        .HasForeignKey("GropMng.Core.Domain.Garden.Plants.Container", "PlantInstanceId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Container_PlantInstance");
+
+                    b.Navigation("PlantInstance");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.PlantInstance", b =>
                 {
-                    b.HasOne("GropMng.Core.Domain.Garden.Plants.Container", "Container")
-                        .WithMany("PlantInstances")
-                        .HasForeignKey("ContainerId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("FK_PlantInstance_Container");
-
                     b.HasOne("GropMng.Core.Domain.Garden.Locations.GardenSpot", "GardenSpot")
                         .WithMany("PlantInstances")
                         .HasForeignKey("GardenSpotId")
@@ -2510,8 +2578,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasForeignKey("SoilMixId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_PlantInstance_SoilMix");
-
-                    b.Navigation("Container");
 
                     b.Navigation("GardenSpot");
 
@@ -2671,11 +2737,6 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("Passwords");
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Container", b =>
-                {
-                    b.Navigation("PlantInstances");
-                });
-
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Plant", b =>
                 {
                     b.Navigation("PlantInstances");
@@ -2683,6 +2744,8 @@ namespace GropMng.Data.Migrations.SqlServer
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.PlantInstance", b =>
                 {
+                    b.Navigation("Container");
+
                     b.Navigation("DiseaseRecords");
 
                     b.Navigation("FertilizingLogs");

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Web.Framework.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,6 +11,10 @@ namespace GropMng.Web.Areas.Admin.Models.Plant;
 public class PlantModel
 {
     public int Id { get; set; }
+
+    [UIHint("Picture")]
+    [GropResourceDisplayName("admin.plant.fields.picture")]
+    public int PictureId { get; set; }
 
     [GropResourceDisplayName("admin.plant.fields.commonname")]
     public string CommonName { get; set; } = string.Empty;

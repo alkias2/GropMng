@@ -75,6 +75,7 @@ public class PlantInstanceListRowModel
     public PlantHealthStatus HealthStatus { get; set; }
     public int? AgeYears { get; set; }
     public bool IsActive { get; set; }
+    public string MainImageUrl { get; set; } = string.Empty;
 }
 
 /// <summary>

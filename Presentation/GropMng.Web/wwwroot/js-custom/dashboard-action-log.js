@@ -9,11 +9,59 @@
 (function () {
     'use strict';
 
+    function resolveActionItem($trigger) {
+        var $item = $trigger.closest('[data-dashboard-action-item]');
+        if ($item.length) {
+            return $item;
+        }
+
+        $item = $trigger.closest('[data-skip-key]');
+        if ($item.length) {
+            return $item;
+        }
+
+        $item = $trigger.closest('.list-group-item');
+        if ($item.length) {
+            return $item;
+        }
+
+        $item = $trigger.closest('.col-md-6, .col-lg-4, .col-xl-4');
+        if ($item.length) {
+            return $item;
+        }
+
+        return $trigger.closest('.dashboard-action-card');
+    }
+
+    function getActionItems($container) {
+        var $items = $container.find('[data-dashboard-action-item]');
+        if ($items.length) {
+            return $items;
+        }
+
+        $items = $container.find('[data-skip-key]');
+        if ($items.length) {
+            return $items;
+        }
+
+        $items = $container.find('.list-group-item');
+        if ($items.length) {
+            return $items;
+        }
+
+        return $container.find('.dashboard-action-card');
+    }
+
     function getToken() {
         return $('input[name="__RequestVerificationToken"]').first().val();
     }
 
     function removeRow($row, $container) {
+        if (!$row || !$row.length) {
+            updateEmptyState($container);
+            return;
+        }
+
         $row.addClass('opacity-50');
         $row.fadeOut(400, function () {
             $(this).remove();
@@ -22,15 +70,25 @@
     }
 
     function updateEmptyState($container) {
-        var $listGroup = $container.find('.list-group');
-        var visible = $listGroup.find('.list-group-item:visible').length;
+        var $items = getActionItems($container);
+        var visible = $items.filter(':visible').length;
 
-        if ($listGroup.length && visible === 0) {
-            $listGroup.replaceWith(
+        if (visible === 0) {
+            var $content = $container.find('.dashboard-actions-grid').first();
+            if (!$content.length) {
+                $content = $container.find('.list-group').first();
+            }
+
+            var emptyHtml =
                 '<p class="text-muted mb-0" id="actions-empty-msg">' +
                 ($container.data('empty-text') || 'All done for today!') +
-                '</p>'
-            );
+                '</p>';
+
+            if ($content.length) {
+                $content.replaceWith(emptyHtml);
+            } else if (!$container.find('#actions-empty-msg').length) {
+                $container.append(emptyHtml);
+            }
         }
     }
 
@@ -68,7 +126,7 @@
 
             var url = $btn.data('url');
             var plantInstanceId = $btn.data('plant-instance-id');
-            var $row = $btn.closest('.list-group-item');
+            var $row = resolveActionItem($btn);
 
             $btn.prop('disabled', true)
                 .html('<span class="spinner-border spinner-border-sm" role="status"></span>');
@@ -105,7 +163,7 @@
             var actionType = $btn.data('action-type');
             var plantName = $btn.data('plant-name');
             var frequencyDays = $btn.data('frequency-days');
-            var $row = $btn.closest('.list-group-item');
+            var $row = resolveActionItem($btn);
 
             var $modal = $('#skipActionModal');
             $modal.find('.skip-plant-name').text(plantName);

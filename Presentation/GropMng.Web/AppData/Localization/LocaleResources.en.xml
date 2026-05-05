@@ -1313,7 +1313,7 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.overdue</Name>
-    <Value>Overdue Actions</Value>
+    <Value>Overdue</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.activecases</Name>
@@ -1484,5 +1484,150 @@
   <LocaleResource>
     <Name>mygarden.plantinstance.filter.activeonly</Name>
     <Value>Active Plants Only</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.upload</Name>
+    <Value>Upload Image</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.remove</Name>
+    <Value>Remove</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.preview.alt</Name>
+    <Value>Picture preview</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.uploading</Name>
+    <Value>Uploading…</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.error</Name>
+    <Value>Upload failed. Please try again.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.picture</Name>
+    <Value>Picture</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.gardenspot.field.picture</Name>
+    <Value>Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.title</Name>
+    <Value>Photos</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.add</Name>
+    <Value>Add Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.empty</Name>
+    <Value>No photos yet. Upload the first one below.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.caption</Name>
+    <Value>Caption</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.takendate</Name>
+    <Value>Taken Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.displayorder</Name>
+    <Value>Display Order</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.thumbnail</Name>
+    <Value>Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.confirm</Name>
+    <Value>Are you sure you want to delete this photo?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.add.success</Name>
+    <Value>Photo added successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.success</Name>
+    <Value>Photo deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.update.success</Name>
+    <Value>Photo updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.image</Name>
+    <Value>Image</Value>
+  </LocaleResource>
+  <!-- Container -->
+  <LocaleResource>
+    <Name>mygarden.container.list.title</Name>
+    <Value>Containers</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.add</Name>
+    <Value>Add Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.create.title</Name>
+    <Value>New Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.edit.title</Name>
+    <Value>Edit Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.list.empty</Name>
+    <Value>No containers found.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.type</Name>
+    <Value>Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.material</Name>
+    <Value>Material</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.color</Name>
+    <Value>Color</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.base</Name>
+    <Value>Base Circumference</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.rim</Name>
+    <Value>Rim Circumference</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.height</Name>
+    <Value>Height</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.length</Name>
+    <Value>Length</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.width</Name>
+    <Value>Width</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.volume</Name>
+    <Value>Volume (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.drainage</Name>
+    <Value>Has Drainage Hole</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.inuse.warning</Name>
+    <Value>Cannot delete: container is linked to a plant.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.linked.plant</Name>
+    <Value>Linked Plant</Value>
   </LocaleResource>
 </Language>

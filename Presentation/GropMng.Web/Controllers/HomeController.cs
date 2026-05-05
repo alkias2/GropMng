@@ -4,6 +4,7 @@ using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Models.Dashboard;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +27,8 @@ namespace GropMng.Web.Controllers
         private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
         private readonly IRepository<Fertilizer> _fertilizerRepository;
         private readonly IRepository<ActionSkip> _actionSkipRepository;
+        private readonly IRepository<PlantPhoto> _plantPhotoRepository;
+        private readonly IPictureService _pictureService;
 
         public HomeController(
             ICurrentOwnerProvider currentOwnerProvider,
@@ -40,7 +43,9 @@ namespace GropMng.Web.Controllers
             IRepository<RepottingLog> repottingLogRepository,
             IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
             IRepository<Fertilizer> fertilizerRepository,
-            IRepository<ActionSkip> actionSkipRepository)
+            IRepository<ActionSkip> actionSkipRepository,
+            IRepository<PlantPhoto> plantPhotoRepository,
+            IPictureService pictureService)
         {
             _currentOwnerProvider = currentOwnerProvider;
             _plantInstanceRepository = plantInstanceRepository;
@@ -55,6 +60,8 @@ namespace GropMng.Web.Controllers
             _plantDiseaseRecordRepository = plantDiseaseRecordRepository;
             _fertilizerRepository = fertilizerRepository;
             _actionSkipRepository = actionSkipRepository;
+            _plantPhotoRepository = plantPhotoRepository;
+            _pictureService = pictureService;
         }
 
         #region Methods
@@ -180,10 +187,6 @@ namespace GropMng.Web.Controllers
                     locationMap));
             }
 
-            model.OverdueActionsCount = actionRows.Count(a => a.DueStatus == DashboardDueStatus.Overdue);
-            // ActionsTodayCount = only due today (not overdue) — matches the "Today" badge in the list
-            model.ActionsTodayCount = actionRows.Count(a => a.DueStatus == DashboardDueStatus.Today);
-
             // Load active skips for this owner and filter them out of the displayed list
             var activeSkips = await _actionSkipRepository.GetAllAsync(
                 query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
@@ -193,16 +196,47 @@ namespace GropMng.Web.Controllers
                 .Select(s => (s.PlantInstanceId, s.ActionType))
                 .ToHashSet();
 
-            // Show all actions that need attention (overdue + today), no cap — totals match KPIs exactly
-            model.TodayActions = actionRows
+            // Keep only actionable rows shown to the owner (overdue + today, excluding active skips)
+            var actionableRows = actionRows
                 .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
                 .Where(a => !skipSet.Contains((a.PlantInstanceId, a.ActionType == DashboardActionType.Watering
                     ? ActionSkipType.Watering
                     : ActionSkipType.Fertilizing)))
+                .ToList();
+
+            // KPIs are based on visible actionable rows so cards always match the list below.
+            model.OverdueActionsCount = actionableRows.Count(a => a.DueStatus == DashboardDueStatus.Overdue);
+            model.ActionsTodayCount = actionableRows.Count(a => a.DueStatus == DashboardDueStatus.Today);
+
+            model.TodayActions = actionableRows
                 .OrderBy(a => a.DueStatus)
                 .ThenBy(a => a.DueDate)
                 .ThenBy(a => a.PlantName)
                 .ToList();
+
+            // Batch-load main plant photos for dashboard action cards (500px thumb)
+            if (model.TodayActions.Count > 0)
+            {
+                var actionInstanceIds = model.TodayActions
+                    .Select(a => a.PlantInstanceId)
+                    .Distinct()
+                    .ToHashSet();
+
+                var mainPhotos = await _plantPhotoRepository.GetAllAsync(
+                    query => query
+                        .Where(p => p.OwnerId == ownerId && actionInstanceIds.Contains(p.PlantInstanceId))
+                        .GroupBy(p => p.PlantInstanceId)
+                        .Select(g => g.OrderBy(p => p.DisplayOrder).First()),
+                    cancellationToken: cancellationToken);
+
+                var mainPhotoPictureIdByInstance = mainPhotos.ToDictionary(p => p.PlantInstanceId, p => p.PictureId);
+
+                foreach (var action in model.TodayActions)
+                {
+                    if (mainPhotoPictureIdByInstance.TryGetValue(action.PlantInstanceId, out var picId))
+                        action.PlantMainImageUrl = await _pictureService.GetPictureUrlAsync(picId, targetSize: 500);
+                }
+            }
 
             var fertilizerIds = fertilizingLogs.Select(f => f.FertilizerId).Distinct().ToList();
             var fertilizers = fertilizerIds.Count > 0

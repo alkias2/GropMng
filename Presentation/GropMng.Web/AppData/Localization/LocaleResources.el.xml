@@ -1307,11 +1307,11 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.actionstoday</Name>
-    <Value>Σήμερα</Value>
+    <Value>Λήγουν Σήμερα</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.overdue</Name>
-    <Value>Σε Καθυστέρηση</Value>
+    <Value>Εκκρεμούν από Πριν</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.kpi.activecases</Name>
@@ -1482,5 +1482,150 @@
   <LocaleResource>
     <Name>mygarden.plantinstance.filter.activeonly</Name>
     <Value>Μόνο Ενεργά Φυτά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.upload</Name>
+    <Value>Μεταφόρτωση Εικόνας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.remove</Name>
+    <Value>Αφαίρεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.preview.alt</Name>
+    <Value>Προεπισκόπηση εικόνας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.uploading</Name>
+    <Value>Γίνεται μεταφόρτωση…</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.picture.status.error</Name>
+    <Value>Η μεταφόρτωση απέτυχε. Δοκιμάστε ξανά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.plant.fields.picture</Name>
+    <Value>Εικόνα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.gardenspot.field.picture</Name>
+    <Value>Φωτογραφία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.title</Name>
+    <Value>Φωτογραφίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.add</Name>
+    <Value>Προσθήκη Φωτογραφίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photos.empty</Name>
+    <Value>Δεν υπάρχουν φωτογραφίες. Ανεβάστε την πρώτη παρακάτω.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.caption</Name>
+    <Value>Λεζάντα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.takendate</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.displayorder</Name>
+    <Value>Σειρά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.thumbnail</Name>
+    <Value>Φωτογραφία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.confirm</Name>
+    <Value>Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη φωτογραφία;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.add.success</Name>
+    <Value>Η φωτογραφία προστέθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.delete.success</Name>
+    <Value>Η φωτογραφία διαγράφηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.update.success</Name>
+    <Value>Η φωτογραφία ενημερώθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.photo.field.image</Name>
+    <Value>Εικόνα</Value>
+  </LocaleResource>
+  <!-- Container -->
+  <LocaleResource>
+    <Name>mygarden.container.list.title</Name>
+    <Value>Γλάστρες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.add</Name>
+    <Value>Νέα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.create.title</Name>
+    <Value>Νέα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.edit.title</Name>
+    <Value>Επεξεργασία Γλάστρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.list.empty</Name>
+    <Value>Δεν υπάρχουν καταχωρημένες γλάστρες.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.type</Name>
+    <Value>Τύπος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.material</Name>
+    <Value>Υλικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.color</Name>
+    <Value>Χρώμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.base</Name>
+    <Value>Περίμετρο Βάσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.rim</Name>
+    <Value>Περίμετρο Χείλους</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.height</Name>
+    <Value>Ύψος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.length</Name>
+    <Value>Μήκος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.width</Name>
+    <Value>Πλάτος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.volume</Name>
+    <Value>Χωρητικότητα (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.drainage</Name>
+    <Value>Έχει τρύπα αποστράγγισης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.inuse.warning</Name>
+    <Value>Δεν είναι δυνατή η διαγραφή: η γλάστρα είναι συνδεδεμένη με φυτό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.linked.plant</Name>
+    <Value>Συνδεδεμένο Φυτό</Value>
   </LocaleResource>
 </Language>

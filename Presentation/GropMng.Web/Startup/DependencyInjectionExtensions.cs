@@ -9,6 +9,7 @@ using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Garden.Preferences;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Core.Interfaces.Services.Logging;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Data.DbContext;
 using GropMng.Data.Repositories;
@@ -21,6 +22,7 @@ using GropMng.Services.Services.Garden.Plants;
 using GropMng.Services.Services.Garden.Preferences;
 using GropMng.Services.Services.Localization;
 using GropMng.Services.Services.Logging;
+using GropMng.Services.Services.Media;
 using GropMng.Services.Services.User;
 using GropMng.Web.Initialization;
 using GropMng.Web.Initialization.Options;
@@ -172,6 +174,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IEnumLocalizationHelper, EnumLocalizationHelper>();
 
         services.AddScoped<ISettingService, SettingService>();
+        services.AddScoped<IPictureService, PictureService>();
 
         services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
         services.AddScoped<ILocalizationModelFactory, LocalizationModelFactory>();
@@ -199,6 +202,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<SoilMixSeeder>();
         services.AddScoped<ContainerSeeder>();
         services.AddScoped<PlantInstanceSeeder>();
+        services.AddScoped<PlantPhotoSeeder>();
         services.AddScoped<WateringScheduleSeeder>();
         services.AddScoped<FertilizingScheduleSeeder>();
         services.AddScoped<PlantDiseaseRecordSeeder>();

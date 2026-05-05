@@ -61,6 +61,12 @@
 </ul>
 
 <div class="row g-3">
+    <div class="col-md-4">
+        @{ ViewData["PictureEntityType"] = "plant"; }
+        <grop-label asp-for="PictureId" />
+        <grop-editor asp-for="PictureId" />
+    </div>
+
     <div class="col-md-6">
         <grop-label asp-for="CommonName" />
         <grop-editor asp-for="CommonName" asp-required="true" />

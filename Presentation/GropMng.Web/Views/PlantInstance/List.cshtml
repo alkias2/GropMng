@@ -115,6 +115,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th style="width:60px;">@T("admin.plant.fields.picture")</th>
                             <th>@T("mygarden.plantinstance.field.plant")</th>
                             <th>@T("mygarden.plantinstance.field.nickname")</th>
                             <th>@T("mygarden.plantinstance.field.location")</th>
@@ -129,6 +130,22 @@
                         @foreach (var row in Model)
                         {
                             <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(row.MainImageUrl))
+                                    {
+                                        <img src="@row.MainImageUrl"
+                                             alt="@row.PlantName"
+                                             class="rounded"
+                                             style="width:48px;height:48px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                             style="width:48px;height:48px;">
+                                            <i class="bx bx-leaf text-muted fs-4"></i>
+                                        </div>
+                                    }
+                                </td>
                                 <td>@row.PlantName</td>
                                 <td>@(row.Nickname ?? "—")</td>
                                 <td>@row.LocationName</td>

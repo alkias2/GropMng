@@ -3,6 +3,7 @@ using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Localization;
+using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Web.Areas.Admin.Models.Plant;
 using GropMng.Web.Extensions;
 using GropMng.Web.Framework.Models.Extensions;
@@ -21,16 +22,22 @@ public class PlantModelFactory : IPlantModelFactory
     private readonly IPlantService _plantService;
     private readonly IMapper _mapper;
     private readonly ILocalizationService _localizationService;
+    private readonly IPictureService _pictureService;
 
     #endregion
 
     #region Ctor
 
-    public PlantModelFactory(IPlantService plantService, IMapper mapper, ILocalizationService localizationService)
+    public PlantModelFactory(
+        IPlantService plantService,
+        IMapper mapper,
+        ILocalizationService localizationService,
+        IPictureService pictureService)
     {
         _plantService = plantService;
         _mapper = mapper;
         _localizationService = localizationService;
+        _pictureService = pictureService;
     }
 
     #endregion
@@ -91,6 +98,8 @@ public class PlantModelFactory : IPlantModelFactory
             row.FlagsSummary = flags.Count > 0
                 ? string.Join(", ", flags)
                 : noneText;
+
+            row.PictureThumbnailUrl = await _pictureService.GetPictureUrlAsync(row.PictureId, targetSize: 150);
         }
 
         var listModel = new PlantListModel();
@@ -133,8 +142,26 @@ public class PlantModelFactory : IPlantModelFactory
         if (existing == null)
             return false;
 
+        var previousPictureId = existing.PictureId;
+
         _mapper.Map(model, existing);
         await _plantService.UpdatePlantAsync(existing, cancellationToken);
+
+        // Delete old picture when it has been replaced or removed
+        if (previousPictureId > 0 && previousPictureId != existing.PictureId)
+        {
+            var oldPicture = await _pictureService.GetPictureByIdAsync(previousPictureId);
+            if (oldPicture != null)
+                await _pictureService.DeletePictureAsync(oldPicture);
+        }
+
+        // Keep the SEO filename aligned with the plant name
+        if (existing.PictureId > 0)
+        {
+            var seoName = await _pictureService.GetPictureSeNameAsync(existing.CommonName);
+            await _pictureService.SetSeoFilenameAsync(existing.PictureId, seoName);
+        }
+
         return true;
     }
 
