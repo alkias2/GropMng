@@ -1293,7 +1293,7 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.title</Name>
-    <Value>Owner Dashboard</Value>
+    <Value>Today's Actions</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.subtitle</Name>
@@ -1334,6 +1334,46 @@
   <LocaleResource>
     <Name>dashboard.owner.recentactivity.empty</Name>
     <Value>No activity recorded yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.watering</Name>
+    <Value>Watering</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.fertilizing</Name>
+    <Value>Fertilizing</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.diseases</Name>
+    <Value>Diseases</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.diseases.empty</Name>
+    <Value>No active disease cases in your garden.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.filter.allspots</Name>
+    <Value>All</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.plant</Name>
+    <Value>Plant</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.name</Name>
+    <Value>Disease</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.location</Name>
+    <Value>Location</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.diagnosed</Name>
+    <Value>Diagnosed</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.severity</Name>
+    <Value>Severity</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.action.watering</Name>

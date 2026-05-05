@@ -1291,7 +1291,7 @@
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.title</Name>
-    <Value>Πίνακας Ελέγχου Καλλιεργητή</Value>
+    <Value>Σημερινές Ενέργειες</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.subtitle</Name>
@@ -1332,6 +1332,46 @@
   <LocaleResource>
     <Name>dashboard.owner.recentactivity.empty</Name>
     <Value>Δεν έχει καταγραφεί δραστηριότητα ακόμη.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.watering</Name>
+    <Value>Πότισμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.fertilizing</Name>
+    <Value>Λίπανση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.diseases</Name>
+    <Value>Ασθένειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.tab.diseases.empty</Name>
+    <Value>Δεν υπάρχουν ενεργές ασθένειες στα φυτά σου.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.filter.allspots</Name>
+    <Value>Όλα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.plant</Name>
+    <Value>Φυτό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.name</Name>
+    <Value>Ασθένεια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.location</Name>
+    <Value>Τοποθεσία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.diagnosed</Name>
+    <Value>Ημ. Διάγνωσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.disease.severity</Name>
+    <Value>Βαρύτητα</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>dashboard.owner.action.watering</Name>

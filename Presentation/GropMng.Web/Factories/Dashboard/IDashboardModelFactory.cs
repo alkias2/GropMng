@@ -1,0 +1,15 @@
+using GropMng.Web.Models.Dashboard;
+
+namespace GropMng.Web.Factories.Dashboard;
+
+/// <summary>
+/// Defines the contract for preparing view models for the owner dashboard.
+/// </summary>
+public interface IDashboardModelFactory
+{
+    /// <summary>
+    /// Prepares the full owner dashboard model, including today's watering, fertilizing,
+    /// and active disease tab data.
+    /// </summary>
+    Task<OwnerDashboardModel> PrepareDashboardModelAsync(CancellationToken cancellationToken = default);
+}

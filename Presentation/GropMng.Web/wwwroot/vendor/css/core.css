@@ -19365,7 +19365,6 @@ html:not(.layout-footer-fixed) .content-wrapper {
 }
 
 .dashboard-today-actions {
-  background-color: transparent !important;
   border: 0 !important;
 }
 .dashboard-today-actions .nav-tabs .nav-link {
@@ -19379,9 +19378,6 @@ html:not(.layout-footer-fixed) .content-wrapper {
   padding-top: 0;
   padding-left: 0 !important;
   padding-right: 0 !important;
-}
-.dashboard-today-actions .dashboard-action-card {
-  border: 0 !important;
 }
 
 .dashboard-actions-grid .list-group-item {

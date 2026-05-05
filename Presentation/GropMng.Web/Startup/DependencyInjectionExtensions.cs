@@ -38,6 +38,7 @@ using GropMng.Web.Areas.Admin.Factories.Plant;
 using GropMng.Web.Areas.Admin.Factories.SoilMix;
 using GropMng.Web.Areas.Admin.Factories.Settings;
 using GropMng.Web.Areas.Admin.Factories.User;
+using GropMng.Web.Factories.Dashboard;
 using GropMng.Web.Infrastructure.Navigation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
@@ -178,6 +179,7 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<IAppLogModelFactory, AppLogModelFactory>();
         services.AddScoped<ILocalizationModelFactory, LocalizationModelFactory>();
+        services.AddScoped<IDashboardModelFactory, DashboardModelFactory>();
         services.AddScoped<IPlantModelFactory, PlantModelFactory>();
         services.AddScoped<IFertilizerModelFactory, FertilizerModelFactory>();
         services.AddScoped<IPesticideModelFactory, PesticideModelFactory>();

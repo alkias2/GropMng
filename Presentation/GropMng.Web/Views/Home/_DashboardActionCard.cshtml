@@ -1,0 +1,109 @@
+@model GropMng.Web.Models.Dashboard.DashboardActionModel
+@using GropMng.Web.Models.Dashboard
+@{
+    var badgeClass = Model.DueStatus switch
+    {
+        DashboardDueStatus.Overdue => "danger",
+        DashboardDueStatus.Today => "warning",
+        _ => "info"
+    };
+
+    var actionTypeStr = Model.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
+    var skipKey = $"{Model.PlantInstanceId}:{actionTypeStr}";
+    var plantDisplayName = string.IsNullOrWhiteSpace(Model.Nickname) ? Model.PlantName : $"{Model.PlantName} ({Model.Nickname})";
+    var overdueDays = Model.DueStatus == DashboardDueStatus.Overdue
+        ? DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - Model.DueDate.DayNumber
+        : 0;
+
+    var logUrl = Model.ActionType == DashboardActionType.Watering
+        ? Url.Action("LogWatering", "ActionLog")
+        : Url.Action("LogFertilizing", "ActionLog");
+}
+
+<div class="col-md-6 col-lg-4 col-xl-4 mb-4"
+     data-dashboard-action-item="true"
+     data-skip-key="@skipKey"
+     data-spot-id="@Model.GardenSpotId">
+    <div class="card h-100 dashboard-action-card">
+        <div class="card-body">
+            <div class="rounded-3 text-center mb-3 pt-3 pb-2 dashboard-action-card__media">
+                @if (!string.IsNullOrEmpty(Model.PlantMainImageUrl))
+                {
+                    <img src="@Model.PlantMainImageUrl" alt="@Model.PlantName" class="img-fluid dashboard-action-card__image" />
+                }
+                else
+                {
+                    <div class="dashboard-action-card__fallback"><i class="bx bx-leaf"></i></div>
+                }
+            </div>
+
+            <h5 class="mb-1">@Model.PlantName</h5>
+            <p class="text-muted mb-1">@Model.LocationName</p>
+            <p class="text-muted mb-3">@Model.GardenSpotName</p>
+
+            <div class="row mb-3 g-2">
+                <div class="col-6">
+                    <div class="d-flex">
+                        <div class="avatar flex-shrink-0 me-2">
+                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-calendar-exclamation"></i></span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-nowrap">@Model.DueDate.ToString("yyyy-MM-dd")</h6>
+                            <small>@T("dashboard.owner.status.today")</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex">
+                        <div class="avatar flex-shrink-0 me-2">
+                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-time-five"></i></span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-nowrap">@Model.FrequencyDays @T("dashboard.owner.days")</h6>
+                            <small>@T("dashboard.owner.frequency")</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <span class="badge bg-label-secondary me-1">@(Model.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
+                <span class="badge bg-label-@badgeClass me-1">
+                    @(Model.DueStatus == DashboardDueStatus.Overdue
+                        ? T("dashboard.owner.status.overdue")
+                        : Model.DueStatus == DashboardDueStatus.Today
+                            ? T("dashboard.owner.status.today")
+                            : T("dashboard.owner.status.upcoming"))
+                </span>
+                @if (Model.DueStatus == DashboardDueStatus.Overdue)
+                {
+                    <span class="text-danger small">@overdueDays @T("dashboard.owner.days")</span>
+                }
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button"
+                        class="btn btn-sm btn-success btn-action-done"
+                        data-url="@logUrl"
+                        data-plant-instance-id="@Model.PlantInstanceId"
+                        data-action-type="@actionTypeStr"
+                        data-label-done="@T("dashboard.owner.action.done")"
+                        title="@T("dashboard.owner.action.done")">
+                    <i class="bx bx-check"></i> @T("dashboard.owner.action.done")
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-warning btn-action-skip"
+                        data-plant-instance-id="@Model.PlantInstanceId"
+                        data-action-type="@actionTypeStr"
+                        data-plant-name="@plantDisplayName"
+                        data-frequency-days="@Model.FrequencyDays"
+                        title="@T("dashboard.owner.action.skip")">
+                    <i class="bx bxs-bell-ring"></i> @T("dashboard.owner.action.skip")
+                </button>
+                <a href="@Url.Action("Edit", "PlantInstance", new { id = Model.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
+                    @T("common.details")
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

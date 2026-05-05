@@ -213,7 +213,7 @@
 // Dashboard — Views/Home/Dashboard.cshtml
 // ============================================================
 .dashboard-today-actions{
-   background-color: transparent !important;
+  //  background-color: transparent !important;
    border: 0 !important;
 
   .nav-tabs .nav-link{
@@ -228,9 +228,9 @@
      padding-left: 0 !important;
     padding-right: 0 !important;
    }
-   .dashboard-action-card{
-    border: 0 !important;
-   }
+  //  .dashboard-action-card{
+  //   border: 0 !important;
+  //  }
 }
 .dashboard-actions-grid {
   .list-group-item {

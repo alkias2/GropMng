@@ -1,25 +1,41 @@
 using GropMng.Core.Domain.Garden.Enums;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GropMng.Web.Models.Dashboard;
 
 public class OwnerDashboardModel
 {
-    public int ActivePlantsCount { get; set; }
+    public DashboardWateringTabModel WateringTab { get; set; } = new();
 
-    public int ActionsTodayCount { get; set; }
+    public DashboardFertilizingTabModel FertilizingTab { get; set; } = new();
 
-    public int OverdueActionsCount { get; set; }
+    public DashboardDiseaseTabModel DiseaseTab { get; set; } = new();
+}
 
-    public int ActiveDiseaseCasesCount { get; set; }
+public class DashboardWateringTabModel
+{
+    public IList<DashboardActionModel> Actions { get; set; } = new List<DashboardActionModel>();
 
-    public IList<DashboardActionModel> TodayActions { get; set; } = new List<DashboardActionModel>();
+    public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
+}
 
-    public IList<DashboardActivityModel> RecentActivity { get; set; } = new List<DashboardActivityModel>();
+public class DashboardFertilizingTabModel
+{
+    public IList<DashboardActionModel> Actions { get; set; } = new List<DashboardActionModel>();
+
+    public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
+}
+
+public class DashboardDiseaseTabModel
+{
+    public IList<DashboardDiseaseModel> ActiveCases { get; set; } = new List<DashboardDiseaseModel>();
 }
 
 public class DashboardActionModel
 {
     public int PlantInstanceId { get; set; }
+
+    public int GardenSpotId { get; set; }
 
     public string PlantName { get; set; } = string.Empty;
 
@@ -40,6 +56,25 @@ public class DashboardActionModel
     public GardenSeason Season { get; set; }
 
     public string PlantMainImageUrl { get; set; } = string.Empty;
+}
+
+public class DashboardDiseaseModel
+{
+    public int PlantInstanceId { get; set; }
+
+    public string PlantName { get; set; } = string.Empty;
+
+    public string? Nickname { get; set; }
+
+    public string DiseaseName { get; set; } = string.Empty;
+
+    public DateOnly DiagnosedOn { get; set; }
+
+    public string LocationName { get; set; } = string.Empty;
+
+    public string GardenSpotName { get; set; } = string.Empty;
+
+    public PlantDiseaseSeverity? Severity { get; set; }
 }
 
 public class DashboardActivityModel
