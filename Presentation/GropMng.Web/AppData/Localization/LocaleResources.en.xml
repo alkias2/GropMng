@@ -1561,4 +1561,73 @@
     <Name>mygarden.plantinstance.photo.field.image</Name>
     <Value>Image</Value>
   </LocaleResource>
+  <!-- Container -->
+  <LocaleResource>
+    <Name>mygarden.container.list.title</Name>
+    <Value>Containers</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.add</Name>
+    <Value>Add Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.create.title</Name>
+    <Value>New Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.edit.title</Name>
+    <Value>Edit Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.list.empty</Name>
+    <Value>No containers found.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.type</Name>
+    <Value>Type</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.material</Name>
+    <Value>Material</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.color</Name>
+    <Value>Color</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.base</Name>
+    <Value>Base Circumference</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.rim</Name>
+    <Value>Rim Circumference</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.height</Name>
+    <Value>Height</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.length</Name>
+    <Value>Length</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.width</Name>
+    <Value>Width</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.volume</Name>
+    <Value>Volume (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.drainage</Name>
+    <Value>Has Drainage Hole</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.inuse.warning</Name>
+    <Value>Cannot delete: container is linked to a plant.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.linked.plant</Name>
+    <Value>Linked Plant</Value>
+  </LocaleResource>
 </Language>

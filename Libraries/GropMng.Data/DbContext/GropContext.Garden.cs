@@ -197,7 +197,8 @@ public partial class GropContext
         entity.ToTable("Container", tableBuilder =>
         {
             tableBuilder.HasCheckConstraint("CK_Container_ContainerType", BuildEnumConstraintSql<GardenContainerType>("ContainerType"));
-            tableBuilder.HasCheckConstraint("CK_Container_Dimensions", "[DiameterCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [DepthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
+            tableBuilder.HasCheckConstraint("CK_Container_Dimensions",
+                "[BaseCircumferenceCm] IS NOT NULL OR [RimCircumferenceCm] IS NOT NULL OR [HeightCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
         });
 
         entity.HasKey(e => e.Id).HasName("PK_Container");
@@ -206,16 +207,24 @@ public partial class GropContext
         entity.Property(e => e.OwnerId).IsRequired();
         entity.Property(e => e.ContainerType).HasMaxLength(30).HasStorageEnumConversion().HasDefaultValue(GardenContainerType.Pot);
         entity.Property(e => e.Material).HasMaxLength(100);
+        entity.Property(e => e.BaseCircumferenceCm).HasPrecision(8, 2);
+        entity.Property(e => e.RimCircumferenceCm).HasPrecision(8, 2);
+        entity.Property(e => e.HeightCm).HasPrecision(8, 2);
         entity.Property(e => e.LengthCm).HasPrecision(8, 2);
         entity.Property(e => e.WidthCm).HasPrecision(8, 2);
-        entity.Property(e => e.DepthCm).HasPrecision(8, 2);
-        entity.Property(e => e.DiameterCm).HasPrecision(8, 2);
         entity.Property(e => e.VolumeL).HasPrecision(8, 2);
         entity.Property(e => e.Color).HasMaxLength(50);
         entity.Property(e => e.HasDrainageHole).HasDefaultValue(true);
         entity.Property(e => e.Notes).HasMaxLength(500);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Container_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).IsUnique().HasDatabaseName("UX_Container_PlantInstanceId");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithOne(e => e.Container)
+            .HasForeignKey<Container>(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .HasConstraintName("FK_Container_PlantInstance");
 
         entity.HasOne<Owner>()
             .WithMany()
@@ -266,11 +275,8 @@ public partial class GropContext
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_PlantInstance_GardenSpot");
 
-        entity.HasOne(e => e.Container)
-            .WithMany(e => e.PlantInstances)
-            .HasForeignKey(e => e.ContainerId)
-            .OnDelete(DeleteBehavior.SetNull)
-            .HasConstraintName("FK_PlantInstance_Container");
+        // ContainerId on PlantInstance is the inverse side; the FK lives on Container.PlantInstanceId
+        entity.Ignore(e => e.ContainerId);
 
         entity.HasOne(e => e.SoilMix)
             .WithMany(e => e.PlantInstances)

@@ -3,6 +3,7 @@ using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using Microsoft.EntityFrameworkCore;
 
 namespace GropMng.Services.Services.Garden.Plants;
 
@@ -14,7 +15,6 @@ public class ContainerService : IContainerService
     #region Fields
 
     private readonly IRepository<Container> _containerRepository;
-    private readonly IRepository<PlantInstance> _plantInstanceRepository;
 
     #endregion
 
@@ -23,12 +23,9 @@ public class ContainerService : IContainerService
     /// <summary>
     /// Initializes a new instance of the <see cref="ContainerService" /> class.
     /// </summary>
-    public ContainerService(
-        IRepository<Container> containerRepository,
-        IRepository<PlantInstance> plantInstanceRepository)
+    public ContainerService(IRepository<Container> containerRepository)
     {
         _containerRepository = containerRepository ?? throw new ArgumentNullException(nameof(containerRepository));
-        _plantInstanceRepository = plantInstanceRepository ?? throw new ArgumentNullException(nameof(plantInstanceRepository));
     }
 
     #endregion
@@ -51,13 +48,17 @@ public class ContainerService : IContainerService
     }
 
     /// <inheritdoc />
-    public Task<Container?> GetContainerByIdAsync(int containerId, Guid ownerId, CancellationToken cancellationToken = default)
+    public async Task<Container?> GetContainerByIdAsync(int containerId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         ValidateOwnerId(ownerId);
 
-        return _containerRepository.FirstOrDefaultAsync(
-            c => c.Id == containerId && c.OwnerId == ownerId,
+        var results = await _containerRepository.GetAllAsync(
+            query => query
+                .Include(c => c.PlantInstance)
+                .Where(c => c.Id == containerId && c.OwnerId == ownerId),
             cancellationToken: cancellationToken);
+
+        return results.FirstOrDefault();
     }
 
     /// <inheritdoc />
@@ -88,12 +89,8 @@ public class ContainerService : IContainerService
 
         var container = await EnsureContainerOwnedAsync(containerId, ownerId, cancellationToken);
 
-        var references = await _plantInstanceRepository.CountAsync(
-            p => p.ContainerId == containerId,
-            cancellationToken: cancellationToken);
-
-        if (references > 0)
-            throw new DomainException($"Cannot delete container: it is referenced by {references} plant instance(s).");
+        if (container.PlantInstanceId.HasValue)
+            throw new DomainException("Cannot delete container: it is still linked to a plant instance.");
 
         await _containerRepository.DeleteAsync(container, cancellationToken: cancellationToken);
     }

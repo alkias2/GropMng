@@ -92,16 +92,16 @@ internal sealed class StartupSeeder : IStartupSeeder
         // 4. Owner soil mixes (depend on ingredients)
         var soilMixIds = await _soilMixSeeder.SeedAsync(ingredientIds, cancellationToken);
 
-        // 5. Owner containers
-        var containerIds = await _containerSeeder.SeedAsync(cancellationToken);
-
-        // 6. Plant instances (depend on all catalog lookups + spatial + containers + soil mixes)
+        // 5. Plant instances (depend on all catalog lookups + spatial + soil mixes)
+        // Containers are seeded AFTER instances because Container.PlantInstanceId is the FK.
         var instanceIds = await _plantInstanceSeeder.SeedAsync(
             plantIds,
             locationResult.SpotsByName,
-            containerIds,
             soilMixIds,
             cancellationToken);
+
+        // 6. Owner containers (depend on plant instance IDs — each container links to one instance)
+        await _containerSeeder.SeedAsync(instanceIds, cancellationToken);
 
         // 7. Plant instance photos (depend on plant instance IDs)
         await _plantPhotoSeeder.SeedAsync(instanceIds, cancellationToken);

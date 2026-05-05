@@ -156,7 +156,6 @@ public class PlantInstanceService : IPlantInstanceService
 
         existingPlantInstance.PlantId = plantInstance.PlantId;
         existingPlantInstance.GardenSpotId = plantInstance.GardenSpotId;
-        existingPlantInstance.ContainerId = plantInstance.ContainerId;
         existingPlantInstance.SoilMixId = plantInstance.SoilMixId;
         existingPlantInstance.Nickname = plantInstance.Nickname?.Trim();
         existingPlantInstance.PlantedDate = plantInstance.PlantedDate;
@@ -208,8 +207,9 @@ public class PlantInstanceService : IPlantInstanceService
         existingContainer.Material = container.Material?.Trim();
         existingContainer.LengthCm = container.LengthCm;
         existingContainer.WidthCm = container.WidthCm;
-        existingContainer.DepthCm = container.DepthCm;
-        existingContainer.DiameterCm = container.DiameterCm;
+        existingContainer.BaseCircumferenceCm = container.BaseCircumferenceCm;
+        existingContainer.RimCircumferenceCm = container.RimCircumferenceCm;
+        existingContainer.HeightCm = container.HeightCm;
         existingContainer.VolumeL = container.VolumeL;
         existingContainer.Color = container.Color?.Trim();
         existingContainer.HasDrainageHole = container.HasDrainageHole;

@@ -66,10 +66,11 @@ public class ContainerController : Controller
                 OwnerId = ownerId,
                 ContainerType = model.ContainerType,
                 Material = model.Material,
+                BaseCircumferenceCm = model.BaseCircumferenceCm,
+                RimCircumferenceCm = model.RimCircumferenceCm,
+                HeightCm = model.HeightCm,
                 LengthCm = model.LengthCm,
                 WidthCm = model.WidthCm,
-                DepthCm = model.DepthCm,
-                DiameterCm = model.DiameterCm,
                 VolumeL = model.VolumeL,
                 Color = model.Color,
                 HasDrainageHole = model.HasDrainageHole,
@@ -100,15 +101,16 @@ public class ContainerController : Controller
             Id = container.Id,
             ContainerType = container.ContainerType,
             Material = container.Material,
+            BaseCircumferenceCm = container.BaseCircumferenceCm,
+            RimCircumferenceCm = container.RimCircumferenceCm,
+            HeightCm = container.HeightCm,
             LengthCm = container.LengthCm,
             WidthCm = container.WidthCm,
-            DepthCm = container.DepthCm,
-            DiameterCm = container.DiameterCm,
             VolumeL = container.VolumeL,
             Color = container.Color,
             HasDrainageHole = container.HasDrainageHole,
             Notes = container.Notes,
-            PlantInstanceCount = container.PlantInstances.Count
+            PlantInstanceNickname = container.PlantInstance?.Nickname
         }));
     }
 
@@ -129,10 +131,11 @@ public class ContainerController : Controller
         {
             container.ContainerType = model.ContainerType;
             container.Material = model.Material;
+            container.BaseCircumferenceCm = model.BaseCircumferenceCm;
+            container.RimCircumferenceCm = model.RimCircumferenceCm;
+            container.HeightCm = model.HeightCm;
             container.LengthCm = model.LengthCm;
             container.WidthCm = model.WidthCm;
-            container.DepthCm = model.DepthCm;
-            container.DiameterCm = model.DiameterCm;
             container.VolumeL = model.VolumeL;
             container.Color = model.Color;
             container.HasDrainageHole = model.HasDrainageHole;

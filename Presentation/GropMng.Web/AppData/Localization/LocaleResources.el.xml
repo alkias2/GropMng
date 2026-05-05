@@ -1559,4 +1559,73 @@
     <Name>mygarden.plantinstance.photo.field.image</Name>
     <Value>Εικόνα</Value>
   </LocaleResource>
+  <!-- Container -->
+  <LocaleResource>
+    <Name>mygarden.container.list.title</Name>
+    <Value>Γλάστρες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.add</Name>
+    <Value>Νέα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.create.title</Name>
+    <Value>Νέα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.edit.title</Name>
+    <Value>Επεξεργασία Γλάστρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.list.empty</Name>
+    <Value>Δεν υπάρχουν καταχωρημένες γλάστρες.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.type</Name>
+    <Value>Τύπος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.material</Name>
+    <Value>Υλικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.color</Name>
+    <Value>Χρώμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.base</Name>
+    <Value>Περίμετρο Βάσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.rim</Name>
+    <Value>Περίμετρο Χείλους</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.height</Name>
+    <Value>Ύψος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.length</Name>
+    <Value>Μήκος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.width</Name>
+    <Value>Πλάτος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.volume</Name>
+    <Value>Χωρητικότητα (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.drainage</Name>
+    <Value>Έχει τρύπα αποστράγγισης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.inuse.warning</Name>
+    <Value>Δεν είναι δυνατή η διαγραφή: η γλάστρα είναι συνδεδεμένη με φυτό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.linked.plant</Name>
+    <Value>Συνδεδεμένο Φυτό</Value>
+  </LocaleResource>
 </Language>
