@@ -6,6 +6,10 @@
 }
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-none" id="dashboard-anti-forgery-token">
+        @Html.AntiForgeryToken()
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="mb-1">@T("dashboard.owner.title")</h4>
@@ -16,225 +20,75 @@
         </a>
     </div>
 
-    <div class="card dashboard-today-actions">
-        <div class="card-header pb-0">
-            <div class="nav-align-top">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button
-                            type="button"
-                            class="nav-link active"
-                            role="tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#dashboard-tab-watering"
-                            aria-controls="dashboard-tab-watering"
-                            aria-selected="true">
-                            <i class="bx bx-droplet me-1"></i>@T("dashboard.owner.tab.watering")
-                            @if (Model.WateringTab.Actions.Any())
-                            {
-                                <span class="badge bg-label-info ms-1">@Model.WateringTab.Actions.Count</span>
-                            }
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button
-                            type="button"
-                            class="nav-link"
-                            role="tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#dashboard-tab-fertilizing"
-                            aria-controls="dashboard-tab-fertilizing"
-                            aria-selected="false">
-                            <i class="bx bx-flask me-1"></i>@T("dashboard.owner.tab.fertilizing")
-                            @if (Model.FertilizingTab.Actions.Any())
-                            {
-                                <span class="badge bg-label-success ms-1">@Model.FertilizingTab.Actions.Count</span>
-                            }
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button
-                            type="button"
-                            class="nav-link"
-                            role="tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#dashboard-tab-diseases"
-                            aria-controls="dashboard-tab-diseases"
-                            aria-selected="false">
-                            <i class="bx bx-bug me-1"></i>@T("dashboard.owner.tab.diseases")
-                            @if (Model.DiseaseTab.ActiveCases.Any())
-                            {
-                                <span class="badge bg-label-danger ms-1">@Model.DiseaseTab.ActiveCases.Count</span>
-                            }
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <!-- Section selector -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center gap-4">
 
-        <div class="tab-content">
-
-            @* Tab: Ξ ΟΟ„ΞΉΟƒΞΌΞ± *@
-            <div class="tab-pane fade show active" id="dashboard-tab-watering" role="tabpanel">
-                @if (!Model.WateringTab.Actions.Any())
-                {
-                    <div class="p-4">
-                        <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
+                <button type="button" class="dashboard-section-btn active" data-section="watering">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="bg-label-info p-2 rounded">
+                            <i class="bx bx-droplet bx-sm"></i>
+                        </span>
+                        <div class="content-right">
+                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.watering")</p>
+                            <h4 class="text-info mb-0">@Model.WateringTab.Actions.Count</h4>
+                        </div>
                     </div>
-                }
-                else
-                {
-                    <div class="d-flex justify-content-end px-4 pt-3">
+                </button>
+
+                <button type="button" class="dashboard-section-btn" data-section="fertilizing">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="bg-label-success p-2 rounded">
+                           @*  <i class="bx bx-flask bx-sm"></i> *@
+                           <i class="bx bx-dialpad bx-sm"></i>
+                        </span>
+                        <div class="content-right">
+                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.fertilizing")</p>
+                            <h4 class="text-success mb-0">@Model.FertilizingTab.Actions.Count</h4>
+                        </div>
+                    </div>
+                </button>
+
+                <button type="button" class="dashboard-section-btn" data-section="diseases">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="bg-label-danger p-2 rounded">
+                            <i class="bx bx-bug bx-sm"></i>
+                        </span>
+                        <div class="content-right">
+                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.diseases")</p>
+                            <h4 class="text-danger mb-0">@Model.DiseaseTab.ActiveCases.Count</h4>
+                        </div>
+                    </div>
+                </button>
+
+                <div class="d-flex align-items-center gap-3 ms-auto" id="dashboard-spot-filter-wrapper">
+                    <span class="bg-label-secondary p-2 rounded">
+                        <i class="bx bx-filter-alt bx-sm"></i>
+                    </span>
+                    <div class="content-right">
+                        <p class="mb-0 text-muted">@T("dashboard.owner.filter.label")</p>
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                            <button class="btn btn-sm btn-link p-0 fw-semibold dropdown-toggle"
                                     type="button"
-                                    id="wateringSpotFilter"
+                                    id="dashboardSpotFilter"
                                     data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    data-dashboard-spot-filter-btn="watering">
-                                <i class="bx bx-filter-alt me-1"></i>
-                                <span id="wateringSpotFilterLabel">@T("dashboard.owner.filter.allspots")</span>
+                                    aria-expanded="false">
+                                <span id="dashboardSpotFilterLabel">@T("dashboard.owner.filter.allspots")</span>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="wateringSpotFilter">
-                                @foreach (var item in Model.WateringTab.AvailableGardenSpots)
-                                {
-                                    <a class="dropdown-item @(item.Selected ? "active" : string.Empty)"
-                                       href="javascript:void(0);"
-                                       data-spot-filter-value="@item.Value"
-                                       data-spot-filter-label="@item.Text"
-                                       data-dashboard-spot-filter-item="watering">
-                                        @item.Text
-                                    </a>
-                                }
+                            <div class="dropdown-menu dropdown-menu-end" id="dashboardSpotFilterMenu" aria-labelledby="dashboardSpotFilter">
                             </div>
                         </div>
                     </div>
-                    <div id="dashboard-watering-grid" class="list-group list-group-flush dashboard-actions-grid">
-                        <div class="row px-4 pb-4 pt-2">
-                            @foreach (var action in Model.WateringTab.Actions)
-                            {
-                                @await Html.PartialAsync("_DashboardActionCard", action)
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
+                </div>
 
-            @* Tab: Ξ›Ξ―Ο€Ξ±Ξ½ΟƒΞ· *@
-            <div class="tab-pane fade" id="dashboard-tab-fertilizing" role="tabpanel">
-                @if (!Model.FertilizingTab.Actions.Any())
-                {
-                    <div class="p-4">
-                        <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="d-flex justify-content-end px-4 pt-3">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                    type="button"
-                                    id="fertilizingSpotFilter"
-                                    data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    data-dashboard-spot-filter-btn="fertilizing">
-                                <i class="bx bx-filter-alt me-1"></i>
-                                <span id="fertilizingSpotFilterLabel">@T("dashboard.owner.filter.allspots")</span>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="fertilizingSpotFilter">
-                                @foreach (var item in Model.FertilizingTab.AvailableGardenSpots)
-                                {
-                                    <a class="dropdown-item @(item.Selected ? "active" : string.Empty)"
-                                       href="javascript:void(0);"
-                                       data-spot-filter-value="@item.Value"
-                                       data-spot-filter-label="@item.Text"
-                                       data-dashboard-spot-filter-item="fertilizing">
-                                        @item.Text
-                                    </a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div id="dashboard-fertilizing-grid" class="list-group list-group-flush dashboard-actions-grid">
-                        <div class="row px-4 pb-4 pt-2">
-                            @foreach (var action in Model.FertilizingTab.Actions)
-                            {
-                                @await Html.PartialAsync("_DashboardActionCard", action)
-                            }
-                        </div>
-                    </div>
-                }
             </div>
-
-            @* Tab: Ξ‘ΟƒΞΈΞ­Ξ½ΞµΞΉΞµΟ‚ *@
-            <div class="tab-pane fade" id="dashboard-tab-diseases" role="tabpanel">
-                @if (!Model.DiseaseTab.ActiveCases.Any())
-                {
-                    <div class="p-4">
-                        <p class="text-muted mb-0">@T("dashboard.owner.tab.diseases.empty")</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive p-4 pt-3">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>@T("dashboard.owner.disease.plant")</th>
-                                    <th>@T("dashboard.owner.disease.name")</th>
-                                    <th>@T("dashboard.owner.disease.location")</th>
-                                    <th>@T("dashboard.owner.disease.diagnosed")</th>
-                                    <th>@T("dashboard.owner.disease.severity")</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var disease in Model.DiseaseTab.ActiveCases)
-                                {
-                                    var severityBadge = disease.Severity switch
-                                    {
-                                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Mild => "success",
-                                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Moderate => "warning",
-                                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Severe => "danger",
-                                        _ => "secondary"
-                                    };
-                                    <tr>
-                                        <td>
-                                            <span class="fw-medium">@disease.PlantName</span>
-                                            @if (!string.IsNullOrWhiteSpace(disease.Nickname))
-                                            {
-                                                <small class="text-muted d-block">@disease.Nickname</small>
-                                            }
-                                        </td>
-                                        <td>@disease.DiseaseName</td>
-                                        <td>
-                                            <span>@disease.LocationName</span>
-                                            <small class="text-muted d-block">@disease.GardenSpotName</small>
-                                        </td>
-                                        <td>@disease.DiagnosedOn.ToString("yyyy-MM-dd")</td>
-                                        <td>
-                                            @if (disease.Severity.HasValue)
-                                            {
-                                                <span class="badge bg-label-@severityBadge">@disease.Severity</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("Edit", "PlantInstance", new { id = disease.PlantInstanceId })"
-                                               class="btn btn-sm btn-outline-secondary">
-                                                @T("common.details")
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-
         </div>
+    </div>
+
+    <!-- Panel content -->
+    <div id="dashboard-panel-content">
+        @await Html.PartialAsync("_DashboardWateringPanel", Model.WateringTab)
     </div>
 </div>
 
@@ -268,8 +122,6 @@
 </div>
 
 @section Scripts {
+    <script src="~/js-custom/dashboard-section-loader.js"></script>
     <script src="~/js-custom/dashboard-action-log.js"></script>
-    <script src="~/js-custom/dashboard-spot-filter.js"></script>
 }
-
-

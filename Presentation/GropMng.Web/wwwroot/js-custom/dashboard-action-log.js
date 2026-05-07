@@ -53,7 +53,13 @@
     }
 
     function getToken() {
-        return $('input[name="__RequestVerificationToken"]').first().val();
+        var $tokenInput = $('#dashboard-anti-forgery-token input[name="__RequestVerificationToken"]').first();
+        if ($tokenInput.length) {
+            return $tokenInput.val();
+        }
+
+        $tokenInput = $('input[name="__RequestVerificationToken"]').first();
+        return $tokenInput.length ? $tokenInput.val() : '';
     }
 
     function removeRow($row, $container) {
@@ -77,6 +83,9 @@
             var $content = $container.find('.dashboard-actions-grid').first();
             if (!$content.length) {
                 $content = $container.find('.list-group').first();
+            }
+            if (!$content.length) {
+                $content = $container.find('.row').first();
             }
 
             var emptyHtml =
@@ -134,6 +143,9 @@
             $.ajax({
                 url: url,
                 type: 'POST',
+                headers: {
+                    RequestVerificationToken: getToken()
+                },
                 data: {
                     PlantInstanceId: plantInstanceId,
                     __RequestVerificationToken: getToken()
@@ -198,6 +210,9 @@
         $.ajax({
             url: '/action-log/skip',
             type: 'POST',
+            headers: {
+                RequestVerificationToken: getToken()
+            },
             data: {
                 PlantInstanceId: plantInstanceId,
                 ActionType: actionType,
@@ -233,6 +248,9 @@
 
     $(function () {
         var $container = $('#dashboard-today-actions');
+        if (!$container.length) {
+            $container = $('#dashboard-panel-content');
+        }
         if (!$container.length) {
             return;
         }

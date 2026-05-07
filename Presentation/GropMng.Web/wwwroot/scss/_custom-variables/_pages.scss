@@ -20,6 +20,33 @@
 }
 
 // ============================================================
+// Dashboard section selector buttons
+// ============================================================
+.dashboard-section-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: $border-radius-lg;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(var(--bs-secondary-rgb), 0.06);
+  }
+
+  &.active {
+    // border-color: var(--bs-primary);
+    //background-color: rgba(var(--bs-primary-rgb), 0.06);
+    //background-color: $label-background !important;
+    background-color: rgb(50.064, 61.808, 81.424) !important;
+
+    .content-right .text-muted{ 
+      color:white !important;
+    }
+  }
+}
+
+// ============================================================
 // GropMng — Views/shared/_LandingLayout.cshtml (public navbar)
 // Scoped to .landing-navbar — does NOT affect admin sidebar
 // ============================================================

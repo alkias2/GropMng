@@ -19195,6 +19195,24 @@ html:not(.layout-footer-fixed) .content-wrapper {
   margin-top: 16px;
 }
 
+.dashboard-section-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 0.3125rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.dashboard-section-btn:hover {
+  background-color: rgba(var(--bs-secondary-rgb), 0.06);
+}
+.dashboard-section-btn.active {
+  background-color: rgb(50.064, 61.808, 81.424) !important;
+}
+.dashboard-section-btn.active .content-right .text-muted {
+  color: white !important;
+}
+
 .landing-navbar .app-brand-logo {
   width: auto;
   height: auto;

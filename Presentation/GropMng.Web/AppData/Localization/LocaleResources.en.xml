@@ -1356,6 +1356,10 @@
     <Value>All</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>dashboard.owner.filter.label</Name>
+    <Value>Filter</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>dashboard.owner.disease.plant</Name>
     <Value>Plant</Value>
   </LocaleResource>

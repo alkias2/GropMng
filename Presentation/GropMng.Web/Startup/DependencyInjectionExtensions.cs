@@ -77,7 +77,7 @@ public static class DependencyInjectionExtensions
     /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
     public static IServiceCollection AddCoreFrameworkServices(this IServiceCollection services)
     {
-        services.AddControllersWithViews();
+        services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddMemoryCache();
         services.AddHttpContextAccessor();
         services.AddDataProtection();

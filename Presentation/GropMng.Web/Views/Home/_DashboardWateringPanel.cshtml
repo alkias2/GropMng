@@ -1,0 +1,21 @@
+@model GropMng.Web.Models.Dashboard.DashboardWateringTabModel
+@using GropMng.Web.Models.Dashboard
+@using System.Text.Json
+
+<script id="dashboard-spot-options" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.AvailableGardenSpots.Select(x => new { value = x.Value, text = x.Text })))</script>
+
+@if (!Model.Actions.Any())
+{
+    <div class="p-4">
+        <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var action in Model.Actions)
+        {
+            @await Html.PartialAsync("_DashboardActionCard", action)
+        }
+    </div>
+}

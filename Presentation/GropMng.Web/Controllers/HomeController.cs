@@ -31,6 +31,27 @@ namespace GropMng.Web.Controllers
             return View(model);
         }
 
+        [Authorize]
+        public async Task<IActionResult> DashboardWateringPanel(CancellationToken cancellationToken)
+        {
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            return PartialView("_DashboardWateringPanel", model.WateringTab);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> DashboardFertilizingPanel(CancellationToken cancellationToken)
+        {
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            return PartialView("_DashboardFertilizingPanel", model.FertilizingTab);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> DashboardDiseasesPanel(CancellationToken cancellationToken)
+        {
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            return PartialView("_DashboardDiseasesPanel", model.DiseaseTab);
+        }
+
         #endregion
     }
 }

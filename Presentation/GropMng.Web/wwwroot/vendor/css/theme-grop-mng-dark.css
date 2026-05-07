@@ -1726,11 +1726,6 @@ html:not(.layout-menu-collapsed) .bg-menu-theme.menu-horizontal .menu-inner > .m
   border-color: rgba(216, 222, 233.5, 0.06);
 }
 
-.card {
-  box-shadow: none;
-  border: 1px solid rgb(54.45, 67.65, 92.95);
-}
-
 .accordion .accordion-item {
   border-top: 0 solid rgb(54.45, 67.65, 92.95);
 }
