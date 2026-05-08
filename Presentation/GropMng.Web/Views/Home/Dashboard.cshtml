@@ -18,6 +18,20 @@
         <a href="@Url.Action("List", "PlantInstance")" class="btn btn-primary">
             <i class="bx bx-leaf me-1"></i>@T("dashboard.owner.cta.myplants")
         </a>
+        <button type="button"
+                id="btn-water-all"
+                class="btn btn-info d-none"
+                data-label="@T("dashboard.owner.cta.waterall")"
+                data-success-template="@T("dashboard.owner.toast.waterall.success.template")">
+            <i class="bx bx-droplet me-1"></i>@T("dashboard.owner.cta.waterall")
+        </button>
+        <button type="button"
+                id="btn-fertilize-all"
+                class="btn btn-success d-none"
+                data-label="@T("dashboard.owner.cta.fertilizeall")"
+                data-success-template="@T("dashboard.owner.toast.fertilizeall.success.template")">
+            <i class="bx bx-dialpad me-1"></i>@T("dashboard.owner.cta.fertilizeall")
+        </button>
     </div>
 
     <!-- Section selector -->
@@ -32,7 +46,7 @@
                         </span>
                         <div class="content-right">
                             <p class="mb-0 text-muted">@T("dashboard.owner.tab.watering")</p>
-                            <h4 class="text-info mb-0">@Model.WateringTab.Actions.Count</h4>
+                            <h4 class="text-info mb-0" data-count-section="watering">@Model.WateringTab.Actions.Count</h4>
                         </div>
                     </div>
                 </button>
@@ -45,7 +59,7 @@
                         </span>
                         <div class="content-right">
                             <p class="mb-0 text-muted">@T("dashboard.owner.tab.fertilizing")</p>
-                            <h4 class="text-success mb-0">@Model.FertilizingTab.Actions.Count</h4>
+                            <h4 class="text-success mb-0" data-count-section="fertilizing">@Model.FertilizingTab.Actions.Count</h4>
                         </div>
                     </div>
                 </button>
@@ -122,6 +136,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js-custom/dashboard-section-loader.js"></script>
-    <script src="~/js-custom/dashboard-action-log.js"></script>
+    <script src="~/js-custom/dashboard-section-loader.js" asp-append-version="true"></script>
+    <script src="~/js-custom/dashboard-action-log.js" asp-append-version="true"></script>
 }

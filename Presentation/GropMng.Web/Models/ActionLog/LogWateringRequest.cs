@@ -6,4 +6,6 @@ namespace GropMng.Web.Models.ActionLog;
 public class LogWateringRequest
 {
     public int PlantInstanceId { get; set; }
+
+    public decimal? WaterAmountL { get; set; }
 }

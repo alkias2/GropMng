@@ -8,6 +8,12 @@
 
     var activeSection = 'watering';
 
+    function notifyStateChanged() {
+        if (window.jQuery) {
+            window.jQuery(document).trigger('dashboard:state-changed');
+        }
+    }
+
     // ---------------------------------------------------------------------------
     // Section loading
     // ---------------------------------------------------------------------------
@@ -34,6 +40,7 @@
                 activeSection = section;
                 updateButtonStates();
                 refreshFilter();
+                notifyStateChanged();
             })
             .catch(function () {
                 panel.innerHTML =
@@ -49,6 +56,19 @@
         document.querySelectorAll('.dashboard-section-btn').forEach(function (btn) {
             btn.classList.toggle('active', btn.dataset.section === activeSection);
         });
+
+        // Show bulk action button that matches the active tab.
+        var $waterAllBtn = document.getElementById('btn-water-all');
+        if ($waterAllBtn) {
+            $waterAllBtn.classList.toggle('d-none', activeSection !== 'watering');
+        }
+
+        var $fertilizeAllBtn = document.getElementById('btn-fertilize-all');
+        if ($fertilizeAllBtn) {
+            $fertilizeAllBtn.classList.toggle('d-none', activeSection !== 'fertilizing');
+        }
+
+        notifyStateChanged();
     }
 
     // ---------------------------------------------------------------------------
@@ -105,6 +125,8 @@
         document.querySelectorAll('[data-spot-id]').forEach(function (card) {
             card.style.display = (!value || card.dataset.spotId === value) ? '' : 'none';
         });
+
+        notifyStateChanged();
     }
 
     // ---------------------------------------------------------------------------
@@ -114,6 +136,19 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Bootstrap filter from the server-rendered watering panel
         refreshFilter();
+
+        // Show initial bulk-action button based on active tab.
+        var $waterAllBtn = document.getElementById('btn-water-all');
+        if ($waterAllBtn) {
+            $waterAllBtn.classList.toggle('d-none', activeSection !== 'watering');
+        }
+
+        var $fertilizeAllBtn = document.getElementById('btn-fertilize-all');
+        if ($fertilizeAllBtn) {
+            $fertilizeAllBtn.classList.toggle('d-none', activeSection !== 'fertilizing');
+        }
+
+        notifyStateChanged();
 
         document.querySelectorAll('.dashboard-section-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {

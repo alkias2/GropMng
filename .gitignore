@@ -121,3 +121,10 @@ appsettings.Development.json
 
 # Keep an example env file if you create one later
 !.env.example
+
+# ==============================
+# Copilot agent helper scripts (root-level, generated during AI-assisted sessions)
+# ==============================
+/_write_*.py
+/_write_*.js
+/_write_*.sh

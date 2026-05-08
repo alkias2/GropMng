@@ -65,21 +65,48 @@
     function removeRow($row, $container) {
         if (!$row || !$row.length) {
             updateEmptyState($container);
+            $(document).trigger('dashboard:action-items-changed');
             return;
         }
 
         $row.addClass('opacity-50');
         $row.fadeOut(400, function () {
             $(this).remove();
+            updateSectionCount($container);
             updateEmptyState($container);
+            $(document).trigger('dashboard:action-items-changed');
         });
+    }
+
+    function updateSectionCount($container) {
+        // Determine action type from remaining items in DOM.
+        var actionType = null;
+        $container.find('[data-dashboard-action-item] .btn-action-done').each(function () {
+            actionType = $(this).data('action-type');
+            return false; // break — only need one
+        });
+
+        // When the last card has just been removed no items are left in the DOM.
+        // Fall back to the currently active section tab to still reach 0.
+        if (!actionType) {
+            actionType = $('.dashboard-section-btn.active').data('section') || null;
+        }
+
+        if (!actionType) return;
+
+        var remaining = $container.find(
+            '[data-dashboard-action-item] .btn-action-done[data-action-type="' + actionType + '"]'
+        ).length;
+
+        $('[data-count-section="' + actionType + '"]').text(remaining);
     }
 
     function updateEmptyState($container) {
         var $items = getActionItems($container);
+        var total = $items.length;
         var visible = $items.filter(':visible').length;
 
-        if (visible === 0) {
+        if (total === 0) {
             var $content = $container.find('.dashboard-actions-grid').first();
             if (!$content.length) {
                 $content = $container.find('.list-group').first();
@@ -98,6 +125,13 @@
             } else if (!$container.find('#actions-empty-msg').length) {
                 $container.append(emptyHtml);
             }
+            return;
+        }
+
+        // Keep the grid in place when current filter has no visible cards,
+        // so changing filter still works without a page refresh.
+        if (visible === 0) {
+            $container.find('#actions-empty-msg').remove();
         }
     }
 
@@ -126,6 +160,15 @@
         });
     }
 
+    function formatCountMessage(template, count) {
+        var safeTemplate = template || '';
+        if (safeTemplate.indexOf('{0}') >= 0) {
+            return safeTemplate.replace('{0}', count);
+        }
+
+        return safeTemplate + ' ' + count;
+    }
+
     function bindDoneButtons($container) {
         $container.on('click', '.btn-action-done', function () {
             var $btn = $(this);
@@ -135,10 +178,31 @@
 
             var url = $btn.data('url');
             var plantInstanceId = $btn.data('plant-instance-id');
+            var actionType = $btn.data('action-type');
+            var waterAmountL = $btn.data('water-amount-l') || null;
+            var fertilizerQuantity = $btn.data('fertilizer-quantity') || null;
+            var fertilizerUnit = $btn.data('fertilizer-unit');
             var $row = resolveActionItem($btn);
 
             $btn.prop('disabled', true)
                 .html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+
+            var postData = {
+                PlantInstanceId: plantInstanceId,
+                __RequestVerificationToken: getToken()
+            };
+
+            if (actionType === 'watering' && waterAmountL !== null && waterAmountL !== '') {
+                postData.WaterAmountL = waterAmountL;
+            }
+            if (actionType === 'fertilizing') {
+                if (fertilizerQuantity !== null && fertilizerQuantity !== '') {
+                    postData.Quantity = fertilizerQuantity;
+                }
+                if (fertilizerUnit !== undefined && fertilizerUnit !== '') {
+                    postData.Unit = fertilizerUnit;
+                }
+            }
 
             $.ajax({
                 url: url,
@@ -146,10 +210,7 @@
                 headers: {
                     RequestVerificationToken: getToken()
                 },
-                data: {
-                    PlantInstanceId: plantInstanceId,
-                    __RequestVerificationToken: getToken()
-                },
+                data: postData,
                 success: function (response) {
                     if (response && response.success) {
                         removeRow($row, $container);
@@ -246,6 +307,98 @@
         });
     }
 
+    function bindBulkActionButton($container, options) {
+        function syncButtonState() {
+            var $btn = $(options.buttonSelector);
+            if (!$btn.length) {
+                return;
+            }
+
+            var visibleCount = 0;
+            $container.find('[data-dashboard-action-item]:visible').each(function () {
+                if ($(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').length) {
+                    visibleCount++;
+                }
+            });
+
+            $btn.prop('disabled', visibleCount === 0);
+        }
+
+        $(document).on('dashboard:state-changed dashboard:action-items-changed', syncButtonState);
+
+        $(document).on('click', options.buttonSelector, function () {
+            var $btn = $(this);
+            if ($btn.prop('disabled')) {
+                return;
+            }
+
+            // Collect IDs of visible action items to respect active spot filter.
+            var ids = [];
+            $container.find('[data-dashboard-action-item]:visible').each(function () {
+                var id = $(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').data('plant-instance-id');
+                if (id) {
+                    ids.push(id);
+                }
+            });
+
+            if (ids.length === 0) {
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+
+            var postData = { __RequestVerificationToken: getToken() };
+            $.each(ids, function (i, id) {
+                postData['PlantInstanceIds[' + i + ']'] = id;
+            });
+
+            $.ajax({
+                url: options.url,
+                type: 'POST',
+                headers: { RequestVerificationToken: getToken() },
+                data: postData,
+                success: function (response) {
+                    $btn.prop('disabled', false)
+                        .html(options.iconHtml + ($btn.data('label') || options.defaultLabel));
+
+                    if (response && response.success) {
+                        var affectedCount = typeof response.count === 'number' ? response.count : ids.length;
+
+                        // Remove all visible cards of this action type.
+                        $container.find('[data-dashboard-action-item]:visible').each(function () {
+                            if ($(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').length) {
+                                $(this).addClass('opacity-50').fadeOut(400, function () {
+                                    $(this).remove();
+                                    updateSectionCount($container);
+                                    updateEmptyState($container);
+                                    $(document).trigger('dashboard:action-items-changed');
+                                });
+                            }
+                        });
+
+                        if (affectedCount > 0) {
+                            var successTemplate = $btn.data('success-template') || options.successTemplate || 'Completed for {0} items.';
+                            showToast('success', formatCountMessage(successTemplate, affectedCount));
+                        }
+
+                        return;
+                    }
+
+                    var msg = (response && response.message) ? response.message : 'An error occurred.';
+                    showToast('error', msg);
+                },
+                error: function () {
+                    $btn.prop('disabled', false)
+                        .html(options.iconHtml + ($btn.data('label') || options.defaultLabel));
+                    showToast('error', 'Request failed. Please try again.');
+                }
+            });
+        });
+
+        syncButtonState();
+    }
+
     $(function () {
         var $container = $('#dashboard-today-actions');
         if (!$container.length) {
@@ -257,5 +410,21 @@
 
         bindDoneButtons($container);
         bindSkipButtons($container);
+        bindBulkActionButton($container, {
+            buttonSelector: '#btn-water-all',
+            actionType: 'watering',
+            url: '/action-log/watering-all',
+            iconHtml: '<i class="bx bx-droplet me-1"></i>',
+            defaultLabel: 'Water all',
+            successTemplate: 'Watering recorded for {0} plants.'
+        });
+        bindBulkActionButton($container, {
+            buttonSelector: '#btn-fertilize-all',
+            actionType: 'fertilizing',
+            url: '/action-log/fertilizing-all',
+            iconHtml: '<i class="bx bx-dialpad me-1"></i>',
+            defaultLabel: 'Fertilize all',
+            successTemplate: 'Fertilizing recorded for {0} plants.'
+        });
     });
 })();

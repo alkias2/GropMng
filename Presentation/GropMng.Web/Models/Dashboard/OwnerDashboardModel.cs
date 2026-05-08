@@ -1,5 +1,6 @@
 using GropMng.Core.Domain.Garden.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using GropMng.Core.Domain.Garden.Care;
 
 namespace GropMng.Web.Models.Dashboard;
 
@@ -56,6 +57,11 @@ public class DashboardActionModel
     public GardenSeason Season { get; set; }
 
     public string PlantMainImageUrl { get; set; } = string.Empty;
+
+    // Amount populated from the corresponding schedule (null if not set)
+    public decimal? WaterAmountL { get; set; }
+    public decimal? FertilizerQuantity { get; set; }
+    public FertilizerQuantityUnit? FertilizerQuantityUnit { get; set; }
 }
 
 public class DashboardDiseaseModel

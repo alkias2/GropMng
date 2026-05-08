@@ -6,4 +6,7 @@ namespace GropMng.Web.Models.ActionLog;
 public class LogFertilizingRequest
 {
     public int PlantInstanceId { get; set; }
+
+    public decimal? Quantity { get; set; }
+    public GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit? Unit { get; set; }
 }

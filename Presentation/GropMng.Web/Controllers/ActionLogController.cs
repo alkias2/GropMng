@@ -23,6 +23,7 @@ public class ActionLogController : Controller
     private readonly IRepository<WateringLog> _wateringLogRepository;
     private readonly IRepository<FertilizingLog> _fertilizingLogRepository;
     private readonly IRepository<FertilizingSchedule> _fertilizingScheduleRepository;
+    private readonly IRepository<WateringSchedule> _wateringScheduleRepository;
     private readonly IRepository<ActionSkip> _actionSkipRepository;
 
     #endregion
@@ -35,6 +36,7 @@ public class ActionLogController : Controller
         IRepository<WateringLog> wateringLogRepository,
         IRepository<FertilizingLog> fertilizingLogRepository,
         IRepository<FertilizingSchedule> fertilizingScheduleRepository,
+        IRepository<WateringSchedule> wateringScheduleRepository,
         IRepository<ActionSkip> actionSkipRepository)
     {
         _currentOwnerProvider = currentOwnerProvider;
@@ -42,6 +44,7 @@ public class ActionLogController : Controller
         _wateringLogRepository = wateringLogRepository;
         _fertilizingLogRepository = fertilizingLogRepository;
         _fertilizingScheduleRepository = fertilizingScheduleRepository;
+        _wateringScheduleRepository = wateringScheduleRepository;
         _actionSkipRepository = actionSkipRepository;
     }
 
@@ -70,7 +73,8 @@ public class ActionLogController : Controller
         {
             OwnerId = ownerId,
             PlantInstanceId = instance.Id,
-            WateredAtUtc = DateTime.UtcNow
+            WateredAtUtc = DateTime.UtcNow,
+            WaterAmountL = request.WaterAmountL
         }, cancellationToken: cancellationToken);
 
         return Json(new { success = true });
@@ -106,10 +110,129 @@ public class ActionLogController : Controller
             OwnerId = ownerId,
             PlantInstanceId = instance.Id,
             FertilizerId = schedule.FertilizerId,
-            AppliedAtUtc = DateTime.UtcNow
+            AppliedAtUtc = DateTime.UtcNow,
+            Quantity = request.Quantity ?? schedule.Quantity,
+            Unit = request.Unit ?? schedule.Unit
         }, cancellationToken: cancellationToken);
 
         return Json(new { success = true });
+    }
+
+    /// <summary>
+    /// Records watering for all specified plant instances in a single request.
+    /// WaterAmountL is resolved from the active schedule for each instance.
+    /// </summary>
+    [HttpPost("watering-all")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WateringAll([FromForm] LogWateringAllRequest request, CancellationToken cancellationToken)
+    {
+        if (request.PlantInstanceIds == null || request.PlantInstanceIds.Count == 0)
+            return Json(new { success = false, message = "No plant instances provided." });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var season = ResolveCurrentSeason(today);
+
+        var instances = await _plantInstanceRepository.GetAllAsync(
+            query => query.Where(pi =>
+                request.PlantInstanceIds.Contains(pi.Id)
+                && pi.OwnerId == ownerId
+                && pi.IsActive),
+            cancellationToken: cancellationToken);
+
+        if (instances.Count == 0)
+            return Json(new { success = false, message = "No valid plant instances found." });
+
+        var instanceIds = instances.Select(pi => pi.Id).ToHashSet();
+
+        var schedules = await _wateringScheduleRepository.GetAllAsync(
+            query => query.Where(s =>
+                s.OwnerId == ownerId
+                && instanceIds.Contains(s.PlantInstanceId)
+                && (s.Season == season || s.Season == GardenSeason.AllYear)),
+            cancellationToken: cancellationToken);
+
+        var scheduleMap = schedules
+            .GroupBy(s => s.PlantInstanceId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var count = 0;
+        foreach (var instance in instances)
+        {
+            scheduleMap.TryGetValue(instance.Id, out var schedule);
+
+            await _wateringLogRepository.CreateAsync(new WateringLog
+            {
+                OwnerId = ownerId,
+                PlantInstanceId = instance.Id,
+                WateredAtUtc = DateTime.UtcNow,
+                WaterAmountL = schedule?.WaterAmountL
+            }, cancellationToken: cancellationToken);
+
+            count++;
+        }
+
+        return Json(new { success = true, count });
+    }
+
+    /// <summary>
+    /// Records fertilizing for all specified plant instances in a single request.
+    /// Quantity/Unit/FertilizerId are resolved from the active schedule for each instance.
+    /// </summary>
+    [HttpPost("fertilizing-all")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FertilizingAll([FromForm] LogFertilizingAllRequest request, CancellationToken cancellationToken)
+    {
+        if (request.PlantInstanceIds == null || request.PlantInstanceIds.Count == 0)
+            return Json(new { success = false, message = "No plant instances provided." });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var season = ResolveCurrentSeason(today);
+
+        var instances = await _plantInstanceRepository.GetAllAsync(
+            query => query.Where(pi =>
+                request.PlantInstanceIds.Contains(pi.Id)
+                && pi.OwnerId == ownerId
+                && pi.IsActive),
+            cancellationToken: cancellationToken);
+
+        if (instances.Count == 0)
+            return Json(new { success = false, message = "No valid plant instances found." });
+
+        var instanceIds = instances.Select(pi => pi.Id).ToHashSet();
+
+        var schedules = await _fertilizingScheduleRepository.GetAllAsync(
+            query => query.Where(s =>
+                s.OwnerId == ownerId
+                && instanceIds.Contains(s.PlantInstanceId)
+                && (s.Season == season || s.Season == GardenSeason.AllYear)),
+            cancellationToken: cancellationToken);
+
+        var scheduleMap = schedules
+            .GroupBy(s => s.PlantInstanceId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var count = 0;
+        foreach (var instance in instances)
+        {
+            if (!scheduleMap.TryGetValue(instance.Id, out var schedule))
+                continue;
+
+            await _fertilizingLogRepository.CreateAsync(new FertilizingLog
+            {
+                OwnerId = ownerId,
+                PlantInstanceId = instance.Id,
+                FertilizerId = schedule.FertilizerId,
+                AppliedAtUtc = DateTime.UtcNow,
+                Quantity = schedule.Quantity,
+                Unit = schedule.Unit
+            }, cancellationToken: cancellationToken);
+
+            count++;
+        }
+
+        return Json(new { success = true, count });
     }
 
     /// <summary>
@@ -149,6 +272,19 @@ public class ActionLogController : Controller
 
         return Json(new { success = true });
     }
+
+    #endregion
+
+    #region Private
+
+    private static GardenSeason ResolveCurrentSeason(DateOnly today)
+        => today.Month switch
+        {
+            >= 3 and <= 5 => GardenSeason.Spring,
+            >= 6 and <= 8 => GardenSeason.Summer,
+            >= 9 and <= 11 => GardenSeason.Autumn,
+            _ => GardenSeason.Winter
+        };
 
     #endregion
 }

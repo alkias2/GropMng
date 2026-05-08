@@ -1,5 +1,6 @@
 @model GropMng.Web.Models.Dashboard.DashboardActionModel
 @using GropMng.Web.Models.Dashboard
+@using GropMng.Core.Domain.Garden.Enums
 @{
     var badgeClass = Model.DueStatus switch
     {
@@ -18,6 +19,21 @@
     var logUrl = Model.ActionType == DashboardActionType.Watering
         ? Url.Action("LogWatering", "ActionLog")
         : Url.Action("LogFertilizing", "ActionLog");
+
+    var unitStr = Model.FertilizerQuantityUnit switch
+    {
+        FertilizerQuantityUnit.Gram        => "g",
+        FertilizerQuantityUnit.Kilogram    => "kg",
+        FertilizerQuantityUnit.Millilitre  => "ml",
+        FertilizerQuantityUnit.Litre       => "l",
+        FertilizerQuantityUnit.Tablespoon  => "tbsp",
+        FertilizerQuantityUnit.Teaspoon    => "tsp",
+        _                                  => ""
+    };
+
+    var quantityDisplay = Model.ActionType == DashboardActionType.Watering
+        ? (Model.WaterAmountL.HasValue ? $"{Model.WaterAmountL:0.##}" : "—")
+        : (Model.FertilizerQuantity.HasValue ? $"{Model.FertilizerQuantity:0.##} {unitStr}".Trim() : "—");
 }
 
 <div class="col-md-6 col-lg-4 col-xl-4 mb-4"
@@ -25,7 +41,7 @@
      data-skip-key="@skipKey"
      data-spot-id="@Model.GardenSpotId">
     <div class="card h-100 dashboard-action-card">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
             <div class="rounded-3 text-center mb-3 pt-3 pb-2 dashboard-action-card__media">
                 @if (!string.IsNullOrEmpty(Model.PlantMainImageUrl))
                 {
@@ -41,21 +57,28 @@
             <p class="text-muted mb-1">@Model.LocationName</p>
             <p class="text-muted mb-3">@Model.GardenSpotName</p>
 
-            <div class="row mb-3 g-2">
-                <div class="col-6">
+            <div class="row mt-auto mb-3 g-2">
+                <div class="col-4">
                     <div class="d-flex">
                         <div class="avatar flex-shrink-0 me-2">
                             <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-calendar-exclamation"></i></span>
                         </div>
                         <div>
                             <h6 class="mb-0 text-nowrap">@Model.DueDate.ToString("yyyy-MM-dd")</h6>
-                            <small>@T("dashboard.owner.status.today")</small>
+                            @if (Model.DueStatus != DashboardDueStatus.Overdue)
+                            {
+                                <small>@T("dashboard.owner.status.today")</small>
+                            }
+                            @if (Model.DueStatus == DashboardDueStatus.Overdue)
+                            {
+                                <small class="text-danger d-block">@overdueDays @T("dashboard.owner.daysago")</small>
+                            }
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-4">
                     <div class="d-flex">
-                        <div class="avatar flex-shrink-0 me-2">
+                        <div class="avatar flex-shrink-0 mx-2">
                             <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-time-five"></i></span>
                         </div>
                         <div>
@@ -64,21 +87,19 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="mb-3">
-                <span class="badge bg-label-secondary me-1">@(Model.ActionType == DashboardActionType.Watering ? T("dashboard.owner.action.watering") : T("dashboard.owner.action.fertilizing"))</span>
-                <span class="badge bg-label-@badgeClass me-1">
-                    @(Model.DueStatus == DashboardDueStatus.Overdue
-                        ? T("dashboard.owner.status.overdue")
-                        : Model.DueStatus == DashboardDueStatus.Today
-                            ? T("dashboard.owner.status.today")
-                            : T("dashboard.owner.status.upcoming"))
-                </span>
-                @if (Model.DueStatus == DashboardDueStatus.Overdue)
-                {
-                    <span class="text-danger small">@overdueDays @T("dashboard.owner.days")</span>
-                }
+                <div class="col-4">
+                    <div class="d-flex">
+                        <div class="avatar flex-shrink-0 me-2">
+                            <span class="avatar-initial rounded bg-label-info">
+                                <i class="bx @(Model.ActionType == DashboardActionType.Watering ? "bx-droplet" : "bx-flask")"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-nowrap">@quantityDisplay</h6>
+                            <small>@T(Model.ActionType == DashboardActionType.Watering ? "dashboard.owner.amountL" : "dashboard.owner.quantity")</small>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="d-flex flex-wrap gap-2">
@@ -87,6 +108,9 @@
                         data-url="@logUrl"
                         data-plant-instance-id="@Model.PlantInstanceId"
                         data-action-type="@actionTypeStr"
+                        data-water-amount-l="@Model.WaterAmountL"
+                        data-fertilizer-quantity="@Model.FertilizerQuantity"
+                        data-fertilizer-unit="@((int?)Model.FertilizerQuantityUnit)"
                         data-label-done="@T("dashboard.owner.action.done")"
                         title="@T("dashboard.owner.action.done")">
                     <i class="bx bx-check"></i> @T("dashboard.owner.action.done")

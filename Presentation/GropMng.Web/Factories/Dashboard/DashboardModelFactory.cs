@@ -155,7 +155,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         {
             if (!instanceMap.TryGetValue(schedule.PlantInstanceId, out var instance)) continue;
             var dueDate = CalculateDueDate(latestWateringByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
-            wateringRows.Add(BuildActionRow(instance, DashboardActionType.Watering, schedule.FrequencyDays, schedule.Season, dueDate, today, plantMap, spotMap, locationMap));
+            wateringRows.Add(BuildActionRow(instance, DashboardActionType.Watering, schedule.FrequencyDays, schedule.Season,
+                waterAmountL: schedule.WaterAmountL, fertilizerQuantity: null, fertilizerUnit: null,
+                dueDate, today, plantMap, spotMap, locationMap));
         }
 
         // Build fertilizing action rows
@@ -164,7 +166,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         {
             if (!instanceMap.TryGetValue(schedule.PlantInstanceId, out var instance)) continue;
             var dueDate = CalculateDueDate(latestFertilizingByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
-            fertilizingRows.Add(BuildActionRow(instance, DashboardActionType.Fertilizing, schedule.FrequencyDays, schedule.Season, dueDate, today, plantMap, spotMap, locationMap));
+            fertilizingRows.Add(BuildActionRow(instance, DashboardActionType.Fertilizing, schedule.FrequencyDays, schedule.Season,
+                waterAmountL: null, fertilizerQuantity: schedule.Quantity, fertilizerUnit: schedule.Unit,
+                dueDate, today, plantMap, spotMap, locationMap));
         }
 
         var actionableWatering = wateringRows
@@ -230,6 +234,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         DashboardActionType type,
         byte frequencyDays,
         GardenSeason season,
+        decimal? waterAmountL,
+        decimal? fertilizerQuantity,
+        GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit? fertilizerUnit,
         DateOnly dueDate,
         DateOnly today,
         IReadOnlyDictionary<int, Plant> plantMap,
@@ -259,7 +266,10 @@ public class DashboardModelFactory : IDashboardModelFactory
             FrequencyDays = frequencyDays,
             Season = season,
             DueDate = dueDate,
-            DueStatus = dueStatus
+            DueStatus = dueStatus,
+            WaterAmountL = waterAmountL,
+            FertilizerQuantity = fertilizerQuantity,
+            FertilizerQuantityUnit = fertilizerUnit
         };
     }
 

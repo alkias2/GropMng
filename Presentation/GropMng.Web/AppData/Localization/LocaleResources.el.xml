@@ -1429,7 +1429,34 @@
     <Name>dashboard.owner.days</Name>
     <Value>ημέρες</Value>
   </LocaleResource>
-  <!-- My Garden -->
+  <LocaleResource>
+    <Name>dashboard.owner.daysago</Name>
+    <Value>μέρες πριν</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.amountL</Name>
+    <Value>Λίτρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.quantity</Name>
+    <Value>Ποσότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.waterall</Name>
+    <Value>Πότισμα όλων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.fertilizeall</Name>
+    <Value>Λίπανση όλων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.toast.waterall.success.template</Name>
+    <Value>Καταγράφηκε πότισμα για {0} φυτά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.toast.fertilizeall.success.template</Name>
+    <Value>Καταγράφηκε λίπανση για {0} φυτά.</Value>
+  </LocaleResource>
   <LocaleResource>
     <Name>mygarden.menu.title</Name>
     <Value>Ο Κήπος μου</Value>

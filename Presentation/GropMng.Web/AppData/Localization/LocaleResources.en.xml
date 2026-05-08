@@ -1431,7 +1431,34 @@
     <Name>dashboard.owner.days</Name>
     <Value>days</Value>
   </LocaleResource>
-  <!-- My Garden -->
+  <LocaleResource>
+    <Name>dashboard.owner.daysago</Name>
+    <Value>days ago</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.amountL</Name>
+    <Value>Liters</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.quantity</Name>
+    <Value>Quantity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.waterall</Name>
+    <Value>Water all</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.cta.fertilizeall</Name>
+    <Value>Fertilize all</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.toast.waterall.success.template</Name>
+    <Value>Watering recorded for {0} plants.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.toast.fertilizeall.success.template</Name>
+    <Value>Fertilizing recorded for {0} plants.</Value>
+  </LocaleResource>
   <LocaleResource>
     <Name>mygarden.menu.title</Name>
     <Value>My Garden</Value>
