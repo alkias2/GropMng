@@ -26,7 +26,11 @@ internal sealed class FertilizerCatalogSeeder
         new("Λίπασμα Οξύφιλων Φυτών", "COMPO Azalee-Rhododendron", "7-3-7 (όξινο)", FertilizerKind.Mineral, FertilizerApplicationMethod.Diluted),
         new("Λίπασμα Οπωροφόρων Δέντρων", "COMPO Obstbaum Dünger", "8-8-8", FertilizerKind.Mineral, FertilizerApplicationMethod.Soil),
         new("Λίπασμα Πράσινων Φυτών", "COMPO Green Plants", "7-3-7", FertilizerKind.Chemical, FertilizerApplicationMethod.Diluted),
-        new("Λίπασμα Κάκτων", "COMPO Kaktus Dünger", "5-10-5", FertilizerKind.Chemical, FertilizerApplicationMethod.Diluted)
+        new("Λίπασμα Κάκτων", "COMPO Kaktus Dünger", "5-10-5", FertilizerKind.Chemical, FertilizerApplicationMethod.Diluted),
+        new("Gemma Οργανικό για Τριανταφυλλιές & Ανθοφόρα", "Gemma", "Κοκκώδες βραδ. αποδ.", FertilizerKind.Organic, FertilizerApplicationMethod.Soil, isOrganic: true),
+        new("Gemma Οργανικό Εσπεριδοειδή & Καρποφόρα", "Gemma", "N6-P3-K18+Mg κοκκώδες", FertilizerKind.Organic, FertilizerApplicationMethod.Soil, isOrganic: true),
+        new("Gemma Βιολογική Ακτιβοζίνη για Οξύφιλα", "Gemma", "#NAME?", FertilizerKind.Organic, FertilizerApplicationMethod.Soil, isOrganic: true),
+        new("Compo Υγρό για Κάκτους & Παχύφυτα", "Compo", "NPK 5-5-7+ΙΧΝ υγρό", FertilizerKind.Chemical, FertilizerApplicationMethod.Diluted)
     ];
 
     private readonly GropContext _dbContext;

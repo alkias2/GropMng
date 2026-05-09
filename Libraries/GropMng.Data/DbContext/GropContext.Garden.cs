@@ -375,6 +375,7 @@ public partial class GropContext
         entity.Property(e => e.Quantity).HasPrecision(8, 3);
         entity.Property(e => e.Unit).HasMaxLength(10).HasNullableStorageEnumConversion().HasDefaultValue(FertilizerQuantityUnit.Gram);
         entity.Property(e => e.Notes).HasMaxLength(500);
+        entity.Property(e => e.DilutionInstructions).HasMaxLength(50);
 
         entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_FertilizingSchedule_OwnerId");
         entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_FertilizingSchedule_InstanceId");
