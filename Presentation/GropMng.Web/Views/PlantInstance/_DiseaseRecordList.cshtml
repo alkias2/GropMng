@@ -1,0 +1,102 @@
+@model GropMng.Web.Models.Garden.DiseaseRecordTabModel
+
+@if (!Model.Records.Any())
+{
+    <p class="text-muted small mb-0">@T("mygarden.disease.record.empty")</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.disease.record.field.disease")</th>
+                    <th style="width:120px">@T("mygarden.disease.record.field.detected")</th>
+                    <th style="width:120px">@T("mygarden.disease.record.field.resolved")</th>
+                    <th style="width:120px">@T("mygarden.disease.record.field.severity")</th>
+                    <th style="width:120px">@T("mygarden.disease.record.field.outcome")</th>
+                    <th style="width:90px">@T("mygarden.disease.photo.title")</th>
+                    <th style="width:160px" class="text-end">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Records)
+                {
+                    var severityKey = row.Severity?.ToString().ToLowerInvariant() ?? "";
+                    var outcomeKey = row.Outcome?.ToString().ToLowerInvariant() ?? "";
+                    var collapseId = $"disease-photos-collapse-{row.Id}";
+
+                    <tr>
+                        <td class="small fw-semibold">@row.DiseaseName</td>
+                        <td class="small">@row.DetectedDate.ToString("yyyy-MM-dd")</td>
+                        <td class="small">@(row.ResolvedDate?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td class="small">
+                            @if (!string.IsNullOrEmpty(severityKey))
+                            {
+                                @T($"mygarden.disease.severity.{severityKey}")
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="small">
+                            @if (!string.IsNullOrEmpty(outcomeKey))
+                            {
+                                @T($"mygarden.disease.outcome.{outcomeKey}")
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="small text-center">@row.PhotoCount</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-secondary disease-record-edit-btn"
+                                    data-record-id="@row.Id"
+                                    data-diseaseid="@row.DiseaseId"
+                                    data-detected="@row.DetectedDate.ToString("yyyy-MM-dd")"
+                                    data-resolved="@(row.ResolvedDate?.ToString("yyyy-MM-dd") ?? "")"
+                                    data-severity="@(row.Severity?.ToString() ?? "")"
+                                    data-outcome="@(row.Outcome?.ToString() ?? "")"
+                                    data-treatment="@(row.TreatmentUsed ?? "")"
+                                    data-notes="@(row.Notes ?? "")"
+                                    title="@T("common.edit")">
+                                <i class="bx bx-edit-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-success disease-record-resolve-btn"
+                                    data-record-id="@row.Id"
+                                    title="@T("mygarden.disease.record.quickresolve")">
+                                <i class="bx bx-check-circle"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger disease-record-delete-btn"
+                                    data-record-id="@row.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#@collapseId"
+                                    aria-expanded="false"
+                                    aria-controls="@collapseId"
+                                    title="@T("mygarden.disease.photo.manage")">
+                                <i class="bx bx-camera"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="collapse" id="@collapseId">
+                        <td colspan="7">
+                            @await Html.PartialAsync("_DiseaseRecordDetail", row)
+                            @await Html.PartialAsync("_DiseasePhotoList", new GropMng.Web.Models.Garden.DiseasePhotoListSectionModel
+                            {
+                                PlantInstanceId = Model.PlantInstanceId,
+                                RecordId = row.Id,
+                                Photos = Model.PhotosByRecordId.TryGetValue(row.Id, out var photos) ? photos : Array.Empty<GropMng.Web.Models.Garden.DiseasePhotoRowModel>()
+                            })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

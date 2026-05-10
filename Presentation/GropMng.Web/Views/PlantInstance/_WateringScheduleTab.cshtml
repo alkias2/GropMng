@@ -1,0 +1,136 @@
+@model IReadOnlyList<GropMng.Web.Models.Garden.WateringScheduleRowModel>
+@{
+    var plantInstanceId = (int)ViewBag.PlantInstanceId;
+    var logRows = (IEnumerable<GropMng.Web.Models.Garden.WateringLogRowModel>)ViewBag.LogRows;
+}
+
+@* ── Schedules Section ───────────────────────────────────────────── *@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">@T("mygarden.watering.schedule.title")</h6>
+    <button type="button" class="btn btn-sm btn-primary"
+            id="watering-add-btn-@plantInstanceId"
+            data-schedule-id="0">
+        <i class="bx bx-plus me-1"></i>@T("mygarden.watering.schedule.add")
+    </button>
+</div>
+
+@if (!Model.Any())
+{
+    <p class="text-muted small" id="watering-empty-@plantInstanceId">@T("mygarden.watering.schedule.empty")</p>
+}
+
+<div class="table-responsive mb-4" id="watering-schedule-list-@plantInstanceId">
+    @if (Model.Any())
+    {
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.watering.schedule.field.season")</th>
+                    <th style="width:130px">@T("mygarden.watering.schedule.field.frequencydays")</th>
+                    <th style="width:120px">@T("mygarden.watering.schedule.field.amount")</th>
+                    <th style="width:130px">@T("mygarden.watering.schedule.field.timeofday")</th>
+                    <th>@T("mygarden.watering.schedule.field.notes")</th>
+                    <th style="width:100px; text-align:right">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model)
+                {
+                    <tr data-schedule-id="@row.Id">
+                        <td>
+                            @switch (row.Season)
+                            {
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Spring: @T("common.season.spring"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Summer: @T("common.season.summer"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Autumn: @T("common.season.autumn"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Winter: @T("common.season.winter"); break;
+                                default: @T("common.season.allyear"); break;
+                            }
+                        </td>
+                        <td>@row.FrequencyLabel</td>
+                        <td>@(row.WaterAmountLabel ?? "—")</td>
+                        <td>
+                            @if (row.TimeOfDay.HasValue)
+                            {
+                                @switch (row.TimeOfDay.Value)
+                                {
+                                    case GropMng.Core.Domain.Garden.Enums.GardenTimeOfDay.Morning: @T("common.timeofday.morning"); break;
+                                    case GropMng.Core.Domain.Garden.Enums.GardenTimeOfDay.Midday:  @T("common.timeofday.midday");  break;
+                                    case GropMng.Core.Domain.Garden.Enums.GardenTimeOfDay.Evening: @T("common.timeofday.evening"); break;
+                                    default: @T("common.timeofday.any"); break;
+                                }
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="text-muted small">@(row.Notes ?? "—")</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-secondary watering-edit-btn"
+                                    data-schedule-id="@row.Id"
+                                    data-season="@row.Season"
+                                    data-frequency="@row.FrequencyLabel"
+                                    data-amount="@(row.WaterAmountLabel?.Replace(" L", "") ?? "")"
+                                    data-timeofday="@(row.TimeOfDay?.ToString() ?? "")"
+                                    data-notes="@(row.Notes ?? "")"
+                                    title="@T("common.edit")">
+                                <i class="bx bx-edit-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger watering-delete-btn"
+                                    data-schedule-id="@row.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<hr class="my-3" />
+
+@* ── Recent Watering Log ─────────────────────────────────────────── *@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">@T("mygarden.watering.log.title")</h6>
+    <span class="text-muted small">@T("mygarden.watering.log.viewall")</span>
+</div>
+
+@if (!logRows.Any())
+{
+    <p class="text-muted small">@T("mygarden.watering.log.empty")</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.watering.log.field.date")</th>
+                    <th style="width:120px">@T("mygarden.watering.log.field.amount")</th>
+                    <th>@T("mygarden.watering.log.field.notes")</th>
+                    <th style="width:100px; text-align:right">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in logRows)
+                {
+                    <tr>
+                        <td class="small">@log.WateredAtUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td class="small">@(log.WaterAmountLabel ?? "—")</td>
+                        <td class="text-muted small">@(log.Notes ?? "—")</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger watering-log-delete-btn"
+                                    data-log-id="@log.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,60 @@
+@model GropMng.Web.Models.Garden.RepottingFormModel
+@{
+    var modalId = $"repotting-modal-{Model.PlantInstanceId}";
+}
+<div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="@(modalId)-title"
+                    data-title-add="@T("mygarden.repotting.add")"
+                    data-title-edit="@T("mygarden.repotting.edit")">
+                    @T("mygarden.repotting.add")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="@(modalId)-log-id" value="0" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">@T("mygarden.repotting.form.newcontainer")</label>
+                        <select id="@(modalId)-containerid" class="form-select">
+                            @foreach (var container in Model.AvailableContainers)
+                            {
+                                <option value="@container.Value">@container.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">@T("mygarden.repotting.form.newsoilmix")</label>
+                        <select id="@(modalId)-soilmixid" class="form-select">
+                            @foreach (var soilMix in Model.AvailableSoilMixes)
+                            {
+                                <option value="@soilMix.Value">@soilMix.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.repotting.form.date") <span class="text-danger">*</span></label>
+                        <input type="date" id="@(modalId)-repottedon" class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">@T("mygarden.repotting.form.notes")</label>
+                        <textarea id="@(modalId)-notes" class="form-control" rows="3" maxlength="500"></textarea>
+                    </div>
+                </div>
+
+                <div id="@(modalId)-error" class="text-danger small mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(modalId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+@model GropMng.Web.Models.Garden.QuickContainerCreateFormModel
+@{
+    var modalId = $"quick-container-modal-{Model.PlantInstanceId}";
+}
+<div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@T("mygarden.repotting.container.quickcreate")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.container.field.type")</label>
+                        <select id="@(modalId)-type" class="form-select">
+                            @foreach (var type in Model.AvailableContainerTypes)
+                            {
+                                <option value="@type.Value">@type.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.container.field.material")</label>
+                        <input type="text" id="@(modalId)-material" class="form-control" maxlength="100" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.container.field.color")</label>
+                        <input type="text" id="@(modalId)-color" class="form-control" maxlength="50" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.base")</label>
+                        <input type="text" id="@(modalId)-base" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.rim")</label>
+                        <input type="text" id="@(modalId)-rim" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.height")</label>
+                        <input type="text" id="@(modalId)-height" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.volume")</label>
+                        <input type="text" id="@(modalId)-volume" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.length")</label>
+                        <input type="text" id="@(modalId)-length" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">@T("mygarden.container.field.width")</label>
+                        <input type="text" id="@(modalId)-width" class="form-control" inputmode="decimal" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="@(modalId)-drainage" checked />
+                            <label class="form-check-label" for="@(modalId)-drainage">@T("mygarden.container.field.drainage")</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">@T("common.notes")</label>
+                        <textarea id="@(modalId)-notes" class="form-control" rows="3" maxlength="500"></textarea>
+                    </div>
+                </div>
+
+                <div id="@(modalId)-error" class="text-danger small mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(modalId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

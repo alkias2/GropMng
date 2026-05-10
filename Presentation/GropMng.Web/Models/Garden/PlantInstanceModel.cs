@@ -48,6 +48,8 @@ public class PlantInstanceModel
 
     public PlantHealthStatus HealthStatus { get; set; } = PlantHealthStatus.Good;
 
+    public int ActiveDiseaseCount { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     [MaxLength(500)]

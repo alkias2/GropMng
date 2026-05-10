@@ -1,0 +1,173 @@
+@model GropMng.Web.Models.Garden.FertilizingScheduleTabModel
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">@T("mygarden.fertilizing.schedule.title")</h6>
+    <button type="button" class="btn btn-sm btn-primary"
+            id="fertilizing-add-btn-@Model.PlantInstanceId"
+            data-schedule-id="0">
+        <i class="bx bx-plus me-1"></i>@T("mygarden.fertilizing.schedule.add")
+    </button>
+</div>
+
+@if (!Model.Schedules.Any())
+{
+    <p class="text-muted small" id="fertilizing-empty-@Model.PlantInstanceId">@T("mygarden.fertilizing.schedule.empty")</p>
+}
+
+<div class="table-responsive mb-4" id="fertilizing-schedule-list-@Model.PlantInstanceId">
+    @if (Model.Schedules.Any())
+    {
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.fertilizing.schedule.field.fertilizer")</th>
+                    <th>@T("mygarden.fertilizing.schedule.field.season")</th>
+                    <th style="width:130px">@T("mygarden.fertilizing.schedule.field.frequencydays")</th>
+                    <th style="width:160px">@T("mygarden.fertilizing.schedule.field.quantity")</th>
+                    <th>@T("mygarden.fertilizing.schedule.field.notes")</th>
+                    <th>@T("mygarden.fertilizing.schedule.field.dilution")</th>
+                    <th style="width:100px; text-align:right">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Schedules)
+                {
+                    <tr data-schedule-id="@row.Id">
+                        <td>@row.FertilizerName</td>
+                        <td>
+                            @switch (row.Season)
+                            {
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Spring: @T("common.season.spring"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Summer: @T("common.season.summer"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Autumn: @T("common.season.autumn"); break;
+                                case GropMng.Core.Domain.Garden.Enums.GardenSeason.Winter: @T("common.season.winter"); break;
+                                default: @T("common.season.allyear"); break;
+                            }
+                        </td>
+                        <td>@row.FrequencyLabel</td>
+                        <td>
+                            @if (row.Quantity.HasValue)
+                            {
+                                <span>@row.Quantity.Value.ToString("0.##")</span>
+                                @if (row.Unit.HasValue)
+                                {
+                                    <span class="text-muted small ms-1">
+                                        @switch (row.Unit.Value)
+                                        {
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Gram: @T("common.quantityunit.gram"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Kilogram: @T("common.quantityunit.kilogram"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Millilitre: @T("common.quantityunit.millilitre"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Litre: @T("common.quantityunit.litre"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Tablespoon: @T("common.quantityunit.tablespoon"); break;
+                                            default: @T("common.quantityunit.teaspoon"); break;
+                                        }
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="text-muted small">@(row.Notes ?? "—")</td>
+                        <td class="text-muted small">@(row.DilutionInstructions ?? "—")</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-secondary fertilizing-edit-btn"
+                                    data-schedule-id="@row.Id"
+                                    data-fertilizerid="@row.FertilizerId"
+                                    data-season="@row.Season"
+                                    data-frequency="@row.FrequencyLabel"
+                                    data-quantity="@(row.Quantity?.ToString("0.##", global::System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                                    data-unit="@(row.Unit?.ToString() ?? "")"
+                                    data-notes="@(row.Notes ?? "")"
+                                    data-dilution="@(row.DilutionInstructions ?? "")"
+                                    title="@T("common.edit")">
+                                <i class="bx bx-edit-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fertilizing-delete-btn"
+                                    data-schedule-id="@row.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<hr class="my-3" />
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">@T("mygarden.fertilizing.log.title")</h6>
+    <span class="text-muted small">@T("mygarden.fertilizing.log.viewall")</span>
+</div>
+
+@if (!Model.LogRows.Any())
+{
+    <p class="text-muted small">@T("mygarden.fertilizing.log.empty")</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.fertilizing.log.field.date")</th>
+                    <th>@T("mygarden.fertilizing.log.field.fertilizer")</th>
+                    <th style="width:160px">@T("mygarden.fertilizing.log.field.quantity")</th>
+                    <th>@T("mygarden.fertilizing.log.field.notes")</th>
+                    <th style="width:100px; text-align:right">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.LogRows)
+                {
+                    <tr>
+                        <td class="small">@log.AppliedAtUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                        <td class="small">@log.FertilizerName</td>
+                        <td class="small">
+                            @if (log.Quantity.HasValue)
+                            {
+                                <span>@log.Quantity.Value.ToString("0.##")</span>
+                                @if (log.Unit.HasValue)
+                                {
+                                    <span class="text-muted small ms-1">
+                                        @switch (log.Unit.Value)
+                                        {
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Gram: @T("common.quantityunit.gram"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Kilogram: @T("common.quantityunit.kilogram"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Millilitre: @T("common.quantityunit.millilitre"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Litre: @T("common.quantityunit.litre"); break;
+                                            case GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit.Tablespoon: @T("common.quantityunit.tablespoon"); break;
+                                            default: @T("common.quantityunit.teaspoon"); break;
+                                        }
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="text-muted small">@(log.Notes ?? "—")</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger fertilizing-log-delete-btn"
+                                    data-log-id="@log.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@await Html.PartialAsync("_FertilizingScheduleForm", new GropMng.Web.Models.Garden.FertilizingScheduleFormModel
+{
+    PlantInstanceId = Model.PlantInstanceId,
+    AvailableFertilizers = Model.AvailableFertilizers
+})

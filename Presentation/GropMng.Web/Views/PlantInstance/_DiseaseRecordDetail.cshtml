@@ -1,0 +1,12 @@
+@model GropMng.Web.Models.Garden.DiseaseRecordRowModel
+
+<div class="small text-muted">
+    <div>
+        <strong>@T("mygarden.disease.record.field.treatment"):</strong>
+        @(string.IsNullOrWhiteSpace(Model.TreatmentUsed) ? "—" : Model.TreatmentUsed)
+    </div>
+    <div class="mt-1">
+        <strong>@T("mygarden.disease.record.field.notes"):</strong>
+        @(string.IsNullOrWhiteSpace(Model.Notes) ? "—" : Model.Notes)
+    </div>
+</div>

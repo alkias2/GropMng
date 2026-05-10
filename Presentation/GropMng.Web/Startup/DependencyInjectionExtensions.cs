@@ -39,6 +39,7 @@ using GropMng.Web.Areas.Admin.Factories.SoilMix;
 using GropMng.Web.Areas.Admin.Factories.Settings;
 using GropMng.Web.Areas.Admin.Factories.User;
 using GropMng.Web.Factories.Dashboard;
+using GropMng.Web.Infrastructure.ModelBinding;
 using GropMng.Web.Infrastructure.Navigation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
@@ -77,7 +78,12 @@ public static class DependencyInjectionExtensions
     /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
     public static IServiceCollection AddCoreFrameworkServices(this IServiceCollection services)
     {
-        services.AddControllersWithViews().AddRazorRuntimeCompilation();
+        services
+            .AddControllersWithViews(options =>
+            {
+                options.ModelBinderProviders.Insert(0, new FlexibleDecimalModelBinderProvider());
+            })
+            .AddRazorRuntimeCompilation();
         services.AddMemoryCache();
         services.AddHttpContextAccessor();
         services.AddDataProtection();

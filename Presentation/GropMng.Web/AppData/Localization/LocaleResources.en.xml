@@ -1632,6 +1632,601 @@
     <Name>mygarden.plantinstance.photo.field.image</Name>
     <Value>Image</Value>
   </LocaleResource>
+  <!-- PlantInstance Tabs -->
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.details</Name>
+    <Value>Details</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.watering</Name>
+    <Value>Watering</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.fertilizing</Name>
+    <Value>Fertilizing</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.diseases</Name>
+    <Value>Diseases</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.container</Name>
+    <Value>Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.photos</Name>
+    <Value>Photos</Value>
+  </LocaleResource>
+  <!-- Repotting -->
+  <LocaleResource>
+    <Name>mygarden.repotting.title</Name>
+    <Value>Repotting</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.add</Name>
+    <Value>Add Repotting</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.edit</Name>
+    <Value>Edit Repotting</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.quickcreate</Name>
+    <Value>Quick Create Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.title</Name>
+    <Value>Current Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.container</Name>
+    <Value>Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmix</Name>
+    <Value>Soil Mix</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.volume</Name>
+    <Value>Volume</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.notes</Name>
+    <Value>Container Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.changed</Name>
+    <Value>Changed On</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.created</Name>
+    <Value>Created On</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.updated</Name>
+    <Value>Updated On</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredients</Name>
+    <Value>Soil Mix Composition</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.name</Name>
+    <Value>Ingredient</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.percentage</Name>
+    <Value>Percentage</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredients.empty</Name>
+    <Value>No ingredient composition is available for the selected mix.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.title</Name>
+    <Value>Repotting History</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.recent</Name>
+    <Value>Recent entries</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.empty</Name>
+    <Value>No repotting history available.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.date</Name>
+    <Value>Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.container</Name>
+    <Value>Container Change</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.soilmix</Name>
+    <Value>Soil Mix Change</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.nochange</Name>
+    <Value>No change</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.newcontainer</Name>
+    <Value>New Container</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.newsoilmix</Name>
+    <Value>New Soil Mix</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.date</Name>
+    <Value>Repotting Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.validation.date</Name>
+    <Value>Repotting date is required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.delete.confirm</Name>
+    <Value>Delete this repotting entry?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.save.success</Name>
+    <Value>Repotting entry saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.save.error</Name>
+    <Value>Failed to save repotting entry.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.delete.success</Name>
+    <Value>Repotting entry deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.delete.error</Name>
+    <Value>Failed to delete repotting entry.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.notifications.create.success</Name>
+    <Value>Container created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.notifications.create.error</Name>
+    <Value>Failed to create container.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.load.error</Name>
+    <Value>Failed to load container data.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.dialog.confirm</Name>
+    <Value>Confirm</Value>
+  </LocaleResource>
+  <!-- PlantDiseaseRecord -->
+  <LocaleResource>
+    <Name>mygarden.disease.record.title</Name>
+    <Value>Disease Records</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.add</Name>
+    <Value>Add Record</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.edit</Name>
+    <Value>Edit Record</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.empty</Name>
+    <Value>No disease records available.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.quickresolve</Name>
+    <Value>Quick Resolve</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.delete.confirm</Name>
+    <Value>Delete this disease record?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.validation.required</Name>
+    <Value>Disease and detected date are required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.disease</Name>
+    <Value>Disease</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.detected</Name>
+    <Value>Detected Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.resolved</Name>
+    <Value>Resolved Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.severity</Name>
+    <Value>Severity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.outcome</Name>
+    <Value>Outcome</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.treatment</Name>
+    <Value>Treatment</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.save.success</Name>
+    <Value>Disease record saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.save.error</Name>
+    <Value>Failed to save disease record.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.delete.success</Name>
+    <Value>Disease record deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.delete.error</Name>
+    <Value>Failed to delete disease record.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.resolve.success</Name>
+    <Value>Disease record marked as resolved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.mild</Name>
+    <Value>Mild</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.moderate</Name>
+    <Value>Moderate</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.severe</Name>
+    <Value>Severe</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.critical</Name>
+    <Value>Critical</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.resolved</Name>
+    <Value>Resolved</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.ongoing</Name>
+    <Value>Ongoing</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.lost</Name>
+    <Value>Lost</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.unknown</Name>
+    <Value>Unknown</Value>
+  </LocaleResource>
+  <!-- DiseasePhoto -->
+  <LocaleResource>
+    <Name>mygarden.disease.photo.title</Name>
+    <Value>Photos</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.manage</Name>
+    <Value>Manage Photos</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.add</Name>
+    <Value>Add Photo</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.empty</Name>
+    <Value>No photos for this record.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.upload.placeholder</Name>
+    <Value>Select image to upload</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.delete.confirm</Name>
+    <Value>Delete this disease photo?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.validation.required</Name>
+    <Value>Please upload a photo first.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.notifications.add.success</Name>
+    <Value>Disease photo added.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.notifications.delete.success</Name>
+    <Value>Disease photo deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.image</Name>
+    <Value>Image</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.takendate</Name>
+    <Value>Taken Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.displayorder</Name>
+    <Value>Display Order</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <!-- WateringSchedule -->
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.title</Name>
+    <Value>Watering Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.add</Name>
+    <Value>Add Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.edit</Name>
+    <Value>Edit Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.empty</Name>
+    <Value>No watering schedules defined yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.delete.confirm</Name>
+    <Value>Delete this watering schedule?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.season</Name>
+    <Value>Season</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.frequencydays</Name>
+    <Value>Every (days)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.amount</Name>
+    <Value>Amount (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.timeofday</Name>
+    <Value>Time of Day</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.save.success</Name>
+    <Value>Watering schedule saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.delete.success</Name>
+    <Value>Watering schedule deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.title</Name>
+    <Value>Watering Log</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.viewall</Name>
+    <Value>Full log history →</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.date</Name>
+    <Value>Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.amount</Name>
+    <Value>Amount</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.empty</Name>
+    <Value>No watering entries recorded yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.delete.confirm</Name>
+    <Value>Delete this watering log entry?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.notifications.delete.success</Name>
+    <Value>Watering log entry deleted.</Value>
+  </LocaleResource>
+  <!-- FertilizingSchedule -->
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.title</Name>
+    <Value>Fertilizing Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.add</Name>
+    <Value>Add Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.edit</Name>
+    <Value>Edit Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.empty</Name>
+    <Value>No fertilizing schedules defined yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.delete.confirm</Name>
+    <Value>Delete this fertilizing schedule?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.validation.required</Name>
+    <Value>Fertilizer, season, and frequency are required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.fertilizer</Name>
+    <Value>Fertilizer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.season</Name>
+    <Value>Season</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.frequencydays</Name>
+    <Value>Every (days)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.quantity</Name>
+    <Value>Quantity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.unit</Name>
+    <Value>Unit</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.dilution</Name>
+    <Value>Dilution Instructions</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.save.success</Name>
+    <Value>Fertilizing schedule saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.save.error</Name>
+    <Value>Failed to save fertilizing schedule.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.delete.success</Name>
+    <Value>Fertilizing schedule deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.delete.error</Name>
+    <Value>Failed to delete fertilizing schedule.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.title</Name>
+    <Value>Fertilizing Log</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.viewall</Name>
+    <Value>Full log history →</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.date</Name>
+    <Value>Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.fertilizer</Name>
+    <Value>Fertilizer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.quantity</Name>
+    <Value>Quantity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.empty</Name>
+    <Value>No fertilizing entries recorded yet.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.delete.confirm</Name>
+    <Value>Delete this fertilizing log entry?</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.notifications.delete.success</Name>
+    <Value>Fertilizing log entry deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.gram</Name>
+    <Value>g</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.kilogram</Name>
+    <Value>kg</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.millilitre</Name>
+    <Value>ml</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.litre</Name>
+    <Value>L</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.tablespoon</Name>
+    <Value>tbsp</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.teaspoon</Name>
+    <Value>tsp</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.networkerror</Name>
+    <Value>Network error.</Value>
+  </LocaleResource>
+  <!-- Common Enums -->
+  <LocaleResource>
+    <Name>common.season.spring</Name>
+    <Value>Spring</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.summer</Name>
+    <Value>Summer</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.autumn</Name>
+    <Value>Autumn</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.winter</Name>
+    <Value>Winter</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.allyear</Name>
+    <Value>All Year</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.morning</Name>
+    <Value>Morning</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.midday</Name>
+    <Value>Midday</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.evening</Name>
+    <Value>Evening</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.any</Name>
+    <Value>Any time</Value>
+  </LocaleResource>
   <!-- Container -->
   <LocaleResource>
     <Name>mygarden.container.list.title</Name>
@@ -1692,6 +2287,10 @@
   <LocaleResource>
     <Name>mygarden.container.field.drainage</Name>
     <Value>Has Drainage Hole</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.notes</Name>
+    <Value>Notes</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>mygarden.container.inuse.warning</Name>

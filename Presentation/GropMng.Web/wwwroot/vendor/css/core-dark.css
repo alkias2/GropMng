@@ -19240,6 +19240,19 @@ html:not(.layout-footer-fixed) .content-wrapper {
   }
 }
 
+.grop-pot-diagram {
+  max-width: 420px;
+  margin-inline: auto;
+}
+.grop-pot-diagram__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0.5px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  background: var(--bs-body-bg);
+}
+
 .mm-categories-page .category-pane {
   display: grid;
   gap: 1rem;

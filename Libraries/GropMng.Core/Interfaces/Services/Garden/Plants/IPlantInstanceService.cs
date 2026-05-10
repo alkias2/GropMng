@@ -156,6 +156,26 @@ public interface IPlantInstanceService
     Task DeleteWateringScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieves a paged list of watering log entries for a plant instance. Logs are read-only from this service.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="pageIndex">The zero-based page index.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>A paged list of watering log entries ordered by date descending.</returns>
+    Task<IPagedList<WateringLog>> GetWateringLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a watering log entry from a plant instance.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="logId">The identifier of the watering log entry to delete.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    Task DeleteWateringLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Retrieves all fertilizing schedules for a plant instance.
     /// </summary>
     /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
@@ -190,6 +210,64 @@ public interface IPlantInstanceService
     /// <param name="ownerId">The owner identifier used to validate access to the plant instance.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     Task DeleteFertilizingScheduleAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paged list of fertilizing log entries for a plant instance.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="pageIndex">The zero-based page index.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>A paged list of fertilizing log entries ordered by date descending.</returns>
+    Task<IPagedList<FertilizingLog>> GetFertilizingLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a fertilizing log entry from a plant instance.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="logId">The identifier of the fertilizing log entry to delete.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    Task DeleteFertilizingLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a repotting event and updates the current container/soil mix of the plant instance atomically.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="repottingLog">The repotting payload to persist.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The created repotting log entry.</returns>
+    Task<RepottingLog> RepotPlantAsync(int plantInstanceId, RepottingLog repottingLog, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves repotting logs for a plant instance ordered by repot date descending.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="pageIndex">The zero-based page index.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>A paged list of repotting logs.</returns>
+    Task<IPagedList<RepottingLog>> GetRepottingLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates a repotting log entry that belongs to a plant instance.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="repottingLog">The repotting log with updated values.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The updated repotting log entry.</returns>
+    Task<RepottingLog> UpdateRepottingLogAsync(int plantInstanceId, RepottingLog repottingLog, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a repotting log entry from a plant instance.
+    /// </summary>
+    /// <param name="plantInstanceId">The identifier of the parent plant instance.</param>
+    /// <param name="logId">The identifier of the repotting log entry to delete.</param>
+    /// <param name="ownerId">The owner identifier used to validate access.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    Task DeleteRepottingLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all photos for a plant instance.

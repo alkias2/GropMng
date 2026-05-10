@@ -7,6 +7,7 @@ using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using Microsoft.EntityFrameworkCore;
 
 namespace GropMng.Services.Services.Garden.Plants;
 
@@ -23,7 +24,10 @@ public class PlantInstanceService : IPlantInstanceService
     private readonly IRepository<Container> _containerRepository;
     private readonly IRepository<SoilMix> _soilMixRepository;
     private readonly IRepository<WateringSchedule> _wateringScheduleRepository;
+    private readonly IRepository<WateringLog> _wateringLogRepository;
     private readonly IRepository<FertilizingSchedule> _fertilizingScheduleRepository;
+    private readonly IRepository<FertilizingLog> _fertilizingLogRepository;
+    private readonly IRepository<RepottingLog> _repottingLogRepository;
     private readonly IRepository<PlantPhoto> _plantPhotoRepository;
     private readonly IRepository<PlantNote> _plantNoteRepository;
     private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
@@ -45,7 +49,10 @@ public class PlantInstanceService : IPlantInstanceService
         IRepository<Container> containerRepository,
         IRepository<SoilMix> soilMixRepository,
         IRepository<WateringSchedule> wateringScheduleRepository,
+        IRepository<WateringLog> wateringLogRepository,
         IRepository<FertilizingSchedule> fertilizingScheduleRepository,
+        IRepository<FertilizingLog> fertilizingLogRepository,
+        IRepository<RepottingLog> repottingLogRepository,
         IRepository<PlantPhoto> plantPhotoRepository,
         IRepository<PlantNote> plantNoteRepository,
         IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
@@ -59,7 +66,10 @@ public class PlantInstanceService : IPlantInstanceService
         _containerRepository = containerRepository ?? throw new ArgumentNullException(nameof(containerRepository));
         _soilMixRepository = soilMixRepository ?? throw new ArgumentNullException(nameof(soilMixRepository));
         _wateringScheduleRepository = wateringScheduleRepository ?? throw new ArgumentNullException(nameof(wateringScheduleRepository));
+        _wateringLogRepository = wateringLogRepository ?? throw new ArgumentNullException(nameof(wateringLogRepository));
         _fertilizingScheduleRepository = fertilizingScheduleRepository ?? throw new ArgumentNullException(nameof(fertilizingScheduleRepository));
+        _fertilizingLogRepository = fertilizingLogRepository ?? throw new ArgumentNullException(nameof(fertilizingLogRepository));
+        _repottingLogRepository = repottingLogRepository ?? throw new ArgumentNullException(nameof(repottingLogRepository));
         _plantPhotoRepository = plantPhotoRepository ?? throw new ArgumentNullException(nameof(plantPhotoRepository));
         _plantNoteRepository = plantNoteRepository ?? throw new ArgumentNullException(nameof(plantNoteRepository));
         _plantDiseaseRecordRepository = plantDiseaseRecordRepository ?? throw new ArgumentNullException(nameof(plantDiseaseRecordRepository));
@@ -121,8 +131,7 @@ public class PlantInstanceService : IPlantInstanceService
         plantInstance.FertilizingSchedules = (await GetFertilizingSchedulesAsync(plantInstanceId, ownerId, cancellationToken)).ToList();
         plantInstance.DiseaseRecords = (await GetDiseaseRecordsAsync(plantInstanceId, ownerId, includePhotos: true, cancellationToken)).ToList();
 
-        if (plantInstance.ContainerId.HasValue)
-            plantInstance.Container = await _containerRepository.FirstOrDefaultAsync(entity => entity.Id == plantInstance.ContainerId.Value && entity.OwnerId == ownerId, cancellationToken: cancellationToken);
+        plantInstance.Container = await GetCurrentContainerAsync(plantInstanceId, ownerId, cancellationToken);
 
         if (plantInstance.SoilMixId.HasValue)
             plantInstance.SoilMix = await _soilMixRepository.GetByIdAsync(plantInstance.SoilMixId.Value, cancellationToken: cancellationToken);
@@ -139,11 +148,17 @@ public class PlantInstanceService : IPlantInstanceService
         ArgumentNullException.ThrowIfNull(plantInstance);
         await ValidatePlantInstanceRelationshipsAsync(plantInstance, cancellationToken);
 
+        var requestedContainerId = plantInstance.ContainerId;
         plantInstance.Nickname = plantInstance.Nickname?.Trim();
         plantInstance.Notes = plantInstance.Notes?.Trim();
         StampForCreate(plantInstance);
 
-        return await _plantInstanceRepository.CreateAsync(plantInstance, cancellationToken: cancellationToken);
+        var createdPlantInstance = await _plantInstanceRepository.CreateAsync(plantInstance, saveNow: false, cancellationToken: cancellationToken);
+
+        await SyncContainerAssignmentAsync(createdPlantInstance.Id, createdPlantInstance.OwnerId, requestedContainerId, cancellationToken);
+        await _plantInstanceRepository.SaveChangesAsync(cancellationToken);
+
+        return createdPlantInstance;
     }
 
     /// <inheritdoc />
@@ -151,6 +166,7 @@ public class PlantInstanceService : IPlantInstanceService
     {
         ArgumentNullException.ThrowIfNull(plantInstance);
 
+        var requestedContainerId = plantInstance.ContainerId;
         var existingPlantInstance = await EnsurePlantInstanceOwnedAsync(plantInstance.Id, plantInstance.OwnerId, cancellationToken);
         await ValidatePlantInstanceRelationshipsAsync(plantInstance, cancellationToken);
 
@@ -167,7 +183,12 @@ public class PlantInstanceService : IPlantInstanceService
         existingPlantInstance.Notes = plantInstance.Notes?.Trim();
         StampForUpdate(existingPlantInstance);
 
-        return await _plantInstanceRepository.UpdateAsync(existingPlantInstance, cancellationToken: cancellationToken);
+        await SyncContainerAssignmentAsync(existingPlantInstance.Id, existingPlantInstance.OwnerId, requestedContainerId, cancellationToken);
+
+        var updatedPlantInstance = await _plantInstanceRepository.UpdateAsync(existingPlantInstance, saveNow: false, cancellationToken: cancellationToken);
+        await _plantInstanceRepository.SaveChangesAsync(cancellationToken);
+
+        return updatedPlantInstance;
     }
 
     /// <inheritdoc />
@@ -223,9 +244,8 @@ public class PlantInstanceService : IPlantInstanceService
     public async Task DeleteContainerAsync(int containerId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         var container = await EnsureContainerOwnedAsync(containerId, ownerId, cancellationToken);
-        var linkedCount = await _plantInstanceRepository.CountAsync(entity => entity.ContainerId == containerId && entity.OwnerId == ownerId, cancellationToken: cancellationToken);
 
-        if (linkedCount > 0)
+        if (container.PlantInstanceId.HasValue)
             throw new DomainException($"Container with id '{containerId}' cannot be deleted because it is referenced by plant instances.");
 
         await _containerRepository.DeleteAsync(container, cancellationToken: cancellationToken);
@@ -235,7 +255,11 @@ public class PlantInstanceService : IPlantInstanceService
     public Task<IReadOnlyList<SoilMix>> GetSoilMixesAsync(CancellationToken cancellationToken = default)
     {
         return _soilMixRepository.GetAllAsync(
-            query => query.OrderBy(soilMix => soilMix.Name).ThenBy(soilMix => soilMix.Id),
+            query => query
+                .Include(soilMix => soilMix.Ingredients)
+                .ThenInclude(ingredientLine => ingredientLine.SoilIngredient)
+                .OrderBy(soilMix => soilMix.Name)
+                .ThenBy(soilMix => soilMix.Id),
             cancellationToken: cancellationToken);
     }
 
@@ -335,6 +359,28 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
+    public async Task<IPagedList<WateringLog>> GetWateringLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+
+        return await _wateringLogRepository.GetPagedAsync(
+            query => query
+                .Where(log => log.PlantInstanceId == plantInstanceId && log.OwnerId == ownerId)
+                .OrderByDescending(log => log.WateredAtUtc),
+            pageIndex,
+            pageSize,
+            cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteWateringLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+        var log = await EnsureWateringLogOwnedAsync(plantInstanceId, logId, ownerId, cancellationToken);
+        await _wateringLogRepository.DeleteAsync(log, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<FertilizingSchedule>> GetFertilizingSchedulesAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken = default)
     {
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
@@ -389,6 +435,120 @@ public class PlantInstanceService : IPlantInstanceService
         await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
         var schedule = await EnsureFertilizingScheduleOwnedAsync(plantInstanceId, scheduleId, ownerId, cancellationToken);
         await _fertilizingScheduleRepository.DeleteAsync(schedule, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IPagedList<FertilizingLog>> GetFertilizingLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+
+        return await _fertilizingLogRepository.GetPagedAsync(
+            query => query
+                .Where(log => log.PlantInstanceId == plantInstanceId && log.OwnerId == ownerId)
+                .OrderByDescending(log => log.AppliedAtUtc),
+            pageIndex,
+            pageSize,
+            cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteFertilizingLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+        var log = await EnsureFertilizingLogOwnedAsync(plantInstanceId, logId, ownerId, cancellationToken);
+        await _fertilizingLogRepository.DeleteAsync(log, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<RepottingLog> RepotPlantAsync(int plantInstanceId, RepottingLog repottingLog, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(repottingLog);
+        ValidateOwnerId(repottingLog.OwnerId);
+
+        var plantInstance = await EnsurePlantInstanceOwnedAsync(plantInstanceId, repottingLog.OwnerId, cancellationToken);
+
+        if (repottingLog.NewContainerId.HasValue)
+            await EnsureContainerOwnedAsync(repottingLog.NewContainerId.Value, repottingLog.OwnerId, cancellationToken);
+
+        if (repottingLog.NewSoilMixId.HasValue)
+            await EnsureSoilMixExistsAsync(repottingLog.NewSoilMixId.Value, cancellationToken);
+
+        var currentContainer = await GetCurrentContainerAsync(plantInstanceId, repottingLog.OwnerId, cancellationToken);
+
+        repottingLog.PlantInstanceId = plantInstanceId;
+        repottingLog.OwnerId = plantInstance.OwnerId;
+        repottingLog.PreviousContainerId = currentContainer?.Id;
+        repottingLog.PreviousSoilMixId = plantInstance.SoilMixId;
+        repottingLog.ContainerChanged = repottingLog.NewContainerId != repottingLog.PreviousContainerId;
+        repottingLog.SoilMixChanged = repottingLog.NewSoilMixId != repottingLog.PreviousSoilMixId;
+        repottingLog.Notes = repottingLog.Notes?.Trim();
+
+        if (!repottingLog.ContainerChanged && !repottingLog.SoilMixChanged)
+            throw new DomainException("No container or soil mix change detected for repotting.");
+
+        if (repottingLog.RepottedAtUtc == default)
+            repottingLog.RepottedAtUtc = DateTime.UtcNow;
+
+        plantInstance.SoilMixId = repottingLog.NewSoilMixId;
+
+        StampForCreate(repottingLog);
+        StampForUpdate(plantInstance);
+
+        var created = await _repottingLogRepository.CreateAsync(repottingLog, saveNow: false, cancellationToken: cancellationToken);
+        await SyncContainerAssignmentAsync(plantInstance.Id, plantInstance.OwnerId, repottingLog.NewContainerId, cancellationToken);
+        await _plantInstanceRepository.UpdateAsync(plantInstance, saveNow: false, cancellationToken: cancellationToken);
+        await _plantInstanceRepository.SaveChangesAsync(cancellationToken);
+
+        return created;
+    }
+
+    /// <inheritdoc />
+    public async Task<IPagedList<RepottingLog>> GetRepottingLogsAsync(int plantInstanceId, Guid ownerId, int pageIndex = 0, int pageSize = 5, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+
+        return await _repottingLogRepository.GetPagedAsync(
+            query => query
+                .Where(log => log.PlantInstanceId == plantInstanceId && log.OwnerId == ownerId)
+                .OrderByDescending(log => log.RepottedAtUtc)
+                .ThenByDescending(log => log.Id),
+            pageIndex,
+            pageSize,
+            cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<RepottingLog> UpdateRepottingLogAsync(int plantInstanceId, RepottingLog repottingLog, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(repottingLog);
+        ValidateOwnerId(repottingLog.OwnerId);
+
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, repottingLog.OwnerId, cancellationToken);
+        var existingLog = await EnsureRepottingLogOwnedAsync(plantInstanceId, repottingLog.Id, repottingLog.OwnerId, cancellationToken);
+
+        if (repottingLog.NewContainerId.HasValue)
+            await EnsureContainerOwnedAsync(repottingLog.NewContainerId.Value, repottingLog.OwnerId, cancellationToken);
+
+        if (repottingLog.NewSoilMixId.HasValue)
+            await EnsureSoilMixExistsAsync(repottingLog.NewSoilMixId.Value, cancellationToken);
+
+        existingLog.NewContainerId = repottingLog.NewContainerId;
+        existingLog.NewSoilMixId = repottingLog.NewSoilMixId;
+        existingLog.ContainerChanged = existingLog.NewContainerId != existingLog.PreviousContainerId;
+        existingLog.SoilMixChanged = existingLog.NewSoilMixId != existingLog.PreviousSoilMixId;
+        existingLog.RepottedAtUtc = repottingLog.RepottedAtUtc;
+        existingLog.Notes = repottingLog.Notes?.Trim();
+        StampForUpdate(existingLog);
+
+        return await _repottingLogRepository.UpdateAsync(existingLog, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteRepottingLogAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        await EnsurePlantInstanceOwnedAsync(plantInstanceId, ownerId, cancellationToken);
+        var log = await EnsureRepottingLogOwnedAsync(plantInstanceId, logId, ownerId, cancellationToken);
+        await _repottingLogRepository.DeleteAsync(log, cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
@@ -655,6 +815,44 @@ public class PlantInstanceService : IPlantInstanceService
             await EnsureSoilMixExistsAsync(plantInstance.SoilMixId.Value, cancellationToken);
     }
 
+    private async Task<Container?> GetCurrentContainerAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken)
+    {
+        ValidateOwnerId(ownerId);
+
+        return await _containerRepository.FirstOrDefaultAsync(
+            entity => entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
+            cancellationToken: cancellationToken);
+    }
+
+    private async Task SyncContainerAssignmentAsync(int plantInstanceId, Guid ownerId, int? newContainerId, CancellationToken cancellationToken)
+    {
+        var currentContainer = await GetCurrentContainerAsync(plantInstanceId, ownerId, cancellationToken);
+        if (currentContainer?.Id == newContainerId)
+            return;
+
+        Container? requestedContainer = null;
+        if (newContainerId.HasValue)
+        {
+            requestedContainer = await EnsureContainerOwnedAsync(newContainerId.Value, ownerId, cancellationToken);
+            if (requestedContainer.PlantInstanceId.HasValue && requestedContainer.PlantInstanceId.Value != plantInstanceId)
+                throw new DomainException($"Container with id '{newContainerId.Value}' is already assigned to another plant instance.");
+        }
+
+        if (currentContainer is not null)
+        {
+            currentContainer.PlantInstanceId = null;
+            StampForUpdate(currentContainer);
+            await _containerRepository.UpdateAsync(currentContainer, saveNow: false, cancellationToken: cancellationToken);
+        }
+
+        if (requestedContainer is not null)
+        {
+            requestedContainer.PlantInstanceId = plantInstanceId;
+            StampForUpdate(requestedContainer);
+            await _containerRepository.UpdateAsync(requestedContainer, saveNow: false, cancellationToken: cancellationToken);
+        }
+    }
+
     private async Task<Plant> EnsurePlantExistsAsync(int plantId, CancellationToken cancellationToken)
     {
         var plant = await _plantRepository.GetByIdAsync(plantId, cancellationToken: cancellationToken);
@@ -709,6 +907,15 @@ public class PlantInstanceService : IPlantInstanceService
         return schedule ?? throw new DomainException($"WateringSchedule with id '{scheduleId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
+    private async Task<WateringLog> EnsureWateringLogOwnedAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken)
+    {
+        var log = await _wateringLogRepository.FirstOrDefaultAsync(
+            entity => entity.Id == logId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
+            cancellationToken: cancellationToken);
+
+        return log ?? throw new DomainException($"WateringLog with id '{logId}' was not found for plant instance '{plantInstanceId}'.");
+    }
+
     private async Task<FertilizingSchedule> EnsureFertilizingScheduleOwnedAsync(int plantInstanceId, int scheduleId, Guid ownerId, CancellationToken cancellationToken)
     {
         var schedule = await _fertilizingScheduleRepository.FirstOrDefaultAsync(
@@ -718,6 +925,15 @@ public class PlantInstanceService : IPlantInstanceService
         return schedule ?? throw new DomainException($"FertilizingSchedule with id '{scheduleId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
+    private async Task<FertilizingLog> EnsureFertilizingLogOwnedAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken)
+    {
+        var log = await _fertilizingLogRepository.FirstOrDefaultAsync(
+            entity => entity.Id == logId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
+            cancellationToken: cancellationToken);
+
+        return log ?? throw new DomainException($"FertilizingLog with id '{logId}' was not found for plant instance '{plantInstanceId}'.");
+    }
+
     private async Task<PlantPhoto> EnsurePlantPhotoOwnedAsync(int plantInstanceId, int photoId, Guid ownerId, CancellationToken cancellationToken)
     {
         var photo = await _plantPhotoRepository.FirstOrDefaultAsync(
@@ -725,6 +941,15 @@ public class PlantInstanceService : IPlantInstanceService
             cancellationToken: cancellationToken);
 
         return photo ?? throw new DomainException($"PlantPhoto with id '{photoId}' was not found for plant instance '{plantInstanceId}'.");
+    }
+
+    private async Task<RepottingLog> EnsureRepottingLogOwnedAsync(int plantInstanceId, int logId, Guid ownerId, CancellationToken cancellationToken)
+    {
+        var log = await _repottingLogRepository.FirstOrDefaultAsync(
+            entity => entity.Id == logId && entity.PlantInstanceId == plantInstanceId && entity.OwnerId == ownerId,
+            cancellationToken: cancellationToken);
+
+        return log ?? throw new DomainException($"RepottingLog with id '{logId}' was not found for plant instance '{plantInstanceId}'.");
     }
 
     private async Task<PlantNote> EnsurePlantNoteOwnedAsync(int plantInstanceId, int noteId, Guid ownerId, CancellationToken cancellationToken)

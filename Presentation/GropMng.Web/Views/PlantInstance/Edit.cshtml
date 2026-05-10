@@ -2,6 +2,7 @@
 
 @{
     GropHtml.SetActiveMenuItemSystemName("MyPlants");
+    var activeTab = Context.Request.Query["tab"].FirstOrDefault() ?? "details";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -23,128 +24,134 @@
     </form>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 class="card-title mb-0">@T("mygarden.plantinstance.edit.details")</h5>
+@* ── Tab Navigation ──────────────────────────────────────────────── *@
+<ul class="nav nav-tabs mb-0" id="plantEditTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "details" ? "active" : "")"
+                id="tab-details-btn" data-bs-toggle="tab" data-bs-target="#tab-details"
+                type="button" role="tab" aria-controls="tab-details"
+                aria-selected="@(activeTab == "details" ? "true" : "false")">
+            @T("mygarden.plantinstance.tab.details")
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "watering" ? "active" : "")"
+                id="tab-watering-btn" data-bs-toggle="tab" data-bs-target="#tab-watering"
+                type="button" role="tab" aria-controls="tab-watering"
+                aria-selected="@(activeTab == "watering" ? "true" : "false")"
+                data-lazy-url="@Url.Action("WateringScheduleTab", "PlantInstance", new { id = Model.Id })">
+            @T("mygarden.plantinstance.tab.watering")
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "fertilizing" ? "active" : "")"
+                id="tab-fertilizing-btn" data-bs-toggle="tab" data-bs-target="#tab-fertilizing"
+                type="button" role="tab" aria-controls="tab-fertilizing"
+                aria-selected="@(activeTab == "fertilizing" ? "true" : "false")"
+                data-lazy-url="@Url.Action("FertilizingScheduleTab", "PlantInstance", new { id = Model.Id })">
+            @T("mygarden.plantinstance.tab.fertilizing")
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "diseases" ? "active" : "")"
+                id="tab-diseases-btn" data-bs-toggle="tab" data-bs-target="#tab-diseases"
+                type="button" role="tab" aria-controls="tab-diseases"
+                aria-selected="@(activeTab == "diseases" ? "true" : "false")"
+                data-lazy-url="@Url.Action("DiseaseRecordTab", "PlantInstance", new { id = Model.Id })">
+            @T("mygarden.plantinstance.tab.diseases")
+            @if (Model.ActiveDiseaseCount > 0)
+            {
+                <span class="badge rounded-pill bg-danger ms-1">@Model.ActiveDiseaseCount</span>
+            }
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "container" ? "active" : "")"
+                id="tab-container-btn" data-bs-toggle="tab" data-bs-target="#tab-container"
+                type="button" role="tab" aria-controls="tab-container"
+                aria-selected="@(activeTab == "container" ? "true" : "false")"
+                data-lazy-url="@Url.Action("ContainerRepottingTab", "PlantInstance", new { id = Model.Id })">
+            @T("mygarden.plantinstance.tab.container")
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(activeTab == "photos" ? "active" : "")"
+                id="tab-photos-btn" data-bs-toggle="tab" data-bs-target="#tab-photos"
+                type="button" role="tab" aria-controls="tab-photos"
+                aria-selected="@(activeTab == "photos" ? "true" : "false")">
+            @T("mygarden.plantinstance.tab.photos")
+        </button>
+    </li>
+</ul>
+
+@* ── Tab Content ─────────────────────────────────────────────────── *@
+<div class="tab-content border border-top-0 rounded-bottom p-3 bg-body mb-4" id="plantEditTabContent">
+
+    @* Tab: Details *@
+    <div class="tab-pane fade @(activeTab == "details" ? "show active" : "")"
+         id="tab-details" role="tabpanel" aria-labelledby="tab-details-btn">
+        @await Html.PartialAsync("_DetailsTab", Model)
     </div>
-    <div class="card-body">
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="form-label">@T("mygarden.plantinstance.field.location")</label>
-                <p class="form-control-plaintext">@Model.LocationName</p>
+
+    @* Tab: Watering — lazy-loaded via AJAX *@
+    <div class="tab-pane fade @(activeTab == "watering" ? "show active" : "")"
+         id="tab-watering" role="tabpanel" aria-labelledby="tab-watering-btn">
+        @if (activeTab == "watering")
+        {
+            @await Html.PartialAsync("_WateringScheduleTab", Model.Id)
+        }
+        else
+        {
+            <div class="tab-lazy-placeholder text-center py-4">
+                <span class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">@T("mygarden.plantinstance.field.gardenspot")</label>
-                <p class="form-control-plaintext">@Model.GardenSpotName</p>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">@T("mygarden.plantinstance.field.plant")</label>
-                <p class="form-control-plaintext">@Model.PlantName</p>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">@T("mygarden.plantinstance.field.age")</label>
-                <p class="form-control-plaintext">@(Model.AgeYears.HasValue ? $"{Model.AgeYears} years" : "—")</p>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">@T("mygarden.plantinstance.field.planteddate")</label>
-                <p class="form-control-plaintext">@(Model.PlantedDate?.ToString("dd MMM yyyy") ?? "—")</p>
-            </div>
+        }
+    </div>
+
+    @* Tab: Fertilizing — lazy-loaded via AJAX *@
+    <div class="tab-pane fade @(activeTab == "fertilizing" ? "show active" : "")"
+         id="tab-fertilizing" role="tabpanel" aria-labelledby="tab-fertilizing-btn">
+        <div class="tab-lazy-placeholder text-center py-4">
+            <span class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
-        <form asp-action="Edit" asp-controller="PlantInstance" asp-route-id="@Model.Id" method="post">
-            @Html.AntiForgeryToken()
-
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="PlantId" class="form-label">@T("mygarden.plantinstance.field.plant") <span class="text-danger">*</span></label>
-                    <select asp-for="PlantId" asp-items="Model.AvailablePlants" class="form-select"></select>
-                    <span asp-validation-for="PlantId" class="text-danger small"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="GardenSpotId" class="form-label">@T("mygarden.plantinstance.field.gardenspot") <span class="text-danger">*</span></label>
-                    <select asp-for="GardenSpotId" asp-items="Model.AvailableGardenSpots" class="form-select"></select>
-                    <span asp-validation-for="GardenSpotId" class="text-danger small"></span>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="ContainerId" class="form-label">@T("mygarden.plantinstance.field.container")</label>
-                    <select asp-for="ContainerId" asp-items="Model.AvailableContainers" class="form-select"></select>
-                </div>
-                <div class="col-md-4">
-                    <label asp-for="SoilMixId" class="form-label">@T("mygarden.plantinstance.field.soilmix")</label>
-                    <select asp-for="SoilMixId" asp-items="Model.AvailableSoilMixes" class="form-select"></select>
-                </div>
-                <div class="col-md-4">
-                    <label asp-for="Nickname" class="form-label">@T("mygarden.plantinstance.field.nickname")</label>
-                    <input asp-for="Nickname" class="form-control" />
-                    <span asp-validation-for="Nickname" class="text-danger small"></span>
-                </div>
-
-                <div class="col-md-3">
-                    <label asp-for="PlantedDate" class="form-label">@T("mygarden.plantinstance.field.planteddate")</label>
-                    <input asp-for="PlantedDate" class="form-control" type="date" />
-                    <span asp-validation-for="PlantedDate" class="text-danger small"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="SizeCategory" class="form-label">@T("mygarden.plantinstance.field.size")</label>
-                    <select asp-for="SizeCategory" asp-items="Model.AvailableSizeCategories" class="form-select"></select>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="HeightCm" class="form-label">@T("mygarden.plantinstance.field.height")</label>
-                    <div class="input-group">
-                        <input asp-for="HeightCm" class="form-control" type="number" step="0.5" min="0" />
-                        <span class="input-group-text">cm</span>
-                    </div>
-                    <span asp-validation-for="HeightCm" class="text-danger small"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="SpreadCm" class="form-label">@T("mygarden.plantinstance.field.spread")</label>
-                    <div class="input-group">
-                        <input asp-for="SpreadCm" class="form-control" type="number" step="0.5" min="0" />
-                        <span class="input-group-text">cm</span>
-                    </div>
-                    <span asp-validation-for="SpreadCm" class="text-danger small"></span>
-                </div>
-
-                <div class="col-md-6">
-                    <label asp-for="HealthStatus" class="form-label">@T("mygarden.plantinstance.field.health")</label>
-                    <select asp-for="HealthStatus" asp-items="Model.AvailableHealthStatuses" class="form-select"></select>
-                </div>
-                <div class="col-md-6 d-flex align-items-end">
-                    <div class="form-check mb-2">
-                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
-                        <label asp-for="IsActive" class="form-check-label">@T("mygarden.plantinstance.field.active")</label>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <label asp-for="Notes" class="form-label">@T("common.notes")</label>
-                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                </div>
-            </div>
-
-            <div class="mt-4 d-flex gap-2">
-                <button type="submit" class="btn btn-primary">@T("common.save")</button>
-                <a href="@Url.Action("List", "PlantInstance")" class="btn btn-outline-secondary">@T("common.cancel")</a>
-            </div>
-        </form>
+    @* Tab: Diseases — lazy-loaded via AJAX *@
+    <div class="tab-pane fade @(activeTab == "diseases" ? "show active" : "")"
+         id="tab-diseases" role="tabpanel" aria-labelledby="tab-diseases-btn">
+        <div class="tab-lazy-placeholder text-center py-4">
+            <span class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
+        </div>
     </div>
+
+    @* Tab: Container — lazy-loaded via AJAX *@
+    <div class="tab-pane fade @(activeTab == "container" ? "show active" : "")"
+         id="tab-container" role="tabpanel" aria-labelledby="tab-container-btn">
+        <div class="tab-lazy-placeholder text-center py-4">
+            <span class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
+        </div>
+    </div>
+
+    @* Tab: Photos *@
+    <div class="tab-pane fade @(activeTab == "photos" ? "show active" : "")"
+         id="tab-photos" role="tabpanel" aria-labelledby="tab-photos-btn">
+        @await Html.PartialAsync("_PhotosTab", Model.Id)
+    </div>
+
 </div>
 
-@* ── Plant Photos ─────────────────────────────────────────────────── *@
-@await Html.PartialAsync("_PlantPhotos", Model.Id)
+@* ── Watering Schedule Modal ─────────────────────────────────────── *@
+@await Html.PartialAsync("_WateringScheduleForm", Model.Id)
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" asp-append-version="true" />
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js" asp-append-version="true"></script>
     <script src="~/js-custom/plant-instance-photos.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-instance-watering.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-instance-fertilizing.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-instance-diseases.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-instance-container.js" asp-append-version="true"></script>
     <script>
         GropPlantPhotos.init({
             plantInstanceId  : @Model.Id,
@@ -160,6 +167,107 @@
             deleteConfirm    : '@T("mygarden.plantinstance.photo.delete.confirm")',
             msgUploading     : '@T("admin.picture.status.uploading")',
             msgUploadError   : '@T("admin.picture.status.error")'
+        });
+
+        GropPlantWatering.init({
+            plantInstanceId   : @Model.Id,
+            tabBtn            : document.getElementById('tab-watering-btn'),
+            tabPane           : document.getElementById('tab-watering'),
+            tabUrl            : '@Url.Action("WateringScheduleTab", "PlantInstance", new { id = Model.Id })',
+            createUrl         : '@Url.Action("WateringScheduleCreate", "PlantInstance", new { id = Model.Id })',
+            updateUrlTemplate : '@Url.Action("WateringScheduleUpdate", "PlantInstance", new { id = Model.Id, scheduleId = 0 })',
+            deleteUrlTemplate : '@Url.Action("WateringScheduleDelete", "PlantInstance", new { id = Model.Id, scheduleId = 0 })',
+            deleteLogUrlTemplate : '@Url.Action("WateringLogDelete", "PlantInstance", new { id = Model.Id, logId = 0 })',
+            modalId           : 'watering-schedule-modal-@Model.Id',
+            activeTab         : '@activeTab',
+            deleteConfirm     : '@T("mygarden.watering.schedule.delete.confirm")',
+            deleteLogConfirm  : '@T("mygarden.watering.log.delete.confirm")',
+            msgSaveSuccess    : '@T("mygarden.watering.schedule.notifications.save.success")',
+            msgDeleteSuccess  : '@T("mygarden.watering.schedule.notifications.delete.success")',
+            msgDeleteLogSuccess : '@T("mygarden.watering.log.notifications.delete.success")'
+        });
+
+        GropPlantFertilizing.init({
+            plantInstanceId   : @Model.Id,
+            tabBtn            : document.getElementById('tab-fertilizing-btn'),
+            tabPane           : document.getElementById('tab-fertilizing'),
+            tabUrl            : '@Url.Action("FertilizingScheduleTab", "PlantInstance", new { id = Model.Id })',
+            createUrl         : '@Url.Action("FertilizingScheduleCreate", "PlantInstance", new { id = Model.Id })',
+            updateUrlTemplate : '@Url.Action("FertilizingScheduleUpdate", "PlantInstance", new { id = Model.Id, scheduleId = 0 })',
+            deleteUrlTemplate : '@Url.Action("FertilizingScheduleDelete", "PlantInstance", new { id = Model.Id, scheduleId = 0 })',
+            deleteLogUrlTemplate : '@Url.Action("FertilizingLogDelete", "PlantInstance", new { id = Model.Id, logId = 0 })',
+            modalId           : 'fertilizing-schedule-modal-@Model.Id',
+            activeTab         : '@activeTab',
+            titleAdd          : '@T("mygarden.fertilizing.schedule.add")',
+            titleEdit         : '@T("mygarden.fertilizing.schedule.edit")',
+            validationRequired: '@T("mygarden.fertilizing.schedule.validation.required")',
+            deleteConfirm     : '@T("mygarden.fertilizing.schedule.delete.confirm")',
+            deleteLogConfirm  : '@T("mygarden.fertilizing.log.delete.confirm")',
+            msgSaveSuccess    : '@T("mygarden.fertilizing.schedule.notifications.save.success")',
+            msgDeleteSuccess  : '@T("mygarden.fertilizing.schedule.notifications.delete.success")',
+            msgDeleteLogSuccess : '@T("mygarden.fertilizing.log.notifications.delete.success")',
+            msgSaveError      : '@T("mygarden.fertilizing.schedule.notifications.save.error")',
+            msgDeleteError    : '@T("mygarden.fertilizing.schedule.notifications.delete.error")',
+            msgNetworkError   : '@T("common.networkerror")'
+        });
+
+        GropPlantDiseases.init({
+            plantInstanceId       : @Model.Id,
+            tabBtn                : document.getElementById('tab-diseases-btn'),
+            tabPane               : document.getElementById('tab-diseases'),
+            tabUrl                : '@Url.Action("DiseaseRecordTab", "PlantInstance", new { id = Model.Id })',
+            createUrl             : '@Url.Action("DiseaseRecordCreate", "PlantInstance", new { id = Model.Id })',
+            updateUrlTemplate     : '@Url.Action("DiseaseRecordUpdate", "PlantInstance", new { id = Model.Id, recordId = 0 })',
+            deleteUrlTemplate     : '@Url.Action("DiseaseRecordDelete", "PlantInstance", new { id = Model.Id, recordId = 0 })',
+            quickResolveUrlTemplate : '@Url.Action("DiseaseRecordQuickResolve", "PlantInstance", new { id = Model.Id, recordId = 0 })',
+            addPhotoUrlTemplate   : '@Url.Action("DiseasePhotoAdd", "PlantInstance", new { id = Model.Id, recordId = 0 })',
+            deletePhotoUrlTemplate: '@Url.Action("DiseasePhotoDelete", "PlantInstance", new { id = Model.Id, recordId = 0, photoId = 0 })',
+            uploadUrl             : '@Url.Action("AsyncUpload", "Picture")',
+            modalId               : 'disease-record-modal-@Model.Id',
+            activeTab             : '@activeTab',
+            titleAdd              : '@T("mygarden.disease.record.add")',
+            titleEdit             : '@T("mygarden.disease.record.edit")',
+            validationRequired    : '@T("mygarden.disease.record.validation.required")',
+            deleteConfirm         : '@T("mygarden.disease.record.delete.confirm")',
+            deletePhotoConfirm    : '@T("mygarden.disease.photo.delete.confirm")',
+            msgSaveSuccess        : '@T("mygarden.disease.record.notifications.save.success")',
+            msgSaveError          : '@T("mygarden.disease.record.notifications.save.error")',
+            msgDeleteSuccess      : '@T("mygarden.disease.record.notifications.delete.success")',
+            msgDeleteError        : '@T("mygarden.disease.record.notifications.delete.error")',
+            msgResolveSuccess     : '@T("mygarden.disease.record.notifications.resolve.success")',
+            msgPhotoRequired      : '@T("mygarden.disease.photo.validation.required")',
+            msgPhotoAddSuccess    : '@T("mygarden.disease.photo.notifications.add.success")',
+            msgPhotoDeleteSuccess : '@T("mygarden.disease.photo.notifications.delete.success")',
+            msgUploading          : '@T("admin.picture.status.uploading")',
+            msgUploadError        : '@T("admin.picture.status.error")',
+            msgNetworkError       : '@T("common.networkerror")'
+        });
+
+        GropPlantContainer.init({
+            plantInstanceId         : @Model.Id,
+            tabBtn                  : document.getElementById('tab-container-btn'),
+            tabPane                 : document.getElementById('tab-container'),
+            tabUrl                  : '@Url.Action("ContainerRepottingTab", "PlantInstance", new { id = Model.Id })',
+            createUrl               : '@Url.Action("RepottingCreate", "PlantInstance", new { id = Model.Id })',
+            updateUrlTemplate       : '@Url.Action("RepottingUpdate", "PlantInstance", new { id = Model.Id, logId = 0 })',
+            deleteUrlTemplate       : '@Url.Action("RepottingDelete", "PlantInstance", new { id = Model.Id, logId = 0 })',
+            quickCreateContainerUrl : '@Url.Action("ContainerQuickCreate", "PlantInstance", new { id = Model.Id })',
+            repottingModalId        : 'repotting-modal-@Model.Id',
+            quickContainerModalId   : 'quick-container-modal-@Model.Id',
+            activeTab               : '@activeTab',
+            titleAdd                : '@T("mygarden.repotting.add")',
+            titleEdit               : '@T("mygarden.repotting.edit")',
+            validationDateRequired  : '@T("mygarden.repotting.validation.date")',
+            deleteConfirm           : '@T("mygarden.repotting.delete.confirm")',
+            deleteConfirmButtonText : '@T("mygarden.repotting.dialog.confirm")',
+            msgSaveSuccess          : '@T("mygarden.repotting.notifications.save.success")',
+            msgSaveError            : '@T("mygarden.repotting.notifications.save.error")',
+            msgDeleteSuccess        : '@T("mygarden.repotting.notifications.delete.success")',
+            msgDeleteError          : '@T("mygarden.repotting.notifications.delete.error")',
+            msgContainerCreateSuccess : '@T("mygarden.repotting.container.notifications.create.success")',
+            msgContainerCreateError : '@T("mygarden.repotting.container.notifications.create.error")',
+            msgLoadError            : '@T("mygarden.repotting.notifications.load.error")',
+            msgNetworkError         : '@T("common.networkerror")'
         });
     </script>
 }

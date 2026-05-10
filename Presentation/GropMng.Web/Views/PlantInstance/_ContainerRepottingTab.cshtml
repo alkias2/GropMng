@@ -1,0 +1,32 @@
+@model GropMng.Web.Models.Garden.RepottingTabModel
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">@T("mygarden.repotting.title")</h6>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="repotting-quick-container-btn-@Model.PlantInstanceId">
+            <i class="bx bx-plus-circle me-1"></i>@T("mygarden.repotting.container.quickcreate")
+        </button>
+        <button type="button" class="btn btn-sm btn-primary" id="repotting-add-btn-@Model.PlantInstanceId">
+            <i class="bx bx-transfer-alt me-1"></i>@T("mygarden.repotting.add")
+        </button>
+    </div>
+</div>
+
+@await Html.PartialAsync("_CurrentContainerCard", Model.CurrentContainer)
+
+<div class="mt-4">
+    @await Html.PartialAsync("_RepottingLogList", Model)
+</div>
+
+@await Html.PartialAsync("_RepottingForm", new GropMng.Web.Models.Garden.RepottingFormModel
+{
+    PlantInstanceId = Model.PlantInstanceId,
+    AvailableContainers = Model.AvailableContainers,
+    AvailableSoilMixes = Model.AvailableSoilMixes
+})
+
+@await Html.PartialAsync("_QuickContainerCreate", new GropMng.Web.Models.Garden.QuickContainerCreateFormModel
+{
+    PlantInstanceId = Model.PlantInstanceId,
+    AvailableContainerTypes = Model.AvailableContainerTypes
+})

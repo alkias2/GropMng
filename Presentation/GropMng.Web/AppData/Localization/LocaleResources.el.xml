@@ -1630,6 +1630,601 @@
     <Name>mygarden.plantinstance.photo.field.image</Name>
     <Value>Εικόνα</Value>
   </LocaleResource>
+  <!-- PlantInstance Tabs -->
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.details</Name>
+    <Value>Στοιχεία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.watering</Name>
+    <Value>Πότισμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.fertilizing</Name>
+    <Value>Λίπανση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.diseases</Name>
+    <Value>Ασθένειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.container</Name>
+    <Value>Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.plantinstance.tab.photos</Name>
+    <Value>Φωτογραφίες</Value>
+  </LocaleResource>
+  <!-- Repotting -->
+  <LocaleResource>
+    <Name>mygarden.repotting.title</Name>
+    <Value>Μεταφυτεύσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.add</Name>
+    <Value>Νέα Μεταφύτευση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.edit</Name>
+    <Value>Επεξεργασία Μεταφύτευσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.quickcreate</Name>
+    <Value>Γρήγορη Δημιουργία Γλάστρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.title</Name>
+    <Value>Τρέχουσα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.container</Name>
+    <Value>Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmix</Name>
+    <Value>Μείγμα Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.volume</Name>
+    <Value>Όγκος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.notes</Name>
+    <Value>Σημειώσεις Γλάστρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.changed</Name>
+    <Value>Ημερομηνία Αλλαγής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.created</Name>
+    <Value>Ημερομηνία Δημιουργίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.updated</Name>
+    <Value>Ημερομηνία Ενημέρωσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredients</Name>
+    <Value>Σύνθεση Μείγματος Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.name</Name>
+    <Value>Συστατικό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.percentage</Name>
+    <Value>Ποσοστό</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredient.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.current.soilmixingredients.empty</Name>
+    <Value>Δεν υπάρχουν διαθέσιμα συστατικά για το επιλεγμένο μείγμα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.title</Name>
+    <Value>Ιστορικό Μεταφυτεύσεων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.recent</Name>
+    <Value>Πρόσφατες εγγραφές</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.empty</Name>
+    <Value>Δεν υπάρχει ιστορικό μεταφυτεύσεων.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.date</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.container</Name>
+    <Value>Αλλαγή Γλάστρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.soilmix</Name>
+    <Value>Αλλαγή Μείγματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.log.nochange</Name>
+    <Value>Χωρίς αλλαγή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.newcontainer</Name>
+    <Value>Νέα Γλάστρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.newsoilmix</Name>
+    <Value>Νέο Μείγμα Χώματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.date</Name>
+    <Value>Ημερομηνία Μεταφύτευσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.form.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.validation.date</Name>
+    <Value>Η ημερομηνία μεταφύτευσης είναι υποχρεωτική.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.delete.confirm</Name>
+    <Value>Διαγραφή αυτής της εγγραφής μεταφύτευσης;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.save.success</Name>
+    <Value>Η μεταφύτευση αποθηκεύτηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.save.error</Name>
+    <Value>Αποτυχία αποθήκευσης μεταφύτευσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.delete.success</Name>
+    <Value>Η εγγραφή μεταφύτευσης διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.delete.error</Name>
+    <Value>Αποτυχία διαγραφής εγγραφής μεταφύτευσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.notifications.create.success</Name>
+    <Value>Η γλάστρα δημιουργήθηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.container.notifications.create.error</Name>
+    <Value>Αποτυχία δημιουργίας γλάστρας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.notifications.load.error</Name>
+    <Value>Αποτυχία φόρτωσης δεδομένων γλάστρας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.repotting.dialog.confirm</Name>
+    <Value>Επιβεβαίωση</Value>
+  </LocaleResource>
+  <!-- PlantDiseaseRecord -->
+  <LocaleResource>
+    <Name>mygarden.disease.record.title</Name>
+    <Value>Αρχεία Ασθενειών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.add</Name>
+    <Value>Νέα Καταγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.edit</Name>
+    <Value>Επεξεργασία Καταγραφής</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.empty</Name>
+    <Value>Δεν υπάρχουν καταγραφές ασθενειών.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.quickresolve</Name>
+    <Value>Γρήγορη Επίλυση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.delete.confirm</Name>
+    <Value>Διαγραφή αυτής της καταγραφής ασθένειας;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.validation.required</Name>
+    <Value>Η ασθένεια και η ημερομηνία εντοπισμού είναι υποχρεωτικές.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.disease</Name>
+    <Value>Ασθένεια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.detected</Name>
+    <Value>Ημ/νία Εντοπισμού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.resolved</Name>
+    <Value>Ημ/νία Επίλυσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.severity</Name>
+    <Value>Σοβαρότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.outcome</Name>
+    <Value>Έκβαση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.treatment</Name>
+    <Value>Αντιμετώπιση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.save.success</Name>
+    <Value>Η καταγραφή ασθένειας αποθηκεύτηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.save.error</Name>
+    <Value>Αποτυχία αποθήκευσης καταγραφής ασθένειας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.delete.success</Name>
+    <Value>Η καταγραφή ασθένειας διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.delete.error</Name>
+    <Value>Αποτυχία διαγραφής καταγραφής ασθένειας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.record.notifications.resolve.success</Name>
+    <Value>Η καταγραφή ενημερώθηκε ως επιλυμένη.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.mild</Name>
+    <Value>Ήπια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.moderate</Name>
+    <Value>Μέτρια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.severe</Name>
+    <Value>Σοβαρή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.severity.critical</Name>
+    <Value>Κρίσιμη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.resolved</Name>
+    <Value>Επιλυμένη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.ongoing</Name>
+    <Value>Σε εξέλιξη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.lost</Name>
+    <Value>Χάθηκε</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.outcome.unknown</Name>
+    <Value>Άγνωστη</Value>
+  </LocaleResource>
+  <!-- DiseasePhoto -->
+  <LocaleResource>
+    <Name>mygarden.disease.photo.title</Name>
+    <Value>Φωτογραφίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.manage</Name>
+    <Value>Διαχείριση Φωτογραφιών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.add</Name>
+    <Value>Προσθήκη Φωτογραφίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.empty</Name>
+    <Value>Δεν υπάρχουν φωτογραφίες για αυτή την καταγραφή.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.upload.placeholder</Name>
+    <Value>Επιλέξτε εικόνα για μεταφόρτωση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.delete.confirm</Name>
+    <Value>Διαγραφή αυτής της φωτογραφίας ασθένειας;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.validation.required</Name>
+    <Value>Ανεβάστε πρώτα μία φωτογραφία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.notifications.add.success</Name>
+    <Value>Η φωτογραφία ασθένειας προστέθηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.notifications.delete.success</Name>
+    <Value>Η φωτογραφία ασθένειας διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.image</Name>
+    <Value>Εικόνα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.takendate</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.displayorder</Name>
+    <Value>Σειρά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.disease.photo.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <!-- WateringSchedule -->
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.title</Name>
+    <Value>Προγραμματισμός Ποτίσματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.add</Name>
+    <Value>Νέο Πρόγραμμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.edit</Name>
+    <Value>Επεξεργασία Προγράμματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.empty</Name>
+    <Value>Δεν υπάρχουν προγράμματα ποτίσματος.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.delete.confirm</Name>
+    <Value>Διαγραφή αυτού του προγράμματος ποτίσματος;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.season</Name>
+    <Value>Εποχή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.frequencydays</Name>
+    <Value>Κάθε (μέρες)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.amount</Name>
+    <Value>Ποσότητα (L)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.timeofday</Name>
+    <Value>Ώρα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.save.success</Name>
+    <Value>Το πρόγραμμα ποτίσματος αποθηκεύτηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.delete.success</Name>
+    <Value>Το πρόγραμμα ποτίσματος διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.title</Name>
+    <Value>Ιστορικό Ποτισμάτων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.viewall</Name>
+    <Value>Αναλυτικό ιστορικό →</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.date</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.amount</Name>
+    <Value>Ποσότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.empty</Name>
+    <Value>Δεν υπάρχουν εγγραφές ποτίσματος.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.delete.confirm</Name>
+    <Value>Διαγραφή αυτής της εγγραφής ποτίσματος;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.notifications.delete.success</Name>
+    <Value>Η εγγραφή ποτίσματος διαγράφηκε.</Value>
+  </LocaleResource>
+  <!-- FertilizingSchedule -->
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.title</Name>
+    <Value>Προγραμματισμός Λίπανσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.add</Name>
+    <Value>Νέο Πρόγραμμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.edit</Name>
+    <Value>Επεξεργασία Προγράμματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.empty</Name>
+    <Value>Δεν υπάρχουν προγράμματα λίπανσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.delete.confirm</Name>
+    <Value>Διαγραφή αυτού του προγράμματος λίπανσης;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.validation.required</Name>
+    <Value>Το λίπασμα, η εποχή και η συχνότητα είναι υποχρεωτικά.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.fertilizer</Name>
+    <Value>Λίπασμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.season</Name>
+    <Value>Εποχή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.frequencydays</Name>
+    <Value>Κάθε (μέρες)</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.quantity</Name>
+    <Value>Ποσότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.unit</Name>
+    <Value>Μονάδα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.field.dilution</Name>
+    <Value>Οδηγίες Αραίωσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.save.success</Name>
+    <Value>Το πρόγραμμα λίπανσης αποθηκεύτηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.save.error</Name>
+    <Value>Αποτυχία αποθήκευσης προγράμματος λίπανσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.delete.success</Name>
+    <Value>Το πρόγραμμα λίπανσης διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.delete.error</Name>
+    <Value>Αποτυχία διαγραφής προγράμματος λίπανσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.title</Name>
+    <Value>Ιστορικό Λίπανσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.viewall</Name>
+    <Value>Αναλυτικό ιστορικό →</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.date</Name>
+    <Value>Ημερομηνία</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.fertilizer</Name>
+    <Value>Λίπασμα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.quantity</Name>
+    <Value>Ποσότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.field.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.empty</Name>
+    <Value>Δεν υπάρχουν εγγραφές λίπανσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.delete.confirm</Name>
+    <Value>Διαγραφή αυτής της εγγραφής λίπανσης;</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.log.notifications.delete.success</Name>
+    <Value>Η εγγραφή λίπανσης διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.gram</Name>
+    <Value>g</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.kilogram</Name>
+    <Value>kg</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.millilitre</Name>
+    <Value>ml</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.litre</Name>
+    <Value>L</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.tablespoon</Name>
+    <Value>tbsp</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.quantityunit.teaspoon</Name>
+    <Value>tsp</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.networkerror</Name>
+    <Value>Σφάλμα δικτύου.</Value>
+  </LocaleResource>
+  <!-- Common Enums -->
+  <LocaleResource>
+    <Name>common.season.spring</Name>
+    <Value>Άνοιξη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.summer</Name>
+    <Value>Καλοκαίρι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.autumn</Name>
+    <Value>Φθινόπωρο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.winter</Name>
+    <Value>Χειμώνας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.season.allyear</Name>
+    <Value>Όλο το χρόνο</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.morning</Name>
+    <Value>Πρωί</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.midday</Name>
+    <Value>Μεσημέρι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.evening</Name>
+    <Value>Εσπέρας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.timeofday.any</Name>
+    <Value>Οποιαδήποτε ώρα</Value>
+  </LocaleResource>
   <!-- Container -->
   <LocaleResource>
     <Name>mygarden.container.list.title</Name>
@@ -1690,6 +2285,10 @@
   <LocaleResource>
     <Name>mygarden.container.field.drainage</Name>
     <Value>Έχει τρύπα αποστράγγισης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.container.field.notes</Name>
+    <Value>Σημειώσεις</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>mygarden.container.inuse.warning</Name>

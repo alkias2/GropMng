@@ -1,8 +1,13 @@
 using GropMng.Core.Common.Exceptions;
+using GropMng.Core.Domain.Garden.Care;
 using GropMng.Core.Domain.Garden.Enums;
+using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Plants;
+using GropMng.Core.Interfaces.Services.Garden.Care;
+using GropMng.Core.Interfaces.Services.Garden.Health;
 using GropMng.Core.Interfaces.Services.Garden.Locations;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Models.Garden;
@@ -24,6 +29,9 @@ public class PlantInstanceController : Controller
     private readonly IPlantInstanceService _plantInstanceService;
     private readonly IPlantService _plantService;
     private readonly ILocationService _locationService;
+    private readonly IFertilizerService _fertilizerService;
+    private readonly IDiseaseService _diseaseService;
+    private readonly IEnumLocalizationHelper _enumLocalizationHelper;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
     private readonly IPictureService _pictureService;
 
@@ -35,12 +43,18 @@ public class PlantInstanceController : Controller
         IPlantInstanceService plantInstanceService,
         IPlantService plantService,
         ILocationService locationService,
+        IFertilizerService fertilizerService,
+        IDiseaseService diseaseService,
+        IEnumLocalizationHelper enumLocalizationHelper,
         ICurrentOwnerProvider currentOwnerProvider,
         IPictureService pictureService)
     {
         _plantInstanceService = plantInstanceService ?? throw new ArgumentNullException(nameof(plantInstanceService));
         _plantService = plantService ?? throw new ArgumentNullException(nameof(plantService));
         _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
+        _fertilizerService = fertilizerService ?? throw new ArgumentNullException(nameof(fertilizerService));
+        _diseaseService = diseaseService ?? throw new ArgumentNullException(nameof(diseaseService));
+        _enumLocalizationHelper = enumLocalizationHelper ?? throw new ArgumentNullException(nameof(enumLocalizationHelper));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
         _pictureService = pictureService ?? throw new ArgumentNullException(nameof(pictureService));
     }
@@ -209,8 +223,8 @@ public class PlantInstanceController : Controller
             LocationName = gardenSpot != null && locationMap.TryGetValue(gardenSpot.LocationId, out var selectedLocation)
                 ? selectedLocation.Name
                 : "—",
-            ContainerId = instance.ContainerId,
-            ContainerInfo = instance.Container?.ContainerType.ToString(),
+            ContainerId = instance.Container?.Id,
+            ContainerInfo = instance.Container is not null ? await BuildContainerDisplayNameAsync(instance.Container) : null,
             SoilMixId = instance.SoilMixId,
             SoilMixName = instance.SoilMix?.Name,
             Nickname = instance.Nickname,
@@ -220,6 +234,7 @@ public class PlantInstanceController : Controller
             HeightCm = instance.HeightCm,
             SpreadCm = instance.SpreadCm,
             HealthStatus = instance.HealthStatus,
+            ActiveDiseaseCount = instance.DiseaseRecords.Count(r => !r.Outcome.HasValue || r.Outcome == PlantDiseaseOutcome.Ongoing),
             IsActive = instance.IsActive,
             Notes = instance.Notes
         };
@@ -494,6 +509,787 @@ public class PlantInstanceController : Controller
         try
         {
             await _plantInstanceService.DeletePlantPhotoAsync(id, photoId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    #endregion
+
+    #region Watering Schedule Actions
+
+    [HttpGet("{id:int}/watering-schedules")]
+    public async Task<IActionResult> WateringScheduleTab(int id, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return NotFound();
+
+        var schedules = await _plantInstanceService.GetWateringSchedulesAsync(id, ownerId, cancellationToken);
+        var recentLogs = await _plantInstanceService.GetWateringLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
+
+        var rows = schedules.Select(s => new WateringScheduleRowModel
+        {
+            Id = s.Id,
+            Season = s.Season,
+            SeasonKey = s.Season.ToString().ToLowerInvariant(),
+            FrequencyLabel = s.FrequencyDays.ToString(),
+            WaterAmountLabel = s.WaterAmountL.HasValue ? $"{s.WaterAmountL:0.##} L" : null,
+            TimeOfDay = s.TimeOfDay,
+            TimeOfDayKey = s.TimeOfDay?.ToString().ToLowerInvariant(),
+            Notes = s.Notes
+        }).ToList();
+
+        var logRows = recentLogs.Select(l => new WateringLogRowModel
+        {
+            Id = l.Id,
+            WateredAtUtc = l.WateredAtUtc,
+            WaterAmountLabel = l.WaterAmountL.HasValue ? $"{l.WaterAmountL:0.##} L" : null,
+            Notes = l.Notes
+        }).ToList();
+
+        ViewBag.PlantInstanceId = id;
+        ViewBag.LogRows = logRows;
+
+        return PartialView("_WateringScheduleTab", rows);
+    }
+
+    [HttpPost("{id:int}/watering-schedules")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WateringScheduleCreate(int id, WateringScheduleModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var schedule = new GropMng.Core.Domain.Garden.Care.WateringSchedule
+            {
+                OwnerId = ownerId,
+                Season = model.Season,
+                FrequencyDays = model.FrequencyDays,
+                WaterAmountL = model.WaterAmountL,
+                TimeOfDay = model.TimeOfDay,
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.AddWateringScheduleAsync(id, schedule, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/watering-schedules/{scheduleId:int}/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WateringScheduleUpdate(int id, int scheduleId, WateringScheduleModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var schedule = new GropMng.Core.Domain.Garden.Care.WateringSchedule
+            {
+                Id = scheduleId,
+                OwnerId = ownerId,
+                Season = model.Season,
+                FrequencyDays = model.FrequencyDays,
+                WaterAmountL = model.WaterAmountL,
+                TimeOfDay = model.TimeOfDay,
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.UpdateWateringScheduleAsync(id, schedule, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/watering-schedules/{scheduleId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WateringScheduleDelete(int id, int scheduleId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteWateringScheduleAsync(id, scheduleId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/watering-logs/{logId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WateringLogDelete(int id, int logId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteWateringLogAsync(id, logId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    #endregion
+
+    #region Fertilizing Schedule Actions
+
+    [HttpGet("{id:int}/fertilizing-schedules")]
+    public async Task<IActionResult> FertilizingScheduleTab(int id, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return NotFound();
+
+        var fertilizersPaged = await _fertilizerService.GetFertilizersAsync(pageIndex: 0, pageSize: int.MaxValue, cancellationToken: cancellationToken);
+        var fertilizers = fertilizersPaged.ToList();
+        var fertilizerMap = fertilizers.ToDictionary(f => f.Id, f => f.Name);
+
+        var schedules = await _plantInstanceService.GetFertilizingSchedulesAsync(id, ownerId, cancellationToken);
+        var recentLogs = await _plantInstanceService.GetFertilizingLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
+
+        var rows = schedules.Select(s => new FertilizingScheduleRowModel
+        {
+            Id = s.Id,
+            FertilizerId = s.FertilizerId,
+            FertilizerName = fertilizerMap.TryGetValue(s.FertilizerId, out var fertilizerName) ? fertilizerName : "—",
+            Season = s.Season,
+            FrequencyLabel = s.FrequencyDays.ToString(),
+            Quantity = s.Quantity,
+            Unit = s.Unit,
+            Notes = s.Notes,
+            DilutionInstructions = s.DilutionInstructions
+        }).ToList();
+
+        var logRows = recentLogs.Select(l => new FertilizingLogRowModel
+        {
+            Id = l.Id,
+            AppliedAtUtc = l.AppliedAtUtc,
+            FertilizerId = l.FertilizerId,
+            FertilizerName = fertilizerMap.TryGetValue(l.FertilizerId, out var fertilizerName) ? fertilizerName : "—",
+            Quantity = l.Quantity,
+            Unit = l.Unit,
+            Notes = l.Notes
+        }).ToList();
+
+        var model = new FertilizingScheduleTabModel
+        {
+            PlantInstanceId = id,
+            Schedules = rows,
+            LogRows = logRows,
+            AvailableFertilizers = fertilizers
+                .OrderBy(f => f.Name)
+                .Select(f => new SelectListItem
+                {
+                    Value = f.Id.ToString(),
+                    Text = f.Name
+                })
+                .ToList()
+        };
+
+        return PartialView("_FertilizingScheduleTab", model);
+    }
+
+    [HttpPost("{id:int}/fertilizing-schedules")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FertilizingScheduleCreate(int id, FertilizingScheduleModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var schedule = new FertilizingSchedule
+            {
+                OwnerId = ownerId,
+                FertilizerId = model.FertilizerId,
+                Season = model.Season,
+                FrequencyDays = model.FrequencyDays,
+                Quantity = model.Quantity,
+                Unit = model.Unit,
+                Notes = model.Notes,
+                DilutionInstructions = model.DilutionInstructions
+            };
+
+            await _plantInstanceService.AddFertilizingScheduleAsync(id, schedule, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/fertilizing-schedules/{scheduleId:int}/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FertilizingScheduleUpdate(int id, int scheduleId, FertilizingScheduleModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var schedule = new FertilizingSchedule
+            {
+                Id = scheduleId,
+                OwnerId = ownerId,
+                FertilizerId = model.FertilizerId,
+                Season = model.Season,
+                FrequencyDays = model.FrequencyDays,
+                Quantity = model.Quantity,
+                Unit = model.Unit,
+                Notes = model.Notes,
+                DilutionInstructions = model.DilutionInstructions
+            };
+
+            await _plantInstanceService.UpdateFertilizingScheduleAsync(id, schedule, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/fertilizing-schedules/{scheduleId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FertilizingScheduleDelete(int id, int scheduleId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteFertilizingScheduleAsync(id, scheduleId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/fertilizing-logs/{logId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FertilizingLogDelete(int id, int logId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteFertilizingLogAsync(id, logId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    #endregion
+
+    #region Container Repotting Actions
+
+    [HttpGet("{id:int}/container-repotting")]
+    public async Task<IActionResult> ContainerRepottingTab(int id, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return NotFound();
+
+        var model = await BuildRepottingTabModelAsync(id, ownerId, cancellationToken);
+        return PartialView("_ContainerRepottingTab", model);
+    }
+
+    [HttpPost("{id:int}/repotting-logs")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RepottingCreate(int id, RepottingModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var repottingLog = new RepottingLog
+            {
+                OwnerId = ownerId,
+                NewContainerId = model.NewContainerId,
+                NewSoilMixId = model.NewSoilMixId,
+                RepottedAtUtc = DateTime.SpecifyKind(model.RepottedOn.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.RepotPlantAsync(id, repottingLog, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/repotting-logs/{logId:int}/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RepottingUpdate(int id, int logId, RepottingModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var repottingLog = new RepottingLog
+            {
+                Id = logId,
+                OwnerId = ownerId,
+                NewContainerId = model.NewContainerId,
+                NewSoilMixId = model.NewSoilMixId,
+                RepottedAtUtc = DateTime.SpecifyKind(model.RepottedOn.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.UpdateRepottingLogAsync(id, repottingLog, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/repotting-logs/{logId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RepottingDelete(int id, int logId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteRepottingLogAsync(id, logId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/containers/quick-create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ContainerQuickCreate(int id, QuickContainerCreateModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return Json(new { success = false, message = "Plant instance not found." });
+
+        try
+        {
+            var created = await _plantInstanceService.CreateContainerAsync(new Container
+            {
+                OwnerId = ownerId,
+                ContainerType = model.ContainerType,
+                Material = model.Material,
+                BaseCircumferenceCm = model.BaseCircumferenceCm,
+                RimCircumferenceCm = model.RimCircumferenceCm,
+                HeightCm = model.HeightCm,
+                LengthCm = model.LengthCm,
+                WidthCm = model.WidthCm,
+                VolumeL = model.VolumeL,
+                Color = model.Color,
+                HasDrainageHole = model.HasDrainageHole,
+                Notes = model.Notes
+            }, cancellationToken);
+
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    id = created.Id,
+                    text = await BuildContainerDisplayNameAsync(created)
+                }
+            });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    private async Task<RepottingTabModel> BuildRepottingTabModelAsync(int plantInstanceId, Guid ownerId, CancellationToken cancellationToken)
+    {
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(plantInstanceId, ownerId, includeDetails: false, cancellationToken)
+            ?? throw new DomainException("Plant instance not found.");
+
+        var containers = await _plantInstanceService.GetContainersAsync(ownerId, cancellationToken);
+        var containerMap = containers.ToDictionary(c => c.Id);
+        var containerDisplayMap = new Dictionary<int, string>(containers.Count);
+        foreach (var containerItem in containers)
+            containerDisplayMap[containerItem.Id] = await BuildContainerDisplayNameAsync(containerItem);
+
+        var soilMixes = await _plantInstanceService.GetSoilMixesAsync(cancellationToken);
+        var soilMixMap = soilMixes.ToDictionary(s => s.Id);
+        var currentSoilMixName = instance.SoilMixId.HasValue && soilMixMap.TryGetValue(instance.SoilMixId.Value, out var soilMix)
+            ? soilMix.Name
+            : "-";
+
+        var logs = await _plantInstanceService.GetRepottingLogsAsync(plantInstanceId, ownerId, pageIndex: 0, pageSize: 20, cancellationToken);
+
+        var currentContainerEntity = instance.Container
+            ?? containers.FirstOrDefault(containerItem => containerItem.PlantInstanceId == plantInstanceId);
+
+        var currentContainerSinceUtc = currentContainerEntity is null
+            ? (DateTime?)null
+            : logs.Where(log => log.NewContainerId == currentContainerEntity.Id)
+                .OrderByDescending(log => log.RepottedAtUtc)
+                .Select(log => (DateTime?)log.RepottedAtUtc)
+                .FirstOrDefault();
+
+        var currentSoilMixIngredients = instance.SoilMixId.HasValue && soilMixMap.TryGetValue(instance.SoilMixId.Value, out var currentSoilMix)
+            ? currentSoilMix.Ingredients
+                .OrderByDescending(ingredientLine => ingredientLine.PercentageByVolume)
+                .ThenBy(ingredientLine => ingredientLine.SoilIngredient.Name)
+                .Select(ingredientLine => new SoilMixIngredientInfoModel
+                {
+                    IngredientName = ingredientLine.SoilIngredient.Name,
+                    PercentageByVolume = ingredientLine.PercentageByVolume,
+                    Notes = ingredientLine.Notes
+                })
+                .ToList()
+            : new List<SoilMixIngredientInfoModel>();
+
+        var currentContainer = currentContainerEntity is not null
+            ? new ContainerInfoModel
+            {
+                ContainerId = currentContainerEntity.Id,
+                ContainerName = containerDisplayMap[currentContainerEntity.Id],
+                Material = currentContainerEntity.Material,
+                Color = currentContainerEntity.Color,
+                BaseCircumferenceCm = currentContainerEntity.BaseCircumferenceCm,
+                RimCircumferenceCm = currentContainerEntity.RimCircumferenceCm,
+                HeightCm = currentContainerEntity.HeightCm,
+                LengthCm = currentContainerEntity.LengthCm,
+                WidthCm = currentContainerEntity.WidthCm,
+                VolumeL = currentContainerEntity.VolumeL,
+                HasDrainageHole = currentContainerEntity.HasDrainageHole,
+                Notes = currentContainerEntity.Notes,
+                ContainerCreatedOnUtc = currentContainerEntity.CreatedAtUtc,
+                ContainerUpdatedOnUtc = currentContainerEntity.UpdatedAtUtc,
+                CurrentContainerSinceUtc = currentContainerSinceUtc,
+                SoilMixId = instance.SoilMixId,
+                SoilMixName = currentSoilMixName,
+                SoilMixIngredients = currentSoilMixIngredients
+            }
+            : new ContainerInfoModel
+            {
+                ContainerName = "-",
+                SoilMixId = instance.SoilMixId,
+                SoilMixName = currentSoilMixName,
+                SoilMixIngredients = currentSoilMixIngredients
+            };
+
+        return new RepottingTabModel
+        {
+            PlantInstanceId = plantInstanceId,
+            CurrentContainer = currentContainer,
+            Logs = logs.Select(log => new RepottingLogRowModel
+            {
+                Id = log.Id,
+                PreviousContainerId = log.PreviousContainerId,
+                PreviousContainerName = log.PreviousContainerId.HasValue && containerMap.TryGetValue(log.PreviousContainerId.Value, out var previousContainer)
+                    ? containerDisplayMap[previousContainer.Id]
+                    : "-",
+                NewContainerId = log.NewContainerId,
+                NewContainerName = log.NewContainerId.HasValue && containerMap.TryGetValue(log.NewContainerId.Value, out var newContainer)
+                    ? containerDisplayMap[newContainer.Id]
+                    : "-",
+                PreviousSoilMixId = log.PreviousSoilMixId,
+                PreviousSoilMixName = log.PreviousSoilMixId.HasValue && soilMixMap.TryGetValue(log.PreviousSoilMixId.Value, out var previousSoil)
+                    ? previousSoil.Name
+                    : "-",
+                NewSoilMixId = log.NewSoilMixId,
+                NewSoilMixName = log.NewSoilMixId.HasValue && soilMixMap.TryGetValue(log.NewSoilMixId.Value, out var newSoil)
+                    ? newSoil.Name
+                    : "-",
+                RepottedOn = DateOnly.FromDateTime(log.RepottedAtUtc),
+                ContainerChanged = log.ContainerChanged,
+                SoilMixChanged = log.SoilMixChanged,
+                Notes = log.Notes
+            }).ToList(),
+            AvailableContainers = new List<SelectListItem> { new() { Value = "", Text = "-" } }
+                .Concat(containers.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = containerDisplayMap[c.Id]
+                }))
+                .ToList(),
+            AvailableSoilMixes = new List<SelectListItem> { new() { Value = "", Text = "-" } }
+                .Concat(soilMixes.Select(s => new SelectListItem
+                {
+                    Value = s.Id.ToString(),
+                    Text = s.Name
+                }))
+                .ToList(),
+            AvailableContainerTypes = Enum.GetValues<GardenContainerType>().Select(t => new SelectListItem
+            {
+                Value = t.ToString(),
+                Text = t.ToString()
+            }).ToList()
+        };
+    }
+
+    private async Task<string> BuildContainerDisplayNameAsync(Container container)
+    {
+        var localizedContainerType = await _enumLocalizationHelper.GetLocalizedNameAsync(container.ContainerType);
+        var colorLabel = string.IsNullOrWhiteSpace(container.Color) ? string.Empty : $" ({container.Color})";
+        return $"{localizedContainerType}{colorLabel}";
+    }
+
+    #endregion
+
+    #region Disease Record Actions
+
+    [HttpGet("{id:int}/disease-records")]
+    public async Task<IActionResult> DiseaseRecordTab(int id, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
+        if (instance is null)
+            return NotFound();
+
+        var diseasesPaged = await _diseaseService.GetDiseasesAsync(pageIndex: 0, pageSize: int.MaxValue, cancellationToken: cancellationToken);
+        var diseases = diseasesPaged.OrderBy(d => d.Name).ToList();
+        var diseaseMap = diseases.ToDictionary(d => d.Id, d => d.Name);
+
+        var records = await _plantInstanceService.GetDiseaseRecordsAsync(id, ownerId, includePhotos: true, cancellationToken);
+        var photoDictionary = new Dictionary<int, IReadOnlyList<DiseasePhotoRowModel>>();
+
+        foreach (var record in records)
+        {
+            var photoRows = new List<DiseasePhotoRowModel>();
+            foreach (var photo in record.Photos.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id))
+            {
+                photoRows.Add(new DiseasePhotoRowModel
+                {
+                    Id = photo.Id,
+                    PictureId = photo.PictureId,
+                    ThumbnailUrl = await _pictureService.GetPictureUrlAsync(photo.PictureId, targetSize: 100),
+                    Notes = photo.Notes,
+                    TakenDate = photo.TakenDate,
+                    DisplayOrder = photo.DisplayOrder
+                });
+            }
+
+            photoDictionary[record.Id] = photoRows;
+        }
+
+        var model = new DiseaseRecordTabModel
+        {
+            PlantInstanceId = id,
+            Records = records.Select(r => new DiseaseRecordRowModel
+            {
+                Id = r.Id,
+                DiseaseId = r.DiseaseId,
+                DiseaseName = diseaseMap.TryGetValue(r.DiseaseId, out var diseaseName) ? diseaseName : "—",
+                DetectedDate = r.DetectedDate,
+                ResolvedDate = r.ResolvedDate,
+                Severity = r.Severity,
+                Outcome = r.Outcome,
+                TreatmentUsed = r.TreatmentUsed,
+                Notes = r.Notes,
+                PhotoCount = photoDictionary.TryGetValue(r.Id, out var photos) ? photos.Count : 0
+            }).ToList(),
+            PhotosByRecordId = photoDictionary,
+            AvailableDiseases = diseases.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = d.Name
+            }).ToList()
+        };
+
+        return PartialView("_DiseaseRecordTab", model);
+    }
+
+    [HttpPost("{id:int}/disease-records")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseaseRecordCreate(int id, DiseaseRecordModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var record = new GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord
+            {
+                OwnerId = ownerId,
+                DiseaseId = model.DiseaseId,
+                DetectedDate = model.DetectedDate,
+                ResolvedDate = model.ResolvedDate,
+                Severity = model.Severity,
+                TreatmentUsed = model.TreatmentUsed,
+                Outcome = model.Outcome,
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.AddDiseaseRecordAsync(id, record, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/disease-records/{recordId:int}/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseaseRecordUpdate(int id, int recordId, DiseaseRecordModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var record = new GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord
+            {
+                Id = recordId,
+                OwnerId = ownerId,
+                DiseaseId = model.DiseaseId,
+                DetectedDate = model.DetectedDate,
+                ResolvedDate = model.ResolvedDate,
+                Severity = model.Severity,
+                TreatmentUsed = model.TreatmentUsed,
+                Outcome = model.Outcome,
+                Notes = model.Notes
+            };
+
+            await _plantInstanceService.UpdateDiseaseRecordAsync(id, record, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/disease-records/{recordId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseaseRecordDelete(int id, int recordId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteDiseaseRecordAsync(id, recordId, ownerId, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/disease-records/{recordId:int}/resolve")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseaseRecordQuickResolve(int id, int recordId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var records = await _plantInstanceService.GetDiseaseRecordsAsync(id, ownerId, includePhotos: false, cancellationToken);
+            var record = records.FirstOrDefault(r => r.Id == recordId);
+            if (record is null)
+                return Json(new { success = false, message = "Disease record not found." });
+
+            record.Outcome = PlantDiseaseOutcome.Resolved;
+            record.ResolvedDate = DateOnly.FromDateTime(DateTime.Today);
+
+            await _plantInstanceService.UpdateDiseaseRecordAsync(id, record, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/disease-records/{recordId:int}/photos/add")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseasePhotoAdd(int id, int recordId, DiseasePhotoModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
+
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            var photo = new DiseasePhoto
+            {
+                OwnerId = ownerId,
+                PictureId = model.PictureId,
+                TakenDate = model.TakenDate,
+                Notes = model.Notes,
+                DisplayOrder = model.DisplayOrder
+            };
+
+            await _plantInstanceService.AddDiseasePhotoAsync(id, recordId, photo, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (DomainException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:int}/disease-records/{recordId:int}/photos/{photoId:int}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiseasePhotoDelete(int id, int recordId, int photoId, CancellationToken cancellationToken)
+    {
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+
+        try
+        {
+            await _plantInstanceService.DeleteDiseasePhotoAsync(id, recordId, photoId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
