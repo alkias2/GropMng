@@ -78,6 +78,14 @@ internal sealed class PlantInstanceSeeder
             .Where(pi => pi.OwnerId == DemoOwnerBusinessId && !pi.IsDeleted)
             .CountAsync(cancellationToken);
 
+        var existingSeedTempIds = (await _dbContext.PlantInstances
+                .Where(pi => pi.OwnerId == DemoOwnerBusinessId && !pi.IsDeleted && pi.Notes != null)
+                .Select(pi => pi.Notes)
+                .ToListAsync(cancellationToken))
+            .Select(TryExtractSeedId)
+            .OfType<int>()
+            .ToHashSet();
+
         if (existing >= Instances.Length)
         {
             await BackfillMissingNicknamesAsync(cancellationToken);
@@ -92,7 +100,8 @@ internal sealed class PlantInstanceSeeder
         var now = DateTime.UtcNow;
         foreach (var inst in Instances)
         {
-            var tempIdx = inst.TempId - 1; // 0-based (kept for future use)
+            if (existingSeedTempIds.Contains(inst.TempId))
+                continue;
 
             if (!plantIdsByScientificName.TryGetValue(inst.ScientificName, out var plantId))
                 continue;

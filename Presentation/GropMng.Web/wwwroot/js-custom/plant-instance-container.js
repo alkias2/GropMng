@@ -211,6 +211,9 @@ var GropPlantContainer = (function () {
             .then(function (html) {
                 _cfg.tabPane.innerHTML = html;
                 _tabLoaded = true;
+                if (typeof window.gropInitFlatpickrInputs === 'function') {
+                    window.gropInitFlatpickrInputs(_cfg.tabPane);
+                }
                 bindTabEvents();
                 drawPotDiagrams(_cfg.tabPane);
             })
@@ -279,7 +282,12 @@ var GropPlantContainer = (function () {
 
         modalEl.querySelector('#' + _cfg.repottingModalId + '-containerid').value = data && data.containerid ? data.containerid : '';
         modalEl.querySelector('#' + _cfg.repottingModalId + '-soilmixid').value = data && data.soilmixid ? data.soilmixid : '';
-        modalEl.querySelector('#' + _cfg.repottingModalId + '-repottedon').value = data && data.repottedon ? data.repottedon : todayIso();
+        var repottedOnInput = modalEl.querySelector('#' + _cfg.repottingModalId + '-repottedon');
+        var repottedOnValue = data && data.repottedon ? data.repottedon : todayIso();
+        repottedOnInput.value = repottedOnValue;
+        if (repottedOnInput._flatpickr) {
+            repottedOnInput._flatpickr.setDate(repottedOnValue, true, 'Y-m-d');
+        }
         modalEl.querySelector('#' + _cfg.repottingModalId + '-notes').value = data && data.notes ? data.notes : '';
 
         modal.show();

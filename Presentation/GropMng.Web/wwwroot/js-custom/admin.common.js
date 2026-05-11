@@ -190,10 +190,12 @@
      * The configuration intentionally disables the native mobile picker so the UI stays
      * consistent across desktop and touch devices.
      */
-    function initializeFlatpickrInputs() {
+    function initializeFlatpickrInputs(rootElement) {
         if (typeof window.flatpickr !== 'function') {
             return;
         }
+
+        var root = rootElement || document;
 
         // Shared defaults for every admin date picker instance.
         var commonFlatpickrOptions = {
@@ -205,7 +207,7 @@
         };
 
         // Date-only controls.
-        document.querySelectorAll('.flatpickr-date').forEach(function (element) {
+        root.querySelectorAll('.flatpickr-date').forEach(function (element) {
             if (element._flatpickr) {
                 return;
             }
@@ -216,7 +218,7 @@
         });
 
         // Date-and-time controls using a 24-hour clock format.
-        document.querySelectorAll('.flatpickr-datetime').forEach(function (element) {
+        root.querySelectorAll('.flatpickr-datetime').forEach(function (element) {
             if (element._flatpickr) {
                 return;
             }
@@ -229,8 +231,86 @@
         });
     }
 
+    function normalizeQuillValue(htmlValue) {
+        if (!htmlValue) {
+            return '';
+        }
+
+        var normalized = String(htmlValue).trim();
+        return normalized === '<p><br></p>' ? '' : normalized;
+    }
+
+    function getQuillToolbar(mode) {
+        if (mode === 'mini') {
+            return [
+                ['bold', 'italic', 'underline'],
+                [{ list: 'bullet' }],
+                ['clean']
+            ];
+        }
+
+        return [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ color: [] }, { background: [] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ align: [] }],
+            ['link', 'blockquote', 'code-block'],
+            ['clean']
+        ];
+    }
+
+    function initializeQuillEditors(rootElement) {
+        if (typeof window.Quill !== 'function') {
+            return;
+        }
+
+        var root = rootElement || document;
+
+        root.querySelectorAll('.grop-quill-editor').forEach(function (editorElement) {
+            if (editorElement.dataset.quillInitialized === 'true') {
+                return;
+            }
+
+            var inputSelector = editorElement.dataset.inputSelector;
+            if (!inputSelector) {
+                return;
+            }
+
+            var hiddenInput = root.querySelector(inputSelector) || document.querySelector(inputSelector);
+            if (!hiddenInput) {
+                return;
+            }
+
+            var mode = editorElement.dataset.quillMode === 'mini' ? 'mini' : 'full';
+            var quill = new window.Quill(editorElement, {
+                theme: 'snow',
+                modules: {
+                    toolbar: getQuillToolbar(mode)
+                }
+            });
+
+            var initialValue = hiddenInput.value || '';
+            if (initialValue) {
+                quill.root.innerHTML = initialValue;
+            }
+
+            quill.on('text-change', function () {
+                hiddenInput.value = normalizeQuillValue(quill.root.innerHTML);
+            });
+
+            hiddenInput.classList.add('d-none');
+            editorElement.dataset.quillInitialized = 'true';
+            hiddenInput._gropQuill = quill;
+        });
+    }
+
+    window.gropInitFlatpickrInputs = initializeFlatpickrInputs;
+    window.gropInitQuillEditors = initializeQuillEditors;
+
     // Initialize shared date controls once the DOM is ready.
     $(function () {
         initializeFlatpickrInputs();
+        initializeQuillEditors();
     });
 })(window, document, window.jQuery);

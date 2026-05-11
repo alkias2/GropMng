@@ -63,6 +63,12 @@ var GropPlantDiseases = (function () {
         .then(function (html) {
             _cfg.tabPane.innerHTML = html;
             _tabLoaded = true;
+            if (typeof window.gropInitFlatpickrInputs === 'function') {
+                window.gropInitFlatpickrInputs(_cfg.tabPane);
+            }
+            if (typeof window.gropInitQuillEditors === 'function') {
+                window.gropInitQuillEditors(_cfg.tabPane);
+            }
             bindTabEvents();
             bindUploadWidgets();
         })
@@ -180,12 +186,31 @@ var GropPlantDiseases = (function () {
         }
 
         _modalEl.querySelector('#' + _cfg.modalId + '-diseaseid').value = (data && data.diseaseid) || '';
-        _modalEl.querySelector('#' + _cfg.modalId + '-detected').value = (data && data.detected) || todayIso();
-        _modalEl.querySelector('#' + _cfg.modalId + '-resolved').value = (data && data.resolved) || '';
+
+        var detectedInput = _modalEl.querySelector('#' + _cfg.modalId + '-detected');
+        var detectedValue = (data && data.detected) || todayIso();
+        detectedInput.value = detectedValue;
+        if (detectedInput._flatpickr) {
+            detectedInput._flatpickr.setDate(detectedValue, true, 'Y-m-d');
+        }
+
+        var resolvedInput = _modalEl.querySelector('#' + _cfg.modalId + '-resolved');
+        var resolvedValue = (data && data.resolved) || '';
+        resolvedInput.value = resolvedValue;
+        if (resolvedInput._flatpickr) {
+            resolvedInput._flatpickr.setDate(resolvedValue || null, true, 'Y-m-d');
+        }
+
         _modalEl.querySelector('#' + _cfg.modalId + '-severity').value = (data && data.severity) || 'Moderate';
         _modalEl.querySelector('#' + _cfg.modalId + '-outcome').value = (data && data.outcome) || 'Ongoing';
         _modalEl.querySelector('#' + _cfg.modalId + '-treatment').value = (data && data.treatment) || '';
-        _modalEl.querySelector('#' + _cfg.modalId + '-notes').value = (data && data.notes) || '';
+
+        var notesInput = _modalEl.querySelector('#' + _cfg.modalId + '-notes');
+        var notesValue = (data && data.notes) || '';
+        notesInput.value = notesValue;
+        if (notesInput._gropQuill) {
+            notesInput._gropQuill.root.innerHTML = notesValue;
+        }
 
         _modal.show();
     }

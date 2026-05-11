@@ -109,31 +109,21 @@ internal sealed class SoilMixSeeder
         IReadOnlyDictionary<string, int> ingredientIdsByName,
         CancellationToken cancellationToken = default)
     {
-        // Return existing if already seeded for this owner
+        // Safety guard: if there is already active SoilMix data, do not append demo defaults.
+        // This keeps startup idempotent even when users rename seeded mix names.
         var existing = await _dbContext.SoilMixes
             .Where(m => !m.IsDeleted)
             .OrderBy(m => m.Id)
             .Select(m => m.Id)
             .ToListAsync(cancellationToken);
 
-        if (existing.Count >= Mixes.Length)
+        if (existing.Count > 0)
             return existing;
 
-        var existingNames = existing.Count > 0
-            ? (await _dbContext.SoilMixes
-                .Where(m => !m.IsDeleted)
-                .Select(m => m.Name)
-                .ToListAsync(cancellationToken)).ToHashSet()
-            : [];
-
         var now = DateTime.UtcNow;
-        var seededMixes = new List<SoilMix>();
 
         foreach (var mix in Mixes)
         {
-            if (existingNames.Contains(mix.Name))
-                continue;
-
             var soilMix = new SoilMix
             {
                 Name = mix.Name,
@@ -162,7 +152,6 @@ internal sealed class SoilMixSeeder
             }
 
             _dbContext.SoilMixes.Add(soilMix);
-            seededMixes.Add(soilMix);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);

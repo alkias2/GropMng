@@ -7,6 +7,13 @@
     </div>
     <div class="mt-1">
         <strong>@T("mygarden.disease.record.field.notes"):</strong>
-        @(string.IsNullOrWhiteSpace(Model.Notes) ? "—" : Model.Notes)
+        @if (string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <span>—</span>
+        }
+        else
+        {
+            <div class="ql-editor p-0">@Html.Raw(Model.Notes)</div>
+        }
     </div>
 </div>

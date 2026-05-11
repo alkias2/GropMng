@@ -72,8 +72,8 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label" for="@(addFormId)-takendate">@T("mygarden.plantinstance.photo.field.takendate")</label>
-                    <input type="date" id="@(addFormId)-takendate" name="TakenDate"
-                           class="form-control"
+                      <input type="text" id="@(addFormId)-takendate" name="TakenDate"
+                          class="form-control flatpickr-date" autocomplete="off"
                            value="@DateTime.Today.ToString("yyyy-MM-dd")" />
                 </div>
                 <div class="col-md-2">
@@ -109,7 +109,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">@T("mygarden.plantinstance.photo.field.takendate")</label>
-                    <input type="date" id="@(editModalId)-takendate" class="form-control" />
+                    <input type="text" id="@(editModalId)-takendate" class="form-control flatpickr-date" autocomplete="off" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">@T("mygarden.plantinstance.photo.field.displayorder")</label>

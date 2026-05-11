@@ -52,7 +52,7 @@
 
                 <div class="col-md-3">
                     <label asp-for="PlantedDate" class="form-label">@T("mygarden.plantinstance.field.planteddate")</label>
-                    <input asp-for="PlantedDate" class="form-control" type="date" />
+                    <input asp-for="PlantedDate" class="form-control flatpickr-date" type="text" autocomplete="off" />
                     <span asp-validation-for="PlantedDate" class="text-danger small"></span>
                 </div>
                 <div class="col-md-3">
@@ -89,7 +89,8 @@
 
                 <div class="col-12">
                     <label asp-for="Notes" class="form-label">@T("common.notes")</label>
-                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                    <div class="grop-quill-editor" data-quill-mode="full" data-input-selector="#Notes"></div>
                 </div>
             </div>
 

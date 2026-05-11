@@ -31,11 +31,11 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">@T("mygarden.disease.record.field.detected") <span class="text-danger">*</span></label>
-                        <input type="date" id="@(modalId)-detected" class="form-control" />
+                        <input type="text" id="@(modalId)-detected" class="form-control flatpickr-date" autocomplete="off" />
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">@T("mygarden.disease.record.field.resolved")</label>
-                        <input type="date" id="@(modalId)-resolved" class="form-control" />
+                        <input type="text" id="@(modalId)-resolved" class="form-control flatpickr-date" autocomplete="off" />
                     </div>
 
                     <div class="col-md-4">
@@ -60,12 +60,13 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@T("mygarden.disease.record.field.treatment")</label>
-                        <input type="text" id="@(modalId)-treatment" class="form-control" maxlength="500" />
+                        <textarea id="@(modalId)-treatment" class="form-control" rows="3" maxlength="500"></textarea>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label">@T("mygarden.disease.record.field.notes")</label>
-                        <textarea id="@(modalId)-notes" class="form-control" rows="3" maxlength="1000"></textarea>
+                        <textarea id="@(modalId)-notes" class="form-control" maxlength="1000"></textarea>
+                        <div class="grop-quill-editor" data-quill-mode="full" data-input-selector="#@(modalId)-notes"></div>
                     </div>
                 </div>
 

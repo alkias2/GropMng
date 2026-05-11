@@ -54,6 +54,17 @@ internal sealed class LocationAndGardenSpotSeeder
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        // Safety guard: once the owner has any active spots, never re-insert demo defaults.
+        // This prevents duplicate spots when users rename the original seeded names.
+        if (location.GardenSpots.Any(s => !s.IsDeleted))
+        {
+            var existingSpotLookup = location.GardenSpots
+                .Where(s => !s.IsDeleted)
+                .ToDictionary(s => s.Name, s => s.Id);
+
+            return new LocationGardenSpotResult(location.Id, existingSpotLookup);
+        }
+
         foreach (var spot in GardenSpots)
         {
             var exists = location.GardenSpots.Any(s => s.Name == spot.Name && !s.IsDeleted);

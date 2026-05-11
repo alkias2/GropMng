@@ -57,7 +57,8 @@
                 </div>
                 <div class="col-12">
                     <label asp-for="Notes" class="form-label">@T("common.notes")</label>
-                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                    <div class="grop-quill-editor" data-quill-mode="full" data-input-selector="#Notes"></div>
                 </div>
             </div>
 

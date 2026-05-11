@@ -219,6 +219,9 @@ var GropPlantPhotos = (function () {
                 photoIdEl.value  = btn.dataset.id;
                 captionEl.value  = btn.dataset.caption !== 'null' ? btn.dataset.caption : '';
                 dateEl.value     = btn.dataset.takendate;
+                if (dateEl._flatpickr) {
+                    dateEl._flatpickr.setDate(btn.dataset.takendate || null, true, 'Y-m-d');
+                }
                 orderEl.value    = btn.dataset.displayorder;
                 _setError(errorEl, null);
 

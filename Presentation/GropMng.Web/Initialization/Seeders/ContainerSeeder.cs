@@ -76,6 +76,13 @@ internal sealed class ContainerSeeder
             .Where(c => c.OwnerId == DemoOwnerBusinessId && !c.IsDeleted)
             .CountAsync(cancellationToken);
 
+        var existingContainerInstanceIds = await _dbContext.Containers
+            .Where(c => c.OwnerId == DemoOwnerBusinessId && !c.IsDeleted && c.PlantInstanceId.HasValue)
+            .Select(c => c.PlantInstanceId!.Value)
+            .ToListAsync(cancellationToken);
+
+        var existingInstanceIdSet = existingContainerInstanceIds.ToHashSet();
+
         if (existing >= Containers.Length)
         {
             return await _dbContext.Containers
@@ -92,6 +99,9 @@ internal sealed class ContainerSeeder
             var instanceId = i < plantInstanceIdsOrderedByTempId.Count
                 ? plantInstanceIdsOrderedByTempId[i]
                 : (int?)null;
+
+            if (instanceId.HasValue && existingInstanceIdSet.Contains(instanceId.Value))
+                continue;
 
             var container = new Container
             {
