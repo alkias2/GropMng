@@ -147,9 +147,757 @@
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" asp-append-version="true" />
     <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js" asp-append-version="true"></script>
-    <script src="~/js-custom/plant-instance-photos.js" asp-append-version="true"></script>
-    <script src="~/js-custom/plant-instance-diseases.js" asp-append-version="true"></script>
     <script src="~/js-custom/plant-instance-container.js" asp-append-version="true"></script>
+
+    <!-- Plant Photo Management: DataTable, add, edit (modal), delete, upload widget -->
+    <script>
+        var GropPlantPhotos = (function () {
+            'use strict';
+
+            /**
+             * Initialises the photo management UI for one PlantInstance.
+             * @@param {object} opts
+             * @@param {number} opts.plantInstanceId
+             * @@param {string} opts.tableId           - id of the <table> element
+             * @@param {string} opts.addFormId         - id of the add-photo <form>
+             * @@param {string} opts.addUploadId       - id of the mini-upload wrapper div
+             * @@param {string} opts.editModalId       - id of the edit <div.modal>
+             * @@param {string} opts.listUrl           - URL for DataTable AJAX source
+             * @@param {string} opts.addUrl            - URL for photo add POST
+             * @@param {string} opts.updateUrl         - URL for photo update POST
+             * @@param {string} opts.deleteUrl         - URL for photo delete POST
+             * @@param {string} opts.uploadUrl         - URL for async picture upload
+             * @@param {string} opts.deleteConfirm     - confirmation message for delete
+             * @@param {string} opts.msgUploading      - status text while uploading
+             * @@param {string} opts.msgUploadError    - status text on upload failure
+             */
+            function init(opts) {
+                var table = _initDataTable(opts);
+                _initUploadWidget(opts);
+                _initAddForm(opts, table);
+                _initEditModal(opts, table);
+            }
+
+            // ── DataTable ─────────────────────────────────────────────────────────
+
+            function _initDataTable(opts) {
+                return $('#' + opts.tableId).DataTable({
+                    processing : true,
+                    ajax       : { url: opts.listUrl, type: 'GET', dataSrc: 'data' },
+                    columns    : [
+                        {
+                            data      : 'thumbnailUrl',
+                            orderable : false,
+                            render    : function (url) {
+                                if (!url) {
+                                    return '<span class="text-muted">—</span>';
+                                }
+                                return '<img src="' + url + '" style="width:60px;height:60px;object-fit:cover" class="rounded border" />';
+                            }
+                        },
+                        { data: 'caption', defaultContent: '<span class="text-muted">—</span>' },
+                        { data: 'takenDate' },
+                        { data: 'displayOrder', className: 'text-center' },
+                        {
+                            data      : null,
+                            orderable : false,
+                            className : 'text-end',
+                            render    : function (row) {
+                                var rowId = row.id || row.Id || 0;
+                                var rowCaption = row.caption || row.Caption || '';
+                                var rowTakenDate = row.takenDate || row.TakenDate || '';
+                                var rowDisplayOrder = row.displayOrder || row.DisplayOrder || 0;
+
+                                return '<button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit-photo" '
+                                     +   'data-id="'           + rowId             + '" '
+                                     +   'data-caption="'      + _esc(rowCaption)   + '" '
+                                     +   'data-takendate="'    + rowTakenDate      + '" '
+                                     +   'data-displayorder="' + rowDisplayOrder   + '">'
+                                     +   '<i class="bx bx-edit-alt"></i>'
+                                     + '</button>'
+                                     + '<button type="button" class="btn btn-sm btn-outline-danger btn-delete-photo" '
+                                     +   'data-id="' + rowId + '">'
+                                     +   '<i class="bx bx-trash"></i>'
+                                     + '</button>';
+                            }
+                        }
+                    ],
+                    language: {
+                        emptyTable: opts.emptyText || 'No photos yet.'
+                    },
+                    order    : [[3, 'asc']],
+                    pageLength: 10,
+                    dom      : '<"row"<"col-sm-6"l><"col-sm-6"f>>t<"row"<"col-sm-6"i><"col-sm-6"p>>'
+                });
+            }
+
+            // ── Mini upload widget ────────────────────────────────────────────────
+
+            function _initUploadWidget(opts) {
+                var uploadId   = opts.addUploadId;
+                var fileInput  = document.getElementById(uploadId + '-file');
+                var preview    = document.getElementById(uploadId + '-preview');
+                var placeholder= document.getElementById(uploadId + '-placeholder');
+                var hidden     = document.getElementById(uploadId + '-hidden');
+                var statusEl   = document.getElementById(uploadId + '-status');
+
+                if (!fileInput || !hidden) return;
+
+                fileInput.addEventListener('change', async function () {
+                    var file = this.files[0];
+                    if (!file) return;
+
+                    statusEl.textContent = opts.msgUploading || 'Uploading…';
+                    fileInput.disabled   = true;
+
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('qqfilename', file.name);
+                    formData.append('entityType', 'plantinstance');
+
+                    try {
+                        var resp = await fetch(opts.uploadUrl, {
+                            method : 'POST',
+                            body   : formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        var json = await resp.json();
+
+                        if (json.success) {
+                            hidden.value          = json.pictureId;
+                            preview.src           = json.imageUrl;
+                            preview.style.display = '';
+                            placeholder.style.display = 'none';
+                            statusEl.textContent  = '';
+                        } else {
+                            statusEl.textContent = json.message || (opts.msgUploadError || 'Upload failed.');
+                        }
+                    } catch (e) {
+                        statusEl.textContent = opts.msgUploadError || 'Upload failed.';
+                    } finally {
+                        fileInput.disabled = false;
+                        fileInput.value    = '';
+                    }
+                });
+            }
+
+            // ── Add form ──────────────────────────────────────────────────────────
+
+            function _initAddForm(opts, table) {
+                var form    = document.getElementById(opts.addFormId);
+                var errorEl = document.getElementById(opts.addFormId + '-error');
+                var uploadId= opts.addUploadId;
+
+                if (!form) return;
+
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    _setError(errorEl, null);
+
+                    var hidden = document.getElementById(uploadId + '-hidden');
+                    if (!hidden || parseInt(hidden.value, 10) <= 0) {
+                        _setError(errorEl, 'Please upload an image first.');
+                        return;
+                    }
+
+                    var data = new FormData(form);
+                    var token = _getAntiforgeryToken(form);
+
+                    try {
+                        var resp = await fetch(opts.addUrl, {
+                            method : 'POST',
+                            body   : data,
+                            headers: {
+                                'X-Requested-With'       : 'XMLHttpRequest',
+                                'RequestVerificationToken': token
+                            }
+                        });
+                        var json = await resp.json();
+
+                        if (json.success) {
+                            table.ajax.reload(null, false);
+                            _resetAddForm(form, uploadId);
+                        } else {
+                            _setError(errorEl, json.message || 'Error adding photo.');
+                        }
+                    } catch (ex) {
+                        _setError(errorEl, 'Unexpected error. Please try again.');
+                    }
+                });
+            }
+
+            function _resetAddForm(form, uploadId) {
+                form.reset();
+
+                var hidden     = document.getElementById(uploadId + '-hidden');
+                var preview    = document.getElementById(uploadId + '-preview');
+                var placeholder= document.getElementById(uploadId + '-placeholder');
+                var statusEl   = document.getElementById(uploadId + '-status');
+
+                if (hidden) hidden.value = '0';
+                if (preview) { preview.src = ''; preview.style.display = 'none'; }
+                if (placeholder) placeholder.style.display = '';
+                if (statusEl) statusEl.textContent = '';
+            }
+
+            // ── Edit modal ────────────────────────────────────────────────────────
+
+            function _initEditModal(opts, table) {
+                var modalEl  = document.getElementById(opts.editModalId);
+                var saveBtn  = document.getElementById(opts.editModalId + '-save-btn');
+                var photoIdEl= document.getElementById(opts.editModalId + '-photo-id');
+                var captionEl= document.getElementById(opts.editModalId + '-caption');
+                var dateEl   = document.getElementById(opts.editModalId + '-takendate');
+                var orderEl  = document.getElementById(opts.editModalId + '-displayorder');
+                var errorEl  = document.getElementById(opts.editModalId + '-error');
+
+                if (!modalEl || !saveBtn) return;
+
+                var bsModal = new bootstrap.Modal(modalEl);
+
+                // Open modal on edit button click (event delegation on table wrapper)
+                document.getElementById('plant-photos-section-' + opts.plantInstanceId)
+                    .addEventListener('click', function (e) {
+                        var btn = e.target.closest('.btn-edit-photo');
+                        if (!btn) return;
+
+                        photoIdEl.value  = btn.dataset.id;
+                        captionEl.value  = btn.dataset.caption !== 'null' ? btn.dataset.caption : '';
+                        dateEl.value     = btn.dataset.takendate;
+                        if (dateEl._flatpickr) {
+                            dateEl._flatpickr.setDate(btn.dataset.takendate || null, true, 'Y-m-d');
+                        }
+                        orderEl.value    = btn.dataset.displayorder;
+                        _setError(errorEl, null);
+
+                        bsModal.show();
+                    });
+
+                // Delete button (event delegation)
+                document.getElementById('plant-photos-section-' + opts.plantInstanceId)
+                    .addEventListener('click', function (e) {
+                        var btn = e.target.closest('.btn-delete-photo');
+                        if (!btn) return;
+
+                        if (!confirm(opts.deleteConfirm || 'Delete this photo?')) return;
+
+                        var photoId  = btn.dataset.id;
+                        var url      = opts.deleteUrl;
+                        var token    = _getAntiforgeryToken(document.body);
+                        var body     = new URLSearchParams({ photoId: photoId });
+
+                        fetch(url, {
+                            method : 'POST',
+                            body   : body,
+                            headers: {
+                                'Content-Type'           : 'application/x-www-form-urlencoded',
+                                'X-Requested-With'       : 'XMLHttpRequest',
+                                'RequestVerificationToken': token
+                            }
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (json) {
+                            if (json.success) {
+                                table.ajax.reload(null, false);
+                            }
+                        });
+                    });
+
+                // Save button in edit modal
+                saveBtn.addEventListener('click', async function () {
+                    _setError(errorEl, null);
+
+                    var photoId  = photoIdEl.value;
+                    var url      = opts.updateUrl;
+                    var token    = _getAntiforgeryToken(modalEl);
+
+                    var body = new URLSearchParams({
+                        photoId      : photoId,
+                        Caption      : captionEl.value,
+                        TakenDate    : dateEl.value,
+                        DisplayOrder : orderEl.value
+                    });
+
+                    try {
+                        var resp = await fetch(url, {
+                            method : 'POST',
+                            body   : body,
+                            headers: {
+                                'Content-Type'           : 'application/x-www-form-urlencoded',
+                                'X-Requested-With'       : 'XMLHttpRequest',
+                                'RequestVerificationToken': token
+                            }
+                        });
+                        var json = await resp.json();
+
+                        if (json.success) {
+                            bsModal.hide();
+                            table.ajax.reload(null, false);
+                        } else {
+                            _setError(errorEl, json.message || 'Error saving changes.');
+                        }
+                    } catch (ex) {
+                        _setError(errorEl, 'Unexpected error. Please try again.');
+                    }
+                });
+            }
+
+            // ── Helpers ───────────────────────────────────────────────────────────
+
+            function _getAntiforgeryToken(ctx) {
+                var el = (ctx && ctx.querySelector)
+                    ? ctx.querySelector('[name="__RequestVerificationToken"]')
+                    : document.querySelector('[name="__RequestVerificationToken"]');
+                return el ? el.value : '';
+            }
+
+            function _setError(el, msg) {
+                if (!el) return;
+                if (msg) {
+                    el.textContent = msg;
+                    el.classList.remove('d-none');
+                } else {
+                    el.textContent = '';
+                    el.classList.add('d-none');
+                }
+            }
+
+            function _esc(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+
+            return { init: init };
+        }());
+    </script>
+
+    <!-- Plant Disease Management: disease records tab, add/edit modal, photo upload per record -->
+    <script>
+        var GropPlantDiseases = (function () {
+            'use strict';
+
+            var _cfg = null;
+            var _tabLoaded = false;
+            var _modalEl = null;
+            var _modal = null;
+
+            function getAntiForgeryToken() {
+                var input = document.querySelector('input[name="__RequestVerificationToken"]');
+                return input ? input.value : '';
+            }
+
+            function buildUrlWithId(template, id) {
+                return template.replace(/\/0(\/|$)/, '/' + id + '$1');
+            }
+
+            function buildUrlWithTwoIds(template, firstId, secondId) {
+                var url = template.replace(/\/0(\/|$)/, '/' + firstId + '$1');
+                return url.replace(/\/0(\/|$)/, '/' + secondId + '$1');
+            }
+
+            function todayIso() {
+                var now = new Date();
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var day = String(now.getDate()).padStart(2, '0');
+                return now.getFullYear() + '-' + month + '-' + day;
+            }
+
+            function showToast(message, isError) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: isError ? 'error' : 'success',
+                        title: message,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    if (isError) console.error(message);
+                    else console.info(message);
+                }
+            }
+
+            function loadTabContent() {
+                if (_tabLoaded) return;
+
+                var placeholder = _cfg.tabPane.querySelector('.tab-lazy-placeholder');
+                var spinner = placeholder ? placeholder.querySelector('.spinner-border') : null;
+                if (spinner) spinner.classList.remove('d-none');
+
+                fetch(_cfg.tabUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    _cfg.tabPane.innerHTML = html;
+                    _tabLoaded = true;
+                    if (typeof window.gropInitFlatpickrInputs === 'function') {
+                        window.gropInitFlatpickrInputs(_cfg.tabPane);
+                    }
+                    if (typeof window.gropInitQuillEditors === 'function') {
+                        window.gropInitQuillEditors(_cfg.tabPane);
+                    }
+                    bindTabEvents();
+                    bindUploadWidgets();
+                })
+                .catch(function () {
+                    if (placeholder) placeholder.innerHTML = '<span class="text-danger small">Error loading disease data.</span>';
+                });
+            }
+
+            function bindTabEvents() {
+                var pane = _cfg.tabPane;
+
+                var addBtn = pane.querySelector('[id^="disease-record-add-btn-"]');
+                if (addBtn) {
+                    addBtn.addEventListener('click', function () { openModal(0, null); });
+                }
+
+                pane.addEventListener('click', function (e) {
+                    var editBtn = e.target.closest('.disease-record-edit-btn');
+                    if (editBtn) {
+                        openModal(parseInt(editBtn.dataset.recordId, 10), editBtn.dataset);
+                        return;
+                    }
+
+                    var deleteBtn = e.target.closest('.disease-record-delete-btn');
+                    if (deleteBtn) {
+                        confirmDelete(parseInt(deleteBtn.dataset.recordId, 10));
+                        return;
+                    }
+
+                    var resolveBtn = e.target.closest('.disease-record-resolve-btn');
+                    if (resolveBtn) {
+                        quickResolve(parseInt(resolveBtn.dataset.recordId, 10));
+                        return;
+                    }
+
+                    var addPhotoBtn = e.target.closest('.disease-photo-add-btn');
+                    if (addPhotoBtn) {
+                        addPhoto(parseInt(addPhotoBtn.dataset.recordId, 10));
+                        return;
+                    }
+
+                    var deletePhotoBtn = e.target.closest('.disease-photo-delete-btn');
+                    if (deletePhotoBtn) {
+                        deletePhoto(parseInt(deletePhotoBtn.dataset.recordId, 10), parseInt(deletePhotoBtn.dataset.photoId, 10));
+                    }
+                });
+            }
+
+            function bindUploadWidgets() {
+                var wrappers = _cfg.tabPane.querySelectorAll('[id^="disease-photo-upload-"]');
+                wrappers.forEach(function (wrapper) {
+                    var uploadId = wrapper.id;
+                    var fileInput = document.getElementById(uploadId + '-file');
+                    var preview = document.getElementById(uploadId + '-preview');
+                    var placeholder = document.getElementById(uploadId + '-placeholder');
+                    var hidden = document.getElementById(uploadId + '-hidden');
+                    var statusEl = document.getElementById(uploadId + '-status');
+
+                    if (!fileInput || !hidden) return;
+
+                    fileInput.addEventListener('change', function () {
+                        var file = this.files[0];
+                        if (!file) return;
+
+                        statusEl.textContent = _cfg.msgUploading;
+                        fileInput.disabled = true;
+
+                        var formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('qqfilename', file.name);
+                        formData.append('entityType', 'plantinstance');
+
+                        fetch(_cfg.uploadUrl, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (json) {
+                            if (json.success) {
+                                hidden.value = json.pictureId;
+                                preview.src = json.imageUrl;
+                                preview.classList.remove('d-none');
+                                if (placeholder) placeholder.classList.add('d-none');
+                                statusEl.textContent = '';
+                            } else {
+                                statusEl.textContent = json.message || _cfg.msgUploadError;
+                            }
+                        })
+                        .catch(function () {
+                            statusEl.textContent = _cfg.msgUploadError;
+                        })
+                        .finally(function () {
+                            fileInput.disabled = false;
+                            fileInput.value = '';
+                        });
+                    });
+                });
+            }
+
+            function openModal(recordId, data) {
+                _modalEl = document.getElementById(_cfg.modalId);
+                if (!_modalEl) return;
+
+                _modal = bootstrap.Modal.getOrCreateInstance(_modalEl);
+
+                _modalEl.querySelector('#' + _cfg.modalId + '-error').classList.add('d-none');
+                _modalEl.querySelector('#' + _cfg.modalId + '-record-id').value = recordId;
+
+                var titleEl = _modalEl.querySelector('#' + _cfg.modalId + '-title');
+                if (titleEl) {
+                    var addTitle = titleEl.getAttribute('data-title-add') || _cfg.titleAdd;
+                    var editTitle = titleEl.getAttribute('data-title-edit') || _cfg.titleEdit;
+                    titleEl.textContent = recordId === 0 ? addTitle : editTitle;
+                }
+
+                _modalEl.querySelector('#' + _cfg.modalId + '-diseaseid').value = (data && data.diseaseid) || '';
+
+                var detectedInput = _modalEl.querySelector('#' + _cfg.modalId + '-detected');
+                var detectedValue = (data && data.detected) || todayIso();
+                detectedInput.value = detectedValue;
+                if (detectedInput._flatpickr) {
+                    detectedInput._flatpickr.setDate(detectedValue, true, 'Y-m-d');
+                }
+
+                var resolvedInput = _modalEl.querySelector('#' + _cfg.modalId + '-resolved');
+                var resolvedValue = (data && data.resolved) || '';
+                resolvedInput.value = resolvedValue;
+                if (resolvedInput._flatpickr) {
+                    resolvedInput._flatpickr.setDate(resolvedValue || null, true, 'Y-m-d');
+                }
+
+                _modalEl.querySelector('#' + _cfg.modalId + '-severity').value = (data && data.severity) || 'Moderate';
+                _modalEl.querySelector('#' + _cfg.modalId + '-outcome').value = (data && data.outcome) || 'Ongoing';
+                _modalEl.querySelector('#' + _cfg.modalId + '-treatment').value = (data && data.treatment) || '';
+
+                var notesInput = _modalEl.querySelector('#' + _cfg.modalId + '-notes');
+                var notesValue = (data && data.notes) || '';
+                notesInput.value = notesValue;
+                if (notesInput._gropQuill) {
+                    notesInput._gropQuill.root.innerHTML = notesValue;
+                }
+
+                _modal.show();
+            }
+
+            function saveModal() {
+                var recordId = parseInt(_modalEl.querySelector('#' + _cfg.modalId + '-record-id').value, 10);
+                var diseaseId = _modalEl.querySelector('#' + _cfg.modalId + '-diseaseid').value;
+                var detected = _modalEl.querySelector('#' + _cfg.modalId + '-detected').value;
+                var resolved = _modalEl.querySelector('#' + _cfg.modalId + '-resolved').value;
+                var severity = _modalEl.querySelector('#' + _cfg.modalId + '-severity').value;
+                var outcome = _modalEl.querySelector('#' + _cfg.modalId + '-outcome').value;
+                var treatment = _modalEl.querySelector('#' + _cfg.modalId + '-treatment').value;
+                var notes = _modalEl.querySelector('#' + _cfg.modalId + '-notes').value;
+                var errorEl = _modalEl.querySelector('#' + _cfg.modalId + '-error');
+
+                if (!diseaseId || !detected) {
+                    errorEl.textContent = _cfg.validationRequired;
+                    errorEl.classList.remove('d-none');
+                    return;
+                }
+
+                var url = recordId === 0
+                    ? _cfg.createUrl
+                    : buildUrlWithId(_cfg.updateUrlTemplate, recordId);
+
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+                formData.append('DiseaseId', diseaseId);
+                formData.append('DetectedDate', detected);
+                if (resolved) formData.append('ResolvedDate', resolved);
+                if (severity) formData.append('Severity', severity);
+                if (outcome) formData.append('Outcome', outcome);
+                if (treatment) formData.append('TreatmentUsed', treatment);
+                if (notes) formData.append('Notes', notes);
+
+                fetch(url, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        _modal.hide();
+                        showToast(_cfg.msgSaveSuccess, false);
+                        reloadTabContent();
+                    } else {
+                        errorEl.textContent = result.message || _cfg.msgSaveError;
+                        errorEl.classList.remove('d-none');
+                    }
+                })
+                .catch(function () {
+                    errorEl.textContent = _cfg.msgNetworkError;
+                    errorEl.classList.remove('d-none');
+                });
+            }
+
+            function confirmDelete(recordId) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: _cfg.deleteConfirm,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    }).then(function (r) {
+                        if (r.isConfirmed) deleteRecord(recordId);
+                    });
+                } else if (window.confirm(_cfg.deleteConfirm)) {
+                    deleteRecord(recordId);
+                }
+            }
+
+            function deleteRecord(recordId) {
+                var url = buildUrlWithId(_cfg.deleteUrlTemplate, recordId);
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+                fetch(url, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        showToast(_cfg.msgDeleteSuccess, false);
+                        reloadTabContent();
+                    } else {
+                        showToast(result.message || _cfg.msgDeleteError, true);
+                    }
+                })
+                .catch(function () {
+                    showToast(_cfg.msgNetworkError, true);
+                });
+            }
+
+            function quickResolve(recordId) {
+                var url = buildUrlWithId(_cfg.quickResolveUrlTemplate, recordId);
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+                fetch(url, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        showToast(_cfg.msgResolveSuccess, false);
+                        reloadTabContent();
+                    } else {
+                        showToast(result.message || _cfg.msgSaveError, true);
+                    }
+                })
+                .catch(function () {
+                    showToast(_cfg.msgNetworkError, true);
+                });
+            }
+
+            function addPhoto(recordId) {
+                var uploadId = 'disease-photo-upload-' + recordId;
+                var hidden = document.getElementById(uploadId + '-hidden');
+                var notes = document.getElementById(uploadId + '-notes');
+                var takenDate = document.getElementById(uploadId + '-takendate');
+                var displayOrder = document.getElementById(uploadId + '-displayorder');
+
+                if (!hidden || parseInt(hidden.value, 10) <= 0) {
+                    showToast(_cfg.msgPhotoRequired, true);
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+                formData.append('PictureId', hidden.value);
+                formData.append('TakenDate', takenDate ? takenDate.value : todayIso());
+                formData.append('DisplayOrder', displayOrder ? displayOrder.value : '0');
+                if (notes && notes.value) formData.append('Notes', notes.value);
+
+                var url = buildUrlWithId(_cfg.addPhotoUrlTemplate, recordId);
+                fetch(url, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        showToast(_cfg.msgPhotoAddSuccess, false);
+                        reloadTabContent();
+                    } else {
+                        showToast(result.message || _cfg.msgSaveError, true);
+                    }
+                })
+                .catch(function () {
+                    showToast(_cfg.msgNetworkError, true);
+                });
+            }
+
+            function deletePhoto(recordId, photoId) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: _cfg.deletePhotoConfirm,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    }).then(function (r) {
+                        if (r.isConfirmed) doDeletePhoto(recordId, photoId);
+                    });
+                } else if (window.confirm(_cfg.deletePhotoConfirm)) {
+                    doDeletePhoto(recordId, photoId);
+                }
+            }
+
+            function doDeletePhoto(recordId, photoId) {
+                var url = buildUrlWithTwoIds(_cfg.deletePhotoUrlTemplate, recordId, photoId);
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+                fetch(url, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        showToast(_cfg.msgPhotoDeleteSuccess, false);
+                        reloadTabContent();
+                    } else {
+                        showToast(result.message || _cfg.msgDeleteError, true);
+                    }
+                })
+                .catch(function () {
+                    showToast(_cfg.msgNetworkError, true);
+                });
+            }
+
+            function reloadTabContent() {
+                _tabLoaded = false;
+                _cfg.tabPane.innerHTML =
+                    '<div class="tab-lazy-placeholder text-center py-4">' +
+                    '<span class="spinner-border spinner-border-sm text-primary" role="status"></span>' +
+                    '</div>';
+                loadTabContent();
+            }
+
+            function init(cfg) {
+                _cfg = cfg;
+
+                document.addEventListener('click', function (e) {
+                    if (e.target && e.target.id === _cfg.modalId + '-save-btn') {
+                        saveModal();
+                    }
+                });
+
+                if (_cfg.tabBtn) {
+                    _cfg.tabBtn.addEventListener('shown.bs.tab', function () {
+                        loadTabContent();
+                    });
+                }
+
+                if (_cfg.activeTab === 'diseases') {
+                    loadTabContent();
+                }
+            }
+
+            return { init: init };
+        }());
+    </script>
 
     <!-- Watering Schedule Management: lazy tab loading, add/edit modal, save/delete operations -->
     <script>
