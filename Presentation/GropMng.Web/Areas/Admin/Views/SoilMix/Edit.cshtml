@@ -15,7 +15,7 @@
     title="@($"{T("common.edit")}: {Model.Name}")"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
         new() { Text = T("admin.soilmix.title"), Url = listUrl },
         new() { Text = T("common.edit") }
     })">

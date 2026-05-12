@@ -11,7 +11,7 @@
     title="@($"{T("admin.localization.language.edit")}: {Model.Name}")"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
         new() { Text = T("admin.localization.languages.title"), Url = listUrl },
         new() { Text = T("admin.localization.language.edit") }
     })">

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GropMng.Core.Interfaces.Services.Logging;
 
 namespace GropMng.Web.Controllers;
 
@@ -20,11 +19,11 @@ public class AppLogController : Controller
 
     [HttpPost]
     public IActionResult AppLogList()
-        => RedirectToAction("List", "AppLog", new { area = "Admin" });
+                => RedirectToAction("List", "AppLog", new { area = "Admin" });
 
     [HttpGet]
     public IActionResult Details(int id)
-        => RedirectToAction("Details", "AppLog", new { area = "Admin", id });
+                => RedirectToAction("Details", "AppLog", new { area = "Admin", id });
 
     [HttpPost]
     public IActionResult Delete(int id)
@@ -32,5 +31,5 @@ public class AppLogController : Controller
 
     [HttpPost]
     public IActionResult DeleteAll()
-        => RedirectToAction("List", "AppLog", new { area = "Admin" });
+                => RedirectToAction("List", "AppLog", new { area = "Admin" });
 }

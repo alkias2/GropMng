@@ -35,7 +35,6 @@ public class LocationController : Controller
     #region Public
 
     [HttpGet("")]
-    [HttpGet("/Location/List")]
     public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);

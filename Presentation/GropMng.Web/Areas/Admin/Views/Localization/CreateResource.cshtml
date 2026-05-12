@@ -9,9 +9,9 @@
     title="@T("admin.localization.resource.create")"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
         new() { Text = T("admin.localization.languages.title"), Url = Url.Action("List", "Localization", new { area = "Admin" }) },
-        new() { Text = T("admin.localization.resources.title"), Url = Url.Action("Resources", "Localization", new { area = "Admin", languageId = Model.LanguageId }) },
+        new() { Text = T("admin.localization.resources.title"), Url = Url.Action("Resources", "Localization", new { area = "Admin", id = Model.LanguageId }) },
         new() { Text = T("admin.localization.resource.create") }
     })">
 </grop-admin-page-header>

@@ -451,7 +451,6 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/photos/{photoId:int}/update")]
     [HttpPost("{id:int}/photos/update")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PlantPhotoUpdate(int id, int photoId, PlantInstancePhotoModel model, CancellationToken cancellationToken)
@@ -489,7 +488,6 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/photos/{photoId:int}/delete")]
     [HttpPost("{id:int}/photos/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PlantPhotoDelete(int id, int photoId, CancellationToken cancellationToken)
@@ -521,7 +519,7 @@ public class PlantInstanceController : Controller
 
     #region Watering Schedule Actions
 
-    [HttpGet("{id:int}/watering-schedules")]
+    [HttpGet("{id:int}/watering")]
     public async Task<IActionResult> WateringScheduleTab(int id, CancellationToken cancellationToken)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
@@ -558,7 +556,7 @@ public class PlantInstanceController : Controller
         return PartialView("_WateringScheduleTab", rows);
     }
 
-    [HttpPost("{id:int}/watering-schedules")]
+    [HttpPost("{id:int}/watering/create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> WateringScheduleCreate(int id, WateringScheduleModel model, CancellationToken cancellationToken)
     {
@@ -588,7 +586,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/watering-schedules/{scheduleId:int}/update")]
+    [HttpPost("{id:int}/watering/{scheduleId:int}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> WateringScheduleUpdate(int id, int scheduleId, WateringScheduleModel model, CancellationToken cancellationToken)
     {
@@ -619,7 +617,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/watering-schedules/{scheduleId:int}/delete")]
+    [HttpPost("{id:int}/watering/{scheduleId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> WateringScheduleDelete(int id, int scheduleId, CancellationToken cancellationToken)
     {
@@ -636,7 +634,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/watering-logs/{logId:int}/delete")]
+    [HttpPost("{id:int}/watering/logs/{logId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> WateringLogDelete(int id, int logId, CancellationToken cancellationToken)
     {
@@ -657,7 +655,7 @@ public class PlantInstanceController : Controller
 
     #region Fertilizing Schedule Actions
 
-    [HttpGet("{id:int}/fertilizing-schedules")]
+    [HttpGet("{id:int}/fertilizing")]
     public async Task<IActionResult> FertilizingScheduleTab(int id, CancellationToken cancellationToken)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
@@ -714,7 +712,7 @@ public class PlantInstanceController : Controller
         return PartialView("_FertilizingScheduleTab", model);
     }
 
-    [HttpPost("{id:int}/fertilizing-schedules")]
+    [HttpPost("{id:int}/fertilizing/create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> FertilizingScheduleCreate(int id, FertilizingScheduleModel model, CancellationToken cancellationToken)
     {
@@ -746,7 +744,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/fertilizing-schedules/{scheduleId:int}/update")]
+    [HttpPost("{id:int}/fertilizing/{scheduleId:int}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> FertilizingScheduleUpdate(int id, int scheduleId, FertilizingScheduleModel model, CancellationToken cancellationToken)
     {
@@ -779,7 +777,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/fertilizing-schedules/{scheduleId:int}/delete")]
+    [HttpPost("{id:int}/fertilizing/{scheduleId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> FertilizingScheduleDelete(int id, int scheduleId, CancellationToken cancellationToken)
     {
@@ -796,7 +794,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/fertilizing-logs/{logId:int}/delete")]
+    [HttpPost("{id:int}/fertilizing/logs/{logId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> FertilizingLogDelete(int id, int logId, CancellationToken cancellationToken)
     {
@@ -817,7 +815,7 @@ public class PlantInstanceController : Controller
 
     #region Container Repotting Actions
 
-    [HttpGet("{id:int}/container-repotting")]
+    [HttpGet("{id:int}/container")]
     public async Task<IActionResult> ContainerRepottingTab(int id, CancellationToken cancellationToken)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
@@ -829,7 +827,7 @@ public class PlantInstanceController : Controller
         return PartialView("_ContainerRepottingTab", model);
     }
 
-    [HttpPost("{id:int}/repotting-logs")]
+    [HttpPost("{id:int}/repotting/create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RepottingCreate(int id, RepottingModel model, CancellationToken cancellationToken)
     {
@@ -858,7 +856,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/repotting-logs/{logId:int}/update")]
+    [HttpPost("{id:int}/repotting/{logId:int}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RepottingUpdate(int id, int logId, RepottingModel model, CancellationToken cancellationToken)
     {
@@ -888,7 +886,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/repotting-logs/{logId:int}/delete")]
+    [HttpPost("{id:int}/repotting/{logId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RepottingDelete(int id, int logId, CancellationToken cancellationToken)
     {
@@ -905,7 +903,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/containers/quick-create")]
+    [HttpPost("{id:int}/container/quick-create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ContainerQuickCreate(int id, QuickContainerCreateModel model, CancellationToken cancellationToken)
     {
@@ -1084,7 +1082,7 @@ public class PlantInstanceController : Controller
 
     #region Disease Record Actions
 
-    [HttpGet("{id:int}/disease-records")]
+    [HttpGet("{id:int}/diseases")]
     public async Task<IActionResult> DiseaseRecordTab(int id, CancellationToken cancellationToken)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
@@ -1145,7 +1143,7 @@ public class PlantInstanceController : Controller
         return PartialView("_DiseaseRecordTab", model);
     }
 
-    [HttpPost("{id:int}/disease-records")]
+    [HttpPost("{id:int}/diseases/create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseaseRecordCreate(int id, DiseaseRecordModel model, CancellationToken cancellationToken)
     {
@@ -1177,7 +1175,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/disease-records/{recordId:int}/update")]
+    [HttpPost("{id:int}/diseases/{recordId:int}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseaseRecordUpdate(int id, int recordId, DiseaseRecordModel model, CancellationToken cancellationToken)
     {
@@ -1210,7 +1208,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/disease-records/{recordId:int}/delete")]
+    [HttpPost("{id:int}/diseases/{recordId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseaseRecordDelete(int id, int recordId, CancellationToken cancellationToken)
     {
@@ -1227,7 +1225,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/disease-records/{recordId:int}/resolve")]
+    [HttpPost("{id:int}/diseases/{recordId:int}/resolve")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseaseRecordQuickResolve(int id, int recordId, CancellationToken cancellationToken)
     {
@@ -1252,7 +1250,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/disease-records/{recordId:int}/photos/add")]
+    [HttpPost("{id:int}/diseases/{recordId:int}/photos/add")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseasePhotoAdd(int id, int recordId, DiseasePhotoModel model, CancellationToken cancellationToken)
     {
@@ -1281,7 +1279,7 @@ public class PlantInstanceController : Controller
         }
     }
 
-    [HttpPost("{id:int}/disease-records/{recordId:int}/photos/{photoId:int}/delete")]
+    [HttpPost("{id:int}/diseases/{recordId:int}/photos/{photoId:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DiseasePhotoDelete(int id, int recordId, int photoId, CancellationToken cancellationToken)
     {

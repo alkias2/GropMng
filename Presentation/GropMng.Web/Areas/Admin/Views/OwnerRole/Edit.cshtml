@@ -11,7 +11,7 @@
     title="@Model.Name"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = "Dashboard", Url = Url.Action("Dashboard", "Home", new { area = "" }) },
         new() { Text = "Roles & Permissions", Url = listUrl },
         new() { Text = "Edit Role" }
     })">

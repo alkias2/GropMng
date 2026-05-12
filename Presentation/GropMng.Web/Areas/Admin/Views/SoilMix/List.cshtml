@@ -14,7 +14,7 @@
     title="@T("admin.soilmix.title")"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
         new() { Text = T("admin.soilmix.title") }
     })">
     <grop-header-button href="@addSoilMixUrl"
