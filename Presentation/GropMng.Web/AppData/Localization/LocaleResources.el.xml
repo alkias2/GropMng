@@ -28,6 +28,10 @@
     <Name>common.cancel</Name>
     <Value>Ακύρωση</Value>
   </LocaleResource>
+    <LocaleResource>
+      <Name>common.ok</Name>
+      <Value>ΟΚ</Value>
+    </LocaleResource>
   <LocaleResource>
     <Name>common.search</Name>
     <Value>Αναζήτηση</Value>
@@ -1072,6 +1076,22 @@
     <Value>Ο πόρος διαγράφηκε με επιτυχία.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.resource.validation.name.required</Name>
+    <Value>Το όνομα πόρου είναι υποχρεωτικό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.update.failed</Name>
+    <Value>Αποτυχία ενημέρωσης πόρου.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.failed</Name>
+    <Value>Αποτυχία διαγραφής πόρου.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.save.failed</Name>
+    <Value>Αποτυχία αποθήκευσης πόρου.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.localization.resource.export</Name>
     <Value>Εξαγωγή XML</Value>
   </LocaleResource>
@@ -1890,6 +1910,10 @@
     <Value>Η καταγραφή ενημερώθηκε ως επιλυμένη.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.disease.record.notifications.load.error</Name>
+    <Value>Αποτυχία φόρτωσης δεδομένων ασθενειών.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.disease.severity.mild</Name>
     <Value>Ήπια</Value>
   </LocaleResource>
@@ -2024,6 +2048,18 @@
     <Value>Το πρόγραμμα ποτίσματος διαγράφηκε.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.delete.error</Name>
+    <Value>Αποτυχία διαγραφής προγράμματος ποτίσματος.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.notifications.delete.error</Name>
+    <Value>Αποτυχία διαγραφής καταγραφής ποτίσματος.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.load.error</Name>
+    <Value>Αποτυχία φόρτωσης δεδομένων ποτίσματος.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.watering.log.title</Name>
     <Value>Ιστορικό Ποτισμάτων</Value>
   </LocaleResource>
@@ -2081,6 +2117,10 @@
     <Value>Το λίπασμα, η εποχή και η συχνότητα είναι υποχρεωτικά.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.validation.amount.decimal</Name>
+    <Value>Μη έγκυρη δεκαδική ποσότητα.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.fertilizing.schedule.field.fertilizer</Name>
     <Value>Λίπασμα</Value>
   </LocaleResource>
@@ -2123,6 +2163,10 @@
   <LocaleResource>
     <Name>mygarden.fertilizing.schedule.notifications.delete.error</Name>
     <Value>Αποτυχία διαγραφής προγράμματος λίπανσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.load.error</Name>
+    <Value>Αποτυχία φόρτωσης δεδομένων λίπανσης.</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>mygarden.fertilizing.log.title</Name>

@@ -28,6 +28,10 @@
     <Name>common.cancel</Name>
     <Value>Cancel</Value>
   </LocaleResource>
+    <LocaleResource>
+      <Name>common.ok</Name>
+      <Value>OK</Value>
+    </LocaleResource>
   <LocaleResource>
     <Name>common.search</Name>
     <Value>Search</Value>
@@ -1074,6 +1078,22 @@
     <Value>Resource deleted successfully.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.resource.validation.name.required</Name>
+    <Value>Resource name is required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.update.failed</Name>
+    <Value>Failed to update resource.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.delete.failed</Name>
+    <Value>Failed to delete resource.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.resource.save.failed</Name>
+    <Value>Failed to save resource.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.localization.resource.export</Name>
     <Value>Export XML</Value>
   </LocaleResource>
@@ -1892,6 +1912,10 @@
     <Value>Disease record marked as resolved.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.disease.record.notifications.load.error</Name>
+    <Value>Failed to load disease data.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.disease.severity.mild</Name>
     <Value>Mild</Value>
   </LocaleResource>
@@ -2026,6 +2050,18 @@
     <Value>Watering schedule deleted.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.delete.error</Name>
+    <Value>Failed to delete watering schedule.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.log.notifications.delete.error</Name>
+    <Value>Failed to delete watering log entry.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.watering.schedule.notifications.load.error</Name>
+    <Value>Failed to load watering data.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.watering.log.title</Name>
     <Value>Watering Log</Value>
   </LocaleResource>
@@ -2083,6 +2119,10 @@
     <Value>Fertilizer, season, and frequency are required.</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.validation.amount.decimal</Name>
+    <Value>Invalid decimal amount.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>mygarden.fertilizing.schedule.field.fertilizer</Name>
     <Value>Fertilizer</Value>
   </LocaleResource>
@@ -2125,6 +2165,10 @@
   <LocaleResource>
     <Name>mygarden.fertilizing.schedule.notifications.delete.error</Name>
     <Value>Failed to delete fertilizing schedule.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>mygarden.fertilizing.schedule.notifications.load.error</Name>
+    <Value>Failed to load fertilizing data.</Value>
   </LocaleResource>
   <LocaleResource>
     <Name>mygarden.fertilizing.log.title</Name>

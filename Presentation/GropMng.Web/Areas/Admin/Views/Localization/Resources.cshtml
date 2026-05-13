@@ -137,7 +137,12 @@
                 edit: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.edit"))),
                 delete: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.delete"))),
                 save: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.save"))),
-                cancel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel")))
+                cancel: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel"))),
+                requiredName: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.localization.resource.validation.name.required"))),
+                updateFailed: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.localization.resource.update.failed"))),
+                deleteFailed: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.localization.resource.delete.failed"))),
+                saveFailed: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.localization.resource.save.failed"))),
+                deleteConfirmText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("admin.localization.resource.delete.confirm")))
             }
         };
     </script>

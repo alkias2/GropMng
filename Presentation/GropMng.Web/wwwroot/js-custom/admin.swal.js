@@ -6,17 +6,18 @@
     }
 
     async function alert(options) {
+        const texts = window.gropCommonTexts || {};
         const Swal = getSwal();
         if (!Swal) {
-            window.alert(options?.text || options?.title || 'Notification');
+            window.alert(options?.text || options?.title || texts.deleteText || 'Notification');
             return;
         }
 
         await Swal.fire({
             icon: options?.icon || 'info',
-            title: options?.title || 'Notification',
+            title: options?.title || texts.deleteTitle || 'Notification',
             text: options?.text || '',
-            confirmButtonText: options?.confirmButtonText || 'OK',
+            confirmButtonText: options?.confirmButtonText || texts.okButtonText || 'OK',
             customClass: {
                 confirmButton: 'btn btn-primary'
             },
@@ -34,8 +35,8 @@
             title: options?.title || texts.deleteTitle || 'Are you sure?',
             text: options?.text || texts.deleteText || 'Are you sure you want to perform this action?',
             showCancelButton: true,
-            confirmButtonText: options?.confirmButtonText || texts.deleteButtonText || 'Yes',
-            cancelButtonText: options?.cancelButtonText || texts.cancelButtonText || 'No, cancel',
+            confirmButtonText: options?.confirmButtonText || texts.deleteButtonText || texts.yesButtonText || 'Yes',
+            cancelButtonText: options?.cancelButtonText || texts.cancelButtonText || texts.noButtonText || 'No, cancel',
             reverseButtons: true,
             customClass: {
                 confirmButton: options?.confirmButtonClass || 'btn btn-danger me-2',
@@ -75,8 +76,8 @@
                     icon: form.dataset.confirmIcon || 'warning',
                     title: form.dataset.confirmTitle || texts.deleteTitle || 'Are you sure?',
                     text: form.dataset.confirmText || texts.deleteText || 'Are you sure you want to perform this action?',
-                    confirmButtonText: form.dataset.confirmButtonText || texts.deleteButtonText || 'Yes',
-                    cancelButtonText: form.dataset.cancelButtonText || texts.cancelButtonText || 'No, cancel'
+                    confirmButtonText: form.dataset.confirmButtonText || texts.deleteButtonText || texts.yesButtonText || 'Yes',
+                    cancelButtonText: form.dataset.cancelButtonText || texts.cancelButtonText || texts.noButtonText || 'No, cancel'
                 });
 
                 if (ok) form.submit();

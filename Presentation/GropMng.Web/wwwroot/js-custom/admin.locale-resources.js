@@ -22,6 +22,11 @@
     var cfg = window.localeResourceConfig || {};
     var texts = cfg.texts || {};
 
+    function t(key, fallback) {
+        var value = texts[key];
+        return (typeof value === 'string' && value.length) ? value : fallback;
+    }
+
     function getToken() {
         return $('input[name="__RequestVerificationToken"]').first().val();
     }
@@ -67,8 +72,8 @@
     window.localeResource_renderActions = function (data, type, row) {
         if (type !== 'display') { return ''; }
         var id = escHtml(row.id);
-        var editText = escHtml(texts.edit || 'Edit');
-        var deleteText = escHtml(texts.delete || 'Delete');
+        var editText = escHtml(t('edit', 'Edit'));
+        var deleteText = escHtml(t('delete', 'Delete'));
         return '<button class="btn btn-sm btn-icon btn-outline-secondary locale-resource-edit-btn me-1" ' +
                    'data-id="' + id + '" title="' + editText + '"><i class="bx bx-pencil"></i></button>' +
                '<button class="btn btn-sm btn-icon btn-outline-danger locale-resource-delete-btn" ' +
@@ -108,8 +113,8 @@
             'value="' + valueVal + '" />'
         );
         // Col 3: Actions — replace with Save/Cancel
-        var saveText = escHtml(texts.save || 'Save');
-        var cancelText = escHtml(texts.cancel || 'Cancel');
+        var saveText = escHtml(t('save', 'Save'));
+        var cancelText = escHtml(t('cancel', 'Cancel'));
         $cells.eq(3).html(
             '<button class="btn btn-sm btn-success locale-resource-save-btn me-1" ' +
                 'data-id="' + escHtml(row.id) + '" ' +
@@ -141,7 +146,7 @@
         var resourceValue = $tr.find('.locale-resource-value-input').val().trim();
 
         if (!resourceName) {
-            alert('Resource name is required.');
+            alert(t('requiredName', 'Resource name is required.'));
             return;
         }
 
@@ -163,12 +168,12 @@
                     exitEditMode();
                 } else {
                     $saveBtn.prop('disabled', false);
-                    showTableError('Update failed.');
+                    showTableError(t('updateFailed', 'Update failed.'));
                 }
             },
             error: function (jqXHR) {
                 $saveBtn.prop('disabled', false);
-                var msg = 'Update failed.';
+                var msg = t('updateFailed', 'Update failed.');
                 try {
                     var body = JSON.parse(jqXHR.responseText);
                     if (body && body.errors) {
@@ -184,12 +189,13 @@
         if (window.GropSwal && typeof window.GropSwal.confirm === 'function') {
             return window.GropSwal.confirm({
                 icon: 'warning',
+                text: t('deleteConfirmText', (window.gropCommonTexts && window.gropCommonTexts.deleteText) || 'Are you sure?'),
                 confirmButtonClass: 'btn btn-danger me-2',
                 cancelButtonClass: 'btn btn-outline-secondary'
             });
         }
 
-        return Promise.resolve(window.confirm((window.gropCommonTexts && window.gropCommonTexts.deleteText) || 'Are you sure?'));
+        return Promise.resolve(window.confirm(t('deleteConfirmText', (window.gropCommonTexts && window.gropCommonTexts.deleteText) || 'Are you sure?')));
     }
 
     /**
@@ -214,11 +220,11 @@
                 if (response && response.success) {
                     refreshTable();
                 } else {
-                    showTableError('Delete failed.');
+                    showTableError(t('deleteFailed', 'Delete failed.'));
                 }
             },
             error: function (jqXHR) {
-                var msg = 'Delete failed.';
+                var msg = t('deleteFailed', 'Delete failed.');
                 try {
                     var body = JSON.parse(jqXHR.responseText);
                     if (body && body.errors) {
@@ -251,7 +257,7 @@
         var value = $('#addResourceValue').val().trim();
 
         if (!name) {
-            $('#addResourceErrors').text('Resource name is required.').removeClass('d-none');
+            $('#addResourceErrors').text(t('requiredName', 'Resource name is required.')).removeClass('d-none');
             return;
         }
 
@@ -273,12 +279,12 @@
                     hideAddPanel();
                     refreshTable();
                 } else {
-                    $('#addResourceErrors').text('Save failed.').removeClass('d-none');
+                    $('#addResourceErrors').text(t('saveFailed', 'Save failed.')).removeClass('d-none');
                 }
             },
             error: function (jqXHR) {
                 $btn.prop('disabled', false);
-                var msg = 'Save failed.';
+                var msg = t('saveFailed', 'Save failed.');
                 try {
                     var body = JSON.parse(jqXHR.responseText);
                     if (body && body.errors) {
