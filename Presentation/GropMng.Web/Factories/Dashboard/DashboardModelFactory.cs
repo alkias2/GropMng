@@ -305,14 +305,15 @@ public class DashboardModelFactory : IDashboardModelFactory
 
         var instanceIds = actionList.Select(a => a.PlantInstanceId).Distinct().ToHashSet();
 
-        var mainPhotos = await _plantPhotoRepository.GetAllAsync(
+        var allPhotos = await _plantPhotoRepository.GetAllAsync(
             query => query
-                .Where(p => p.OwnerId == ownerId && instanceIds.Contains(p.PlantInstanceId))
-                .GroupBy(p => p.PlantInstanceId)
-                .Select(g => g.OrderBy(p => p.DisplayOrder).First()),
+                .Where(p => p.OwnerId == ownerId && instanceIds.Contains(p.PlantInstanceId)),
             cancellationToken: cancellationToken);
 
-        var photoPictureIdByInstance = mainPhotos.ToDictionary(p => p.PlantInstanceId, p => p.PictureId);
+        // GroupBy in-memory: EF Core does not reliably translate GroupBy+First to SQL Server
+        var photoPictureIdByInstance = allPhotos
+            .GroupBy(p => p.PlantInstanceId)
+            .ToDictionary(g => g.Key, g => g.OrderBy(p => p.DisplayOrder).First().PictureId);
 
         foreach (var action in actionList)
         {
