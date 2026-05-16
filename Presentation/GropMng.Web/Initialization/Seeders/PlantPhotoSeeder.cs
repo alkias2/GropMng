@@ -59,7 +59,7 @@ internal sealed class PlantPhotoSeeder
         }
 
         var now = DateTime.UtcNow;
-        var subfolder = $"images/plants/{DemoOwnerBusinessId}";
+        var subfolder = $"images/plants/{DemoOwnerBusinessId:N}";
 
         for (var i = 0; i < plantInstanceIds.Count; i++)
         {
