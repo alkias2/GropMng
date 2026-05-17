@@ -4,7 +4,9 @@ using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Xml.Linq;
+using System.Xml;
 using GropMng.Core;
 
 namespace GropMng.Services.Services.Localization;
@@ -154,17 +156,33 @@ public class LocalizationService : ILocalizationService
                 .OrderBy(resource => resource.ResourceName),
             cancellationToken: cancellationToken);
 
-        var document = new XDocument(
-            new XElement("Language",
-                new XAttribute("Name", language.Name),
-                new XAttribute("LanguageCulture", language.LanguageCulture),
-                new XAttribute("UniqueSeoCode", language.UniqueSeoCode),
-                resources.Select(resource =>
-                    new XElement("LocaleResource",
-                        new XElement("Name", resource.ResourceName),
-                        new XElement("Value", resource.ResourceValue ?? string.Empty)))));
+        var stringBuilder = new StringBuilder();
+        await using var writer = XmlWriter.Create(new StringWriter(stringBuilder), new XmlWriterSettings
+        {
+            Async = true,
+            Indent = true,
+            OmitXmlDeclaration = false
+        });
 
-        return document.ToString(SaveOptions.DisableFormatting);
+        await writer.WriteStartDocumentAsync();
+        await writer.WriteStartElementAsync(null, "Language", null);
+        await writer.WriteAttributeStringAsync(null, "Name", null, language.Name);
+        await writer.WriteAttributeStringAsync(null, "LanguageCulture", null, language.LanguageCulture);
+        await writer.WriteAttributeStringAsync(null, "UniqueSeoCode", null, language.UniqueSeoCode);
+
+        foreach (var resource in resources)
+        {
+            await writer.WriteStartElementAsync(null, "LocaleResource", null);
+            await writer.WriteElementStringAsync(null, "Name", null, resource.ResourceName);
+            await writer.WriteElementStringAsync(null, "Value", null, resource.ResourceValue ?? string.Empty);
+            await writer.WriteEndElementAsync();
+        }
+
+        await writer.WriteEndElementAsync();
+        await writer.WriteEndDocumentAsync();
+        await writer.FlushAsync();
+
+        return stringBuilder.ToString();
     }
 
     /// <inheritdoc />
@@ -194,6 +212,18 @@ public class LocalizationService : ILocalizationService
 
         if (normalizedResources.Count == 0)
             return;
+
+        var duplicateKeys = normalizedResources
+            .GroupBy(resource => resource.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (duplicateKeys.Length > 0)
+        {
+            throw new DomainException($"Duplicate locale resource keys were found in the import XML: {string.Join(", ", duplicateKeys)}.");
+        }
 
         var existingResources = await _resourceRepository.GetAllAsync(
             query => query.Where(resource => resource.LanguageId == language.Id),

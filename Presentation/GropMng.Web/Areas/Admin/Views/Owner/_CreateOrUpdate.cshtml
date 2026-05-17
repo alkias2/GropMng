@@ -43,7 +43,7 @@
 
 <hr class="my-4" />
 
-<h5 class="mb-3">Assigned roles</h5>
+<h5 class="mb-3">@T("admin.owner.roles.assigned")</h5>
 <div class="row g-3">
     @foreach (var role in Model.AvailableRoles)
     {
@@ -59,8 +59,40 @@
 @if (Model.IsSystemAdministrator)
 {
     <div class="alert alert-warning mt-4 mb-0">
-        This owner currently has administrator access. Removing the last administrator role is blocked for safety.
+        @T("admin.owner.roles.warning.systemadministrator")
     </div>
 }
+
+<hr class="my-4" />
+
+<h5 class="mb-3">@T("admin.owner.password.section.title")</h5>
+<div class="row g-3 align-items-end">
+    <div class="col-md-6">
+        <label asp-for="Password" class="form-label">@T("admin.owner.password.field.new")</label>
+        <div class="input-group input-group-merge">
+            <input asp-for="Password"
+                   type="password"
+                   class="form-control"
+                   autocomplete="new-password"
+                   data-password-toggle-target="owner-new-password" />
+            <button type="button"
+                    class="input-group-text cursor-pointer"
+                    data-password-toggle-button="owner-new-password"
+                    aria-label="Toggle password visibility">
+                <i class="bx bx-hide"></i>
+            </button>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <button type="submit"
+                name="changepassword"
+                value="true"
+                formaction="@Url.Action("ChangePassword", "Owner", new { area = "Admin" })"
+                class="btn btn-outline-primary">
+            @T("admin.owner.password.change.button")
+        </button>
+    </div>
+</div>
 
 

@@ -1,6 +1,8 @@
+using System.Text;
 using FluentValidation;
 using GropMng.Web.Areas.Admin.Models.Localization;
 using GropMng.Web.Areas.Admin.Factories.Localization;
+using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,8 @@ public class LocalizationController : Controller
     private readonly ILocalizationModelFactory _factory;
     private readonly IValidator<LanguageSearchModel> _languageSearchValidator;
     private readonly IValidator<LocaleResourceSearchModel> _localeResourceSearchValidator;
+    private readonly ILanguageService _languageService;
+    private readonly ILocalizationService _localizationService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalizationController"/> class.
@@ -26,11 +30,15 @@ public class LocalizationController : Controller
     public LocalizationController(
         ILocalizationModelFactory factory,
         IValidator<LanguageSearchModel> languageSearchValidator,
-        IValidator<LocaleResourceSearchModel> localeResourceSearchValidator)
+        IValidator<LocaleResourceSearchModel> localeResourceSearchValidator,
+        ILanguageService languageService,
+        ILocalizationService localizationService)
     {
         _factory = factory;
         _languageSearchValidator = languageSearchValidator;
         _localeResourceSearchValidator = localeResourceSearchValidator;
+        _languageService = languageService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -293,6 +301,58 @@ public class LocalizationController : Controller
         catch (Exception ex)
         {
             return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportXml(int id, CancellationToken cancellationToken)
+    {
+        var language = await _languageService.GetLanguageByIdAsync(id, cancellationToken);
+        if (language is null)
+            return RedirectToAction(nameof(List));
+
+        try
+        {
+            var xml = await _localizationService.ExportResourcesToXmlAsync(language, cancellationToken);
+            var seoCode = string.IsNullOrWhiteSpace(language.UniqueSeoCode)
+                ? "language"
+                : language.UniqueSeoCode.Trim().ToLowerInvariant();
+
+            return File(Encoding.UTF8.GetBytes(xml), "application/xml", $"language_pack.{seoCode}.xml");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportXml(int id, IFormFile? importxmlfile, CancellationToken cancellationToken)
+    {
+        var language = await _languageService.GetLanguageByIdAsync(id, cancellationToken);
+        if (language is null)
+            return RedirectToAction(nameof(List));
+
+        try
+        {
+            if (importxmlfile is null || importxmlfile.Length <= 0)
+            {
+                TempData["ErrorMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.empty");
+                return RedirectToAction(nameof(Edit), new { id = language.Id });
+            }
+
+            using var streamReader = new StreamReader(importxmlfile.OpenReadStream(), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            await _localizationService.ImportResourcesFromXmlAsync(language, streamReader, updateExistingResources: true, cancellationToken: cancellationToken);
+
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.success");
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
         }
     }
 

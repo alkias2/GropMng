@@ -1120,6 +1120,30 @@
     <Value>Τιμή</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.language.resourcepack.title</Name>
+    <Value>Πακέτο γλωσσικών πόρων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.resourcepack.hint</Name>
+    <Value>Εξαγωγή των πόρων της γλώσσας ή εισαγωγή XML πακέτου σε αυτή τη γλώσσα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.file</Name>
+    <Value>Αρχείο XML</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.updateorcreate</Name>
+    <Value>Όταν το resource key υπάρχει ήδη, ενημερώνεται. Τα keys που λείπουν δημιουργούνται αυτόματα.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.gropschema</Name>
+    <Value>Στην πρώτη φάση διατηρούμε το υπάρχον Grop XML schema.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.duplicatekeys</Name>
+    <Value>Η εισαγωγή απορρίπτεται όταν εντοπίζονται duplicate resource keys μέσα στο XML αρχείο.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.dt.emptytable</Name>
     <Value>Δεν υπάρχουν διαθέσιμα δεδομένα στον πίνακα</Value>
   </LocaleResource>
@@ -1997,6 +2021,58 @@
   <LocaleResource>
     <Name>mygarden.disease.photo.field.notes</Name>
     <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.list.title</Name>
+    <Value>Ιδιοκτήτες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.edit.title</Name>
+    <Value>Επεξεργασία Ιδιοκτήτη</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.notifications.edit.success</Name>
+    <Value>Ο λογαριασμός ιδιοκτήτη ενημερώθηκε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.roles.assigned</Name>
+    <Value>Αντιστοιχισμένοι ρόλοι</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.roles.warning.systemadministrator</Name>
+    <Value>Ο ιδιοκτήτης έχει δικαιώματα διαχειριστή. Η αφαίρεση του τελευταίου ρόλου διαχειριστή μπλοκάρεται για λόγους ασφαλείας.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.section.title</Name>
+    <Value>Αλλαγή κωδικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.field.new</Name>
+    <Value>Νέος κωδικός</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.change.button</Name>
+    <Value>Αλλαγή κωδικού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.notifications.change.success</Name>
+    <Value>Ο κωδικός ιδιοκτήτη άλλαξε με επιτυχία.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.required</Name>
+    <Value>Ο κωδικός είναι υποχρεωτικός.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.ownerid.required</Name>
+    <Value>Το αναγνωριστικό ιδιοκτήτη είναι υποχρεωτικό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.owner.notfound</Name>
+    <Value>Δεν βρέθηκε ιδιοκτήτης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.newpassword.different</Name>
+    <Value>Ο νέος κωδικός πρέπει να διαφέρει από τον τρέχοντα.</Value>
   </LocaleResource>
   <!-- WateringSchedule -->
   <LocaleResource>

@@ -1122,6 +1122,30 @@
     <Value>Value</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>admin.localization.language.resourcepack.title</Name>
+    <Value>Language resource pack</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.resourcepack.hint</Name>
+    <Value>Export the current language resources or import an XML pack into this language.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.file</Name>
+    <Value>XML file</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.updateorcreate</Name>
+    <Value>When a resource key already exists, it is updated. Missing keys are created automatically.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.gropschema</Name>
+    <Value>The first phase keeps the existing Grop XML schema.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.localization.language.import.note.duplicatekeys</Name>
+    <Value>Import is rejected when duplicate resource keys are detected in the XML file.</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>admin.dt.emptytable</Name>
     <Value>No data available in table</Value>
   </LocaleResource>
@@ -1999,6 +2023,58 @@
   <LocaleResource>
     <Name>mygarden.disease.photo.field.notes</Name>
     <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.list.title</Name>
+    <Value>Owners</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.edit.title</Name>
+    <Value>Edit Owner</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.notifications.edit.success</Name>
+    <Value>Owner account updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.roles.assigned</Name>
+    <Value>Assigned roles</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.roles.warning.systemadministrator</Name>
+    <Value>This owner currently has administrator access. Removing the last administrator role is blocked for safety.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.section.title</Name>
+    <Value>Change password</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.field.new</Name>
+    <Value>New password</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.change.button</Name>
+    <Value>Change password</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.notifications.change.success</Name>
+    <Value>Owner password changed successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.required</Name>
+    <Value>Password is required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.ownerid.required</Name>
+    <Value>Owner identifier is required.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.owner.notfound</Name>
+    <Value>Owner was not found.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.owner.password.validation.newpassword.different</Name>
+    <Value>The new password must be different from the current password.</Value>
   </LocaleResource>
   <!-- WateringSchedule -->
   <LocaleResource>

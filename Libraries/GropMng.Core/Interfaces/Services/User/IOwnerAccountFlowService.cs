@@ -31,6 +31,11 @@ public interface IOwnerAccountFlowService
     /// Resets the owner's password when the token is valid and not expired.
     /// </summary>
     Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Changes an owner's password from the admin management flow.
+    /// </summary>
+    Task<ChangeOwnerPasswordResult> ChangeOwnerPasswordAsync(ChangeOwnerPasswordRequest request, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -58,3 +63,30 @@ public sealed record PasswordResetRequestResult(
     bool EmailMatched,
     string? ResetToken,
     DateTime? ExpiresAtUtc);
+
+/// <summary>
+/// Represents the input required to change an owner's password from admin management.
+/// </summary>
+public sealed record ChangeOwnerPasswordRequest(
+    Guid OwnerId,
+    string NewPassword);
+
+/// <summary>
+/// Represents the outcome of an owner password change operation.
+/// </summary>
+public sealed class ChangeOwnerPasswordResult
+{
+    private readonly List<string> _errors = [];
+
+    public bool Success => _errors.Count == 0;
+
+    public IReadOnlyList<string> Errors => _errors;
+
+    public void AddError(string error)
+    {
+        if (string.IsNullOrWhiteSpace(error))
+            return;
+
+        _errors.Add(error.Trim());
+    }
+}

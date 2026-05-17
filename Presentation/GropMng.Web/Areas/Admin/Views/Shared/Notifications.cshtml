@@ -8,27 +8,87 @@
 @if (!string.IsNullOrWhiteSpace(success))
 {
     <script>
-        window.GropSwal?.notify({ icon: 'success', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(success)) });
+        (function () {
+            var payload = { icon: 'success', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(success)) };
+            var show = function () {
+                if (!window.GropSwal || typeof window.GropSwal.notify !== 'function')
+                    return false;
+
+                window.GropSwal.notify(payload);
+                return true;
+            };
+
+            if (!show()) {
+                window.addEventListener('load', function onLoad() {
+                    show();
+                }, { once: true });
+            }
+        })();
     </script>
 }
 
 @if (!string.IsNullOrWhiteSpace(error))
 {
     <script>
-        window.GropSwal?.alert({ icon: 'error', title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error)) });
+        (function () {
+            var payload = { icon: 'error', title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error)) };
+            var show = function () {
+                if (!window.GropSwal || typeof window.GropSwal.alert !== 'function')
+                    return false;
+
+                window.GropSwal.alert(payload);
+                return true;
+            };
+
+            if (!show()) {
+                window.addEventListener('load', function onLoad() {
+                    show();
+                }, { once: true });
+            }
+        })();
     </script>
 }
 
 @if (!string.IsNullOrWhiteSpace(warning))
 {
     <script>
-        window.GropSwal?.alert({ icon: 'warning', title: 'Warning', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(warning)) });
+        (function () {
+            var payload = { icon: 'warning', title: 'Warning', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(warning)) };
+            var show = function () {
+                if (!window.GropSwal || typeof window.GropSwal.alert !== 'function')
+                    return false;
+
+                window.GropSwal.alert(payload);
+                return true;
+            };
+
+            if (!show()) {
+                window.addEventListener('load', function onLoad() {
+                    show();
+                }, { once: true });
+            }
+        })();
     </script>
 }
 
 @if (!string.IsNullOrWhiteSpace(info))
 {
     <script>
-        window.GropSwal?.notify({ icon: 'info', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(info)) });
+        (function () {
+            var payload = { icon: 'info', title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(info)) };
+            var show = function () {
+                if (!window.GropSwal || typeof window.GropSwal.notify !== 'function')
+                    return false;
+
+                window.GropSwal.notify(payload);
+                return true;
+            };
+
+            if (!show()) {
+                window.addEventListener('load', function onLoad() {
+                    show();
+                }, { once: true });
+            }
+        })();
     </script>
 }

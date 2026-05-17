@@ -1,4 +1,6 @@
 using GropMng.Core.Common.Exceptions;
+using GropMng.Core.Interfaces.Services.Localization;
+using GropMng.Core.Interfaces.Services.User;
 using GropMng.Web.Areas.Admin.Models.Owner;
 using GropMng.Web.Areas.Admin.Factories.User;
 using GropMng.Web.Infrastructure.Security;
@@ -15,10 +17,17 @@ namespace GropMng.Web.Areas.Admin.Controllers;
 public class OwnerController : Controller
 {
     private readonly IOwnerModelFactory _ownerModelFactory;
+    private readonly IOwnerAccountFlowService _ownerAccountFlowService;
+    private readonly ILocalizationService _localizationService;
 
-    public OwnerController(IOwnerModelFactory ownerModelFactory)
+    public OwnerController(
+        IOwnerModelFactory ownerModelFactory,
+        IOwnerAccountFlowService ownerAccountFlowService,
+        ILocalizationService localizationService)
     {
         _ownerModelFactory = ownerModelFactory ?? throw new ArgumentNullException(nameof(ownerModelFactory));
+        _ownerAccountFlowService = ownerAccountFlowService ?? throw new ArgumentNullException(nameof(ownerAccountFlowService));
+        _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
     }
 
     [HttpGet]
@@ -66,7 +75,7 @@ public class OwnerController : Controller
             if (!updated)
                 return RedirectToAction(nameof(List));
 
-            TempData["SuccessMessage"] = "Owner account updated successfully.";
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.owner.notifications.edit.success");
             return RedirectToAction(nameof(Edit), new { id = model.OwnerId });
         }
         catch (DomainException ex)
@@ -76,6 +85,41 @@ public class OwnerController : Controller
             MergePostedValues(hydratedModel, model);
             return View(hydratedModel);
         }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(OwnerEditModel model, CancellationToken cancellationToken)
+    {
+        if (model.OwnerId == Guid.Empty)
+            return RedirectToAction(nameof(List));
+
+        if (string.IsNullOrWhiteSpace(model.Password))
+            ModelState.AddModelError(nameof(model.Password), await _localizationService.GetResourceAsync("admin.owner.password.validation.required"));
+
+        if (!ModelState.IsValid)
+        {
+            var invalidModel = await _ownerModelFactory.PrepareEditModelAsync(model.OwnerId, cancellationToken) ?? model;
+            MergePostedValues(invalidModel, model);
+            return View("Edit", invalidModel);
+        }
+
+        var result = await _ownerAccountFlowService.ChangeOwnerPasswordAsync(
+            new ChangeOwnerPasswordRequest(model.OwnerId, model.Password),
+            cancellationToken);
+
+        if (!result.Success)
+        {
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(nameof(model.Password), await _localizationService.GetResourceAsync(error));
+
+            var invalidModel = await _ownerModelFactory.PrepareEditModelAsync(model.OwnerId, cancellationToken) ?? model;
+            MergePostedValues(invalidModel, model);
+            return View("Edit", invalidModel);
+        }
+
+        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.owner.password.notifications.change.success");
+        return RedirectToAction(nameof(Edit), new { id = model.OwnerId });
     }
 
     private static void MergePostedValues(OwnerEditModel destination, OwnerEditModel source)
@@ -88,5 +132,6 @@ public class OwnerController : Controller
         destination.IsActive = source.IsActive;
         destination.IsEmailConfirmed = source.IsEmailConfirmed;
         destination.SelectedRoleSystemNames = source.SelectedRoleSystemNames;
+        destination.Password = source.Password;
     }
 }

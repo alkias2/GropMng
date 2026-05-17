@@ -246,4 +246,197 @@ public class OwnerAccountFlowServiceTests
         Assert.True(passwordService.VerifyPassword("NewStrongPass123!", createdPassword.PasswordHash, createdPassword.PasswordSalt));
         Assert.Equal(createdPassword.PasswordHash, owner.PasswordHash);
     }
+
+    [Fact]
+    public async Task ChangeOwnerPasswordAsync_WhenOwnerExists_RollsCurrentPasswordAndCreatesNewCurrentRecord()
+    {
+        // Arrange
+        var owner = new Owner
+        {
+            Id = 55,
+            OwnerId = Guid.NewGuid(),
+            FirstName = "Maria",
+            LastName = "Green",
+            DisplayName = "Maria Green",
+            Email = "maria@example.com",
+            PasswordHash = "legacy-hash",
+            Status = OwnerAccountStatus.Active,
+            IsEmailConfirmed = true,
+            IsActive = true
+        };
+
+        var currentPassword = new OwnerPassword
+        {
+            Id = 11,
+            OwnerId = owner.Id,
+            PasswordHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("OldPass123!"))),
+            PasswordSalt = string.Empty,
+            IsCurrent = true,
+            PasswordResetToken = "token",
+            PasswordResetTokenExpiresAtUtc = DateTime.UtcNow.AddHours(3),
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var ownerRepository = new Mock<IRepository<Owner>>();
+        var roleRepository = new Mock<IRepository<OwnerRole>>();
+        var passwordRepository = new Mock<IRepository<OwnerPassword>>();
+        var settingService = new Mock<ISettingService>();
+        var passwordService = new OwnerPasswordService();
+        OwnerPassword? createdPassword = null;
+
+        ownerRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<Expression<Func<Owner, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(owner);
+
+        ownerRepository
+            .Setup(repository => repository.UpdateAsync(owner, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(owner);
+
+        passwordRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<Expression<Func<OwnerPassword, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentPassword);
+
+        passwordRepository
+            .Setup(repository => repository.UpdateAsync(currentPassword, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentPassword);
+
+        passwordRepository
+            .Setup(repository => repository.CreateAsync(It.IsAny<OwnerPassword>(), true, It.IsAny<CancellationToken>()))
+            .Callback<OwnerPassword, bool, CancellationToken>((password, _, _) => createdPassword = password)
+            .ReturnsAsync((OwnerPassword password, bool _, CancellationToken _) => password);
+
+        var service = new OwnerAccountFlowService(
+            ownerRepository.Object,
+            roleRepository.Object,
+            passwordRepository.Object,
+            settingService.Object,
+            passwordService,
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+
+        // Act
+        var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(owner.OwnerId, "NewStrongPass456!"));
+
+        // Assert
+        Assert.True(result.Success);
+        Assert.Empty(result.Errors);
+        Assert.False(currentPassword.IsCurrent);
+        Assert.Null(currentPassword.PasswordResetToken);
+        Assert.Null(currentPassword.PasswordResetTokenExpiresAtUtc);
+        Assert.NotNull(createdPassword);
+        Assert.True(createdPassword!.IsCurrent);
+        Assert.Equal(owner.Id, createdPassword.OwnerId);
+        Assert.True(passwordService.VerifyPassword("NewStrongPass456!", createdPassword.PasswordHash, createdPassword.PasswordSalt));
+        Assert.Equal(createdPassword.PasswordHash, owner.PasswordHash);
+    }
+
+    [Fact]
+    public async Task ChangeOwnerPasswordAsync_WhenNewPasswordMatchesCurrent_ReturnsValidationError()
+    {
+        // Arrange
+        var passwordService = new OwnerPasswordService();
+        var existingHash = passwordService.HashPassword("SamePass123!");
+
+        var owner = new Owner
+        {
+            Id = 67,
+            OwnerId = Guid.NewGuid(),
+            FirstName = "Nikos",
+            LastName = "Fields",
+            DisplayName = "Nikos Fields",
+            Email = "nikos@example.com",
+            PasswordHash = existingHash.Hash,
+            Status = OwnerAccountStatus.Active,
+            IsEmailConfirmed = true,
+            IsActive = true
+        };
+
+        var currentPassword = new OwnerPassword
+        {
+            Id = 13,
+            OwnerId = owner.Id,
+            PasswordHash = existingHash.Hash,
+            PasswordSalt = existingHash.Salt,
+            IsCurrent = true,
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var ownerRepository = new Mock<IRepository<Owner>>();
+        var roleRepository = new Mock<IRepository<OwnerRole>>();
+        var passwordRepository = new Mock<IRepository<OwnerPassword>>();
+        var settingService = new Mock<ISettingService>();
+
+        ownerRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<Expression<Func<Owner, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(owner);
+
+        passwordRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<Expression<Func<OwnerPassword, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentPassword);
+
+        var service = new OwnerAccountFlowService(
+            ownerRepository.Object,
+            roleRepository.Object,
+            passwordRepository.Object,
+            settingService.Object,
+            passwordService,
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+
+        // Act
+        var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(owner.OwnerId, "SamePass123!"));
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Contains("admin.owner.password.validation.newpassword.different", result.Errors);
+        passwordRepository.Verify(repository => repository.CreateAsync(It.IsAny<OwnerPassword>(), true, It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ChangeOwnerPasswordAsync_WhenOwnerIsMissing_ReturnsOwnerNotFoundError()
+    {
+        // Arrange
+        var ownerRepository = new Mock<IRepository<Owner>>();
+        var roleRepository = new Mock<IRepository<OwnerRole>>();
+        var passwordRepository = new Mock<IRepository<OwnerPassword>>();
+        var settingService = new Mock<ISettingService>();
+        var passwordService = new OwnerPasswordService();
+
+        ownerRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<Expression<Func<Owner, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Owner?)null);
+
+        var service = new OwnerAccountFlowService(
+            ownerRepository.Object,
+            roleRepository.Object,
+            passwordRepository.Object,
+            settingService.Object,
+            passwordService,
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+
+        // Act
+        var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(Guid.NewGuid(), "AnyPass123!"));
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Contains("admin.owner.password.validation.owner.notfound", result.Errors);
+    }
 }

@@ -38,6 +38,34 @@
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <h6 class="card-title mb-1">@T("admin.localization.language.resourcepack.title")</h6>
+            <p class="text-muted mb-0">@T("admin.localization.language.resourcepack.hint")</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-area="Admin"
+               asp-controller="Localization"
+               asp-action="ExportXml"
+               asp-route-id="@Model.Id"
+               class="btn btn-outline-primary">
+                <i class="bx bx-export me-1"></i> @T("admin.localization.resource.export")
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importXmlModal">
+                <i class="bx bx-import me-1"></i> @T("admin.localization.resource.import")
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0 ps-3">
+            <li>@T("admin.localization.language.import.note.updateorcreate")</li>
+            <li>@T("admin.localization.language.import.note.gropschema")</li>
+            <li>@T("admin.localization.language.import.note.duplicatekeys")</li>
+        </ul>
+    </div>
+</div>
+
 <!-- Danger zone -->
 <div class="card border-danger">
     <div class="card-header bg-label-danger">
@@ -49,6 +77,41 @@
             <i class="bx bx-trash me-1"></i> @T("common.delete")
         </button>
         <grop-action-confirmation asp-button-id="delete-language" asp-action="Delete" asp-route-id="@Model.Id" />
+    </div>
+</div>
+
+<div class="modal fade" id="importXmlModal" tabindex="-1" aria-labelledby="importXmlModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importXmlModalTitle">@T("admin.localization.resource.import")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-area="Admin"
+                  asp-controller="Localization"
+                  asp-action="ImportXml"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="importxmlfile">@T("admin.localization.language.import.file")</label>
+                        <input id="importxmlfile" name="importxmlfile" type="file" class="form-control" accept=".xml,text/xml,application/xml" />
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <div>@T("admin.localization.language.import.note.updateorcreate")</div>
+                        <div>@T("admin.localization.language.import.note.duplicatekeys")</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">@T("common.cancel")</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-import me-1"></i> @T("admin.localization.resource.import")
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

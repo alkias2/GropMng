@@ -17,6 +17,10 @@ namespace GropMng.Services.Services.User;
 public class OwnerAccountFlowService : IOwnerAccountFlowService
 {
     private const string RegisteredOwnerRoleSystemName = "RegisteredOwner";
+    private const string OwnerPasswordValidationOwnerIdRequiredResourceKey = "admin.owner.password.validation.ownerid.required";
+    private const string OwnerPasswordValidationRequiredResourceKey = "admin.owner.password.validation.required";
+    private const string OwnerPasswordValidationOwnerNotFoundResourceKey = "admin.owner.password.validation.owner.notfound";
+    private const string OwnerPasswordValidationDifferentPasswordResourceKey = "admin.owner.password.validation.newpassword.different";
     private static readonly TimeSpan EmailConfirmationTokenLifetime = TimeSpan.FromDays(2);
 
     private readonly IRepository<Owner> _ownerRepository;
@@ -233,6 +237,76 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
         }, cancellationToken: cancellationToken);
 
         return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<ChangeOwnerPasswordResult> ChangeOwnerPasswordAsync(ChangeOwnerPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var result = new ChangeOwnerPasswordResult();
+
+        if (request.OwnerId == Guid.Empty)
+        {
+            result.AddError(OwnerPasswordValidationOwnerIdRequiredResourceKey);
+            return result;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            result.AddError(OwnerPasswordValidationRequiredResourceKey);
+            return result;
+        }
+
+        var owner = await _ownerRepository.FirstOrDefaultAsync(
+            entity => entity.OwnerId == request.OwnerId,
+            asNoTracking: false,
+            cancellationToken: cancellationToken);
+
+        if (owner is null)
+        {
+            result.AddError(OwnerPasswordValidationOwnerNotFoundResourceKey);
+            return result;
+        }
+
+        var trimmedPassword = request.NewPassword.Trim();
+
+        var currentPassword = await _ownerPasswordRepository.FirstOrDefaultAsync(
+            entity => entity.OwnerId == owner.Id && entity.IsCurrent,
+            asNoTracking: false,
+            cancellationToken: cancellationToken);
+
+        if (currentPassword is not null)
+        {
+            var currentSalt = currentPassword.PasswordSalt ?? string.Empty;
+            if (_ownerPasswordService.VerifyPassword(trimmedPassword, currentPassword.PasswordHash, currentSalt))
+            {
+                result.AddError(OwnerPasswordValidationDifferentPasswordResourceKey);
+                return result;
+            }
+
+            currentPassword.IsCurrent = false;
+            currentPassword.PasswordResetToken = null;
+            currentPassword.PasswordResetTokenExpiresAtUtc = null;
+            await _ownerPasswordRepository.UpdateAsync(currentPassword, cancellationToken: cancellationToken);
+        }
+
+        var passwordHash = _ownerPasswordService.HashPassword(trimmedPassword);
+
+        owner.PasswordHash = passwordHash.Hash;
+        owner.UpdatedAtUtc = DateTime.UtcNow;
+        await _ownerRepository.UpdateAsync(owner, cancellationToken: cancellationToken);
+
+        await _ownerPasswordRepository.CreateAsync(new OwnerPassword
+        {
+            OwnerId = owner.Id,
+            PasswordHash = passwordHash.Hash,
+            PasswordSalt = passwordHash.Salt,
+            CreatedAtUtc = DateTime.UtcNow,
+            IsCurrent = true
+        }, cancellationToken: cancellationToken);
+
+        return result;
     }
 
     private async Task<OwnerPassword> GetCurrentPasswordRecordAsync(Owner owner, CancellationToken cancellationToken)

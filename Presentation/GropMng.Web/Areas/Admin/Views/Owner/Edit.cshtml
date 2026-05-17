@@ -1,19 +1,19 @@
 @using GropMng.Web.Framework.TagHelpers.Admin
 @model GropMng.Web.Areas.Admin.Models.Owner.OwnerEditModel
 @{
-    ViewData["Title"] = "Edit Owner";
+    ViewData["Title"] = T("admin.owner.edit.title");
     GropHtml.SetActiveMenuItemSystemName("Owners");
 
     var listUrl = Url.Action("List", "Owner", new { area = "Admin" })!;
 }
 
 <grop-admin-page-header
-    title="@(string.IsNullOrWhiteSpace(Model.DisplayName) ? "Edit Owner" : Model.DisplayName)"
+    title="@(string.IsNullOrWhiteSpace(Model.DisplayName) ? T("admin.owner.edit.title") : Model.DisplayName)"
     breadcrumbs="@(new List<AdminBreadcrumbItemModel>
     {
-        new() { Text = "Dashboard", Url = Url.Action("Dashboard", "Home", new { area = "" }) },
-        new() { Text = "Owners", Url = listUrl },
-        new() { Text = "Edit Owner" }
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.owner.list.title"), Url = listUrl },
+        new() { Text = T("admin.owner.edit.title") }
     })">
     <grop-header-button href="@listUrl"
                         text="@T("common.cancel")"
@@ -37,3 +37,32 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const buttons = document.querySelectorAll('[data-password-toggle-button]');
+            for (const button of buttons) {
+                button.addEventListener('click', function () {
+                    const key = button.getAttribute('data-password-toggle-button');
+                    if (!key)
+                        return;
+
+                    const input = document.querySelector('[data-password-toggle-target="' + key + '"]');
+                    if (!(input instanceof HTMLInputElement))
+                        return;
+
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bx-hide', !isPassword);
+                        icon.classList.toggle('bx-show', isPassword);
+                    }
+                });
+            }
+        })();
+    </script>
+}

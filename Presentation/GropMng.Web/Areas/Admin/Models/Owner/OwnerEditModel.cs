@@ -26,6 +26,10 @@ public class OwnerEditModel
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
+    [DataType(DataType.Password)]
+    [Display(Name = "New password")]
+    public string? Password { get; set; }
+
     public OwnerAccountStatus Status { get; set; }
 
     public bool IsActive { get; set; }
