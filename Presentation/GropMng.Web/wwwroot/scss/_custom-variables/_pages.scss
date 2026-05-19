@@ -296,32 +296,6 @@
 // ============================================================
 // Dashboard — Views/Home/Dashboard.cshtml
 // ============================================================
-.dashboard-today-actions{
-  //  background-color: transparent !important;
-   border: 0 !important;
-
-  .nav-tabs .nav-link{
-    border: 0 !important;
-  }
-  >.card-header{
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-   >.tab-content {
-    padding-top: 0;
-     padding-left: 0 !important;
-    padding-right: 0 !important;
-   }
-  //  .dashboard-action-card{
-  //   border: 0 !important;
-  //  }
-}
-.dashboard-actions-grid {
-  .list-group-item {
-    background: transparent;
-  }
-}
-
 .dashboard-action-card {
     overflow: hidden;
     background: #2c3852;
@@ -384,65 +358,11 @@
         }
     }
 
-
-
-
-    &__status {
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
     &__icon {
         width: 1rem;
         height: 1rem;
         display: inline-block;
         vertical-align: middle;
-    }
-
-    &__image-wrap {
-        position: relative;
-        min-height: 360px;
-        overflow: hidden;
-    }
-
-    &__title-overlay {
-        position: absolute;
-        top: 1.25rem;
-        left: 1rem;
-        right: 1rem;
-        padding: 1.15rem 1.2rem;
-        border-radius: 0.2rem;
-        background: rgba(255, 255, 255, 0.74);
-        color: #2f3b55;
-
-        h4 {
-            font-size: 2rem;
-            font-weight: 600;
-            line-height: 1.15;
-            margin: 0;
-        }
-
-        p {
-            font-size: 2rem;
-            line-height: 1.1;
-            opacity: 0.95;
-        }
-    }
-
-    &__media {
-        min-height: 360px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-    }
-
-    &__image {
-        width: 100%;
-        min-height: 360px;
-        max-height: 360px;
-        object-fit: cover;
-        border-radius: 0;
     }
 
     &__fallback {
@@ -462,72 +382,4 @@
         height: 4rem;
     }
 
-    &__spot {
-        color: #edf2fd;
-        font-size: 2rem;
-        font-weight: 500;
-        margin-top: 0.15rem;
-        margin-bottom: 0.35rem;
-    }
-
-    &__meta {
-        border-top: 1px solid rgba(198, 210, 238, 0.2);
-        border-bottom: 1px solid rgba(198, 210, 238, 0.2);
-        padding-top: 0.75rem;
-        padding-bottom: 0.75rem;
-
-        h6 {
-            color: #b6c4e2;
-            font-size: 0.82rem;
-            line-height: 1.2;
-            font-weight: 600;
-        }
-
-        small {
-            color: #d69a2a;
-            font-size: 0.72rem;
-            line-height: 1.25;
-        }
-    }
-
-    &__meta-accent {
-        color: #d69a2a !important;
-    }
-
-    &__icon--meta {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-top: 0.1rem;
-        color: #4f8bff;
-        flex-shrink: 0;
-    }
-
-    &__actions {
-        padding-top: 0.25rem;
-    }
-
-    &__action-btn {
-        background: rgba(76, 97, 140, 0.58);
-        border: 1px solid rgba(151, 171, 211, 0.2);
-        color: #aebedf;
-    }
-
-    &__action-btn:hover,
-    &__action-btn:focus {
-        background: rgba(91, 114, 161, 0.75);
-        color: #d8e4ff;
-    }
-
-    &__actions .btn-icon {
-        width: 2.75rem;
-        height: 2.75rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    &__icon--action {
-        width: 1.65rem;
-        height: 1.65rem;
-    }
 }
