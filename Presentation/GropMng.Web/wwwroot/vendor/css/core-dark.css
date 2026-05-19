@@ -19199,8 +19199,6 @@ html:not(.layout-footer-fixed) .content-wrapper {
   background: none;
   border: 0;
   padding: 0;
-  width: 100%;
-  text-align: left;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -19208,20 +19206,6 @@ html:not(.layout-footer-fixed) .content-wrapper {
   opacity: 0.92;
 }
 
-.counters-wrapper .card {
-  background: #2a3550;
-  border: 1px solid rgba(132, 157, 204, 0.2);
-  border-radius: 0.4rem;
-  min-height: 102px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.counters-wrapper .card.card-border-shadow-primary.active {
-  border-color: rgba(146, 205, 88, 0.6);
-  box-shadow: inset 0 -2px 0 rgba(146, 205, 88, 0.9);
-}
-.counters-wrapper .card-body {
-  padding: 1rem 1.2rem;
-}
 .counters-wrapper .badge.bg-label-primary {
   background: rgba(94, 115, 160, 0.28) !important;
   color: #8fa0c2 !important;
@@ -19439,6 +19423,53 @@ html:not(.layout-footer-fixed) .content-wrapper {
   overflow: hidden;
   background: #2c3852;
 }
+.dashboard-action-card .card-header {
+  display: block;
+  position: absolute;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.45);
+  width: 100%;
+  min-height: 20%;
+}
+.dashboard-action-card .card-header .card-action-title {
+  color: #36445d;
+  width: 100%;
+  font-size: 1.4rem;
+  padding: 0.5rem 0rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.dashboard-action-card .card-header .fs-4 {
+  color: #36445d;
+  line-height: 1;
+  font-size: 1.1rem !important;
+  font-weight: 400;
+}
+.dashboard-action-card .card-img-top {
+  height: 400px;
+  object-fit: cover;
+  width: 100%;
+}
+.dashboard-action-card .card-body .fw-normal {
+  font-size: 1.2rem;
+}
+.dashboard-action-card .card-body .icon {
+  width: 36px;
+  height: 36px;
+  color: #5a8dee;
+}
+.dashboard-action-card .card-body .icon2 {
+  width: 60px;
+  height: 60px;
+  color: #a1b0cb;
+}
+.dashboard-action-card .card-body .btn-label-primary {
+  background: rgba(76, 85, 105, 0.5) !important;
+}
+.dashboard-action-card .card-body .btn-label-primary:hover {
+  border-color: transparent !important;
+  background: rgba(94, 141, 238, 0.5) !important;
+}
 .dashboard-action-card__status {
   font-weight: 500;
   white-space: nowrap;
@@ -19549,9 +19580,6 @@ html:not(.layout-footer-fixed) .content-wrapper {
 .dashboard-action-card__action-btn:hover, .dashboard-action-card__action-btn:focus {
   background: rgba(91, 114, 161, 0.75);
   color: #d8e4ff;
-}
-.dashboard-action-card .card-body {
-  padding: 1rem 1.1rem 0.9rem;
 }
 .dashboard-action-card__actions .btn-icon {
   width: 2.75rem;
