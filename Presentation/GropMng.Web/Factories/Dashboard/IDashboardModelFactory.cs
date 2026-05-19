@@ -11,5 +11,7 @@ public interface IDashboardModelFactory
     /// Prepares the full owner dashboard model, including today's watering, fertilizing,
     /// and active disease tab data.
     /// </summary>
-    Task<OwnerDashboardModel> PrepareDashboardModelAsync(CancellationToken cancellationToken = default);
+    Task<OwnerDashboardModel> PrepareDashboardModelAsync(
+        DashboardQueryModel? query = null,
+        CancellationToken cancellationToken = default);
 }

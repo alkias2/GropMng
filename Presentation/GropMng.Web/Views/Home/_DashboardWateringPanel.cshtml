@@ -1,21 +1,38 @@
 @model GropMng.Web.Models.Dashboard.DashboardWateringTabModel
 @using GropMng.Web.Models.Dashboard
-@using System.Text.Json
 
-<script id="dashboard-spot-options" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.AvailableGardenSpots.Select(x => new { value = x.Value, text = x.Text })))</script>
-
-@if (!Model.Actions.Any())
+@if (!Model.TodayOverdueActions.Any())
 {
-    <div class="p-4">
+    <div class="p-4" id="actions-empty-msg">
         <p class="text-muted mb-0">@T("dashboard.owner.todayactions.empty")</p>
     </div>
 }
 else
 {
-    <div class="row">
-        @foreach (var action in Model.Actions)
+    <div class="row" data-dashboard-group="today-overdue">
+        @foreach (var action in Model.TodayOverdueActions)
         {
             @await Html.PartialAsync("_DashboardActionCard", action)
         }
     </div>
 }
+
+@if (Model.UpcomingActionGroups.Any())
+{
+    <div class="upcoming-section d-none" data-section="watering">
+        @foreach (var group in Model.UpcomingActionGroups)
+        {
+            <div class="d-flex align-items-center justify-content-between mt-4 mb-2">
+                <h6 class="mb-0">@group.GroupLabel</h6>
+                <small class="text-muted">@group.Actions.Count</small>
+            </div>
+            <div class="row" data-dashboard-group="upcoming" data-group-days="@group.DeltaDaysFromToday">
+                @foreach (var action in group.Actions)
+                {
+                    @await Html.PartialAsync("_DashboardActionCard", action)
+                }
+            </div>
+        }
+    </div>
+}
+

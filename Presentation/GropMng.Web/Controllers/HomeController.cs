@@ -25,30 +25,39 @@ namespace GropMng.Web.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)
+        public async Task<IActionResult> Dashboard(
+            int? spotId,
+            CancellationToken cancellationToken = default)
         {
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
             return View(model);
         }
 
         [Authorize]
-        public async Task<IActionResult> DashboardWateringPanel(CancellationToken cancellationToken)
+        public async Task<IActionResult> DashboardWateringPanel(
+            int? spotId,
+            CancellationToken cancellationToken = default)
         {
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
             return PartialView("_DashboardWateringPanel", model.WateringTab);
         }
 
         [Authorize]
-        public async Task<IActionResult> DashboardFertilizingPanel(CancellationToken cancellationToken)
+        public async Task<IActionResult> DashboardFertilizingPanel(
+            int? spotId,
+            CancellationToken cancellationToken = default)
         {
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
             return PartialView("_DashboardFertilizingPanel", model.FertilizingTab);
         }
 
         [Authorize]
         public async Task<IActionResult> DashboardDiseasesPanel(CancellationToken cancellationToken)
         {
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(cancellationToken);
+            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(null, cancellationToken);
             return PartialView("_DashboardDiseasesPanel", model.DiseaseTab);
         }
 

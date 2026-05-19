@@ -5,106 +5,182 @@
     GropHtml.SetActiveMenuItemSystemName("Dashboard");
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
+@* <div class="container-xxl flex-grow-1 container-p-y"></div> *@
+
     <div class="d-none" id="dashboard-anti-forgery-token">
         @Html.AntiForgeryToken()
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">@T("dashboard.owner.title")</h4>
-            <p class="text-muted mb-0">@T("dashboard.owner.subtitle")</p>
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none" aria-hidden="true" focusable="false">
+        <symbol id="gm-icon-check" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M9.2 16.4L4.8 12l1.4-1.4l3 3l8.6-8.6l1.4 1.4l-10 10z"/>
+        </symbol>
+        
+        <symbol xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" id="gm-icon-fretilize">
+            <rect x="2" y="20.5" width="13.04" height="1.5"></rect>
+            <path d="M14.07,4.26A6,6,0,0,0,9.8,6l-.25.25-.21.26a5.86,5.86,0,0,0-.59-1.49,5.69,5.69,0,0,0-1-1.28,5.92,5.92,0,0,0-2-1.31A5.85,5.85,0,0,0,3.53,2H2V3.51a6.09,6.09,0,0,0,.45,2.31,6,6,0,0,0,1.3,2,6.18,6.18,0,0,0,2,1.31A6.1,6.1,0,0,0,8,9.55V14.8H2v1.5H15V14.8H9.55v-3A5.93,5.93,0,0,0,13.8,10a6,6,0,0,0,1.31-2,5.93,5.93,0,0,0,.46-2.32V4.26ZM6.31,7.68A4.5,4.5,0,0,1,3.53,3.51a4.4,4.4,0,0,1,1.72.34,4.84,4.84,0,0,1,1.46,1,5,5,0,0,1,1,1.46A4.4,4.4,0,0,1,8,8,4.48,4.48,0,0,1,6.31,7.68Zm7.41-.18a4.39,4.39,0,0,1-1,1.46,4.32,4.32,0,0,1-1.46,1,4.36,4.36,0,0,1-1.72.34,4.4,4.4,0,0,1,.34-1.72,4.47,4.47,0,0,1,1-1.46,4.34,4.34,0,0,1,1.47-1,4.46,4.46,0,0,1,1.73-.35A4.51,4.51,0,0,1,13.72,7.5Z"></path>
+            <rect x="2" y="17.65" width="13.04" height="1.5"></rect>
+            <path d="M19.75,12.35A2.25,2.25,0,1,1,22,10.1,2.25,2.25,0,0,1,19.75,12.35Zm0-3.5A1.25,1.25,0,1,0,21,10.1,1.25,1.25,0,0,0,19.75,8.85Z"></path>
+            <path d="M19.75,17.42A2.25,2.25,0,1,1,22,15.17,2.25,2.25,0,0,1,19.75,17.42Zm0-3.5A1.25,1.25,0,1,0,21,15.17,1.25,1.25,0,0,0,19.75,13.92Z"></path>
+            <path d="M19.75,22.5A2.25,2.25,0,1,1,22,20.25,2.25,2.25,0,0,1,19.75,22.5Zm0-3.5A1.25,1.25,0,1,0,21,20.25,1.25,1.25,0,0,0,19.75,19Z"></path>
+        </symbol>
+        <symbol xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" id="gm-icon-otl_bug">
+            <path d="m21.55 9.11-1.84.92c-.37-1.63-1.09-3.09-2.07-4.25l2.07-2.07L18.3 2.3l-2.12 2.12c-1.22-.89-2.64-1.41-4.17-1.41s-2.96.52-4.17 1.41L5.72 2.3 4.31 3.71l2.07 2.07c-.98 1.16-1.7 2.62-2.07 4.25l-1.84-.92-.89 1.79 2.46 1.23c0 .12-.02.25-.02.37 0 .51.04 1.01.11 1.5H2.02v2h2.57c.17.5.37.97.6 1.42L3.31 19.3l1.41 1.41 1.58-1.58C7.75 20.9 9.78 22 12.02 22s4.26-1.1 5.72-2.87l1.58 1.58 1.41-1.41-1.88-1.88c.23-.45.43-.92.6-1.42h2.57v-2h-2.11c.07-.49.11-.99.11-1.5 0-.13-.01-.25-.02-.37l2.46-1.23-.89-1.79ZM16.79 8H7.21c1.1-1.82 2.83-3 4.79-3s3.69 1.18 4.79 3M13 19.89V13h-2v6.89c-1.28-.27-2.43-1.05-3.3-2.17s-.06-.07-.06-.07c-1.02-1.34-1.65-3.15-1.65-5.15 0-.88.13-1.72.35-2.5h11.3c.22.78.35 1.62.35 2.5 0 1.99-.63 3.8-1.65 5.15l-.06.06c-.87 1.13-2.02 1.91-3.3 2.18Z"></path>
+        </symbol>
+        
+
+        <symbol id="gm-icon-leaf" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M21 3.5c-5.9.4-10 2.3-12.7 5.6c-2.6 3.1-3.4 6.8-3.2 10.4l-2.4 2.3l1.4 1.4l2.4-2.3c3.6.3 7.3-.6 10.4-3.2C20.2 15 22.1 10.9 22.5 5L23 3l-2 .5zm-2.5 3.2c-.6 4.4-2.1 7.5-4.5 9.5c-2.1 1.8-4.7 2.5-7.4 2.4l6.5-6.5l-1.4-1.4l-6.5 6.5c-.2-2.6.6-5.2 2.4-7.4c2-2.4 5.1-3.8 9.5-4.5z"/>
+        </symbol>
+        <symbol id="gm-icon-calendar" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v13a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2h3V2zm13 8H4v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9zm-9 3h2v5h-2v-5zm-4 0h2v5H7v-5zm8 0h2v5h-2v-5z"/>
+        </symbol>
+        <symbol id="gm-icon-clock" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20zm0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16zm1 3v4.6l3.2 1.9l-1 1.7L11 12.8V7h2z"/>
+        </symbol>
+        <symbol id="gm-icon-droplet" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2.5c3.2 4 7.5 8.5 7.5 12.7A7.5 7.5 0 1 1 4.5 15.2C4.5 11 8.8 6.5 12 2.5zm0 3.1c-2.5 3.1-5.5 6.4-5.5 9.6a5.5 5.5 0 1 0 11 0c0-3.2-3-6.5-5.5-9.6z"/>
+        </symbol>
+        <symbol id="gm-icon-flask" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M9 2h6v2h-1v5.2l4.6 7.5A3.5 3.5 0 0 1 15.7 22H8.3a3.5 3.5 0 0 1-2.9-5.3L10 9.2V4H9V2zm3 2h0v5.8l-5 8.1a1.5 1.5 0 0 0 1.3 2.1h7.4a1.5 1.5 0 0 0 1.3-2.3l-5-8.1V4zm-3.4 10h6.8l1.2 2H7.4l1.2-2z"/>
+        </symbol>
+       
+        <symbol xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" id="gm-icon-watering-alt">
+    <path d="M13.85,12.8l-.16-.2L10.8,9.28A.6.6,0,0,0,10,9.2L8,10.69a.29.29,0,0,1-.17.07h0a.22.22,0,0,1-.2-.1.27.27,0,0,1,0-.19A3.36,3.36,0,0,1,7.7,9.42,3.68,3.68,0,0,1,12,6.72,3.61,3.61,0,0,1,14.77,9a3,3,0,0,1-.66,3.55ZM9.3,8.5h0l.12-.09a1.59,1.59,0,0,1,.94-.32,1.56,1.56,0,0,1,1.18.55l2.33,2.67a2,2,0,0,0,0-1.88,2.63,2.63,0,0,0-2.06-1.74,2.44,2.44,0,0,0-.53-.05A2.64,2.64,0,0,0,9.3,8.5Z"></path>
+    <path d="M7.76,21.06a1.81,1.81,0,0,1-1.39-.66L4.5,18.26,2.5,16a1.82,1.82,0,0,1,.3-2.71c.15-.11.75-.61,1.28-1l.16-.13,1.37-1.14a5.52,5.52,0,0,1,.08-1.67,5.73,5.73,0,0,1,5.08-4.59l0,0h.54a6.33,6.33,0,0,1,1.37.16,5.73,5.73,0,0,1,3,9.3l-.34.38,1.42.23.84-.83.16-.13a1.08,1.08,0,0,1,1.15-.1,1.11,1.11,0,0,1,.59,1.11c-.05.91-.16,2.55-.23,3.5a1.12,1.12,0,0,1-.67,1A1.1,1.1,0,0,1,17.37,19l-.16-.17c-.17-.25-.43-.57-.66-.86l-5,.29-.46.41-.47.42c-.67.6-1.41,1.28-1.5,1.37A1.87,1.87,0,0,1,7.76,21.06ZM11.33,5.89h0a4.48,4.48,0,0,0-4.41,5.29.43.43,0,0,1-.18.47c-.21.15-1,.81-1.69,1.39s-1.29,1.08-1.48,1.22a.63.63,0,0,0-.27.43.6.6,0,0,0,.17.47l3.86,4.43a.59.59,0,0,0,.91,0c.13-.13.85-.78,1.55-1.41.52-.46,1-.88,1.09-1a.55.55,0,0,1,.35-.15l5.66-.33h0a.53.53,0,0,1,.39.16l.06.07c.21.26.48.59.71.89.06-.85.14-2,.19-2.88-.31.31-.68.67-.94.91a.56.56,0,0,1-.32.11h-.07l-3.63-.6-.48-.08.42-.48c.33-.31,1.18-1.15,1.52-1.54A4.49,4.49,0,0,0,12.37,6,4.56,4.56,0,0,0,11.33,5.89Z"></path>
+    <path d="M21.08,22a.88.88,0,0,1-.5-.17.82.82,0,0,1-.35-.87,3.79,3.79,0,0,1,.42-1.07l.18-.36.24.24a4.28,4.28,0,0,1,.77.89A1,1,0,0,1,22,21a.84.84,0,0,1-.43.84A.86.86,0,0,1,21.08,22ZM21,20.32a2.67,2.67,0,0,0-.25.68.32.32,0,0,0,.15.37.38.38,0,0,0,.6-.35.82.82,0,0,0-.06-.16A3.59,3.59,0,0,0,21,20.32Z"></path>
+    <path d="M20.78,19.32a.68.68,0,0,1-.6-.35c-.09-.16-.19-.39-.25-.51s-.24-.6-.24-.6a5.41,5.41,0,0,1,.64,0,5.92,5.92,0,0,1,.62.06.69.69,0,0,1,.57.68.73.73,0,0,1-.51.72A1,1,0,0,1,20.78,19.32Zm-.36-1c.06.13.13.27.2.4a.19.19,0,0,0,.24.07.23.23,0,0,0,.16-.23.18.18,0,0,0-.15-.19A3.44,3.44,0,0,0,20.42,18.33Z"></path>
+  </symbol>
+        
+        <symbol id="gm-icon-snooze" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 3a9 9 0 0 1 9 9h-2a7 7 0 1 0-2.1 5l1.4 1.4A9 9 0 1 1 12 3zm4.5-1.5l1.2 1.6l1.9-.5l-.5 1.9l1.6 1.2l-1.9.5l-.5 1.9l-1.2-1.6l-1.9.5l.5-1.9l-1.6-1.2l1.9-.5l.5-1.9zM11 7h2v5h-2V7zm0 7h2v2h-2v-2z"/>
+        </symbol>
+        <symbol id="gm-icon-info" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20zm0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16zm-1 6h2v2h-2v-2zm0 4h2v6h-2v-6z"/>
+        </symbol>
+    </svg>
+    
+    <!-- Global Actions -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+        <div class="d-flex flex-column justify-content-center">
+            <h4 class="mb-1 mt-3">@T("dashboard.owner.title")</h4>
+            <p class="text-muted">@T("dashboard.owner.subtitle")</p>
         </div>
-        <a href="@Url.Action("List", "PlantInstance")" class="btn btn-primary">
-            <i class="bx bx-leaf me-1"></i>@T("dashboard.owner.cta.myplants")
-        </a>
-        <button type="button"
-                id="btn-water-all"
-                class="btn btn-info d-none"
-                data-label="@T("dashboard.owner.cta.waterall")"
-                data-success-template="@T("dashboard.owner.toast.waterall.success.template")">
-            <i class="bx bx-droplet me-1"></i>@T("dashboard.owner.cta.waterall")
-        </button>
-        <button type="button"
-                id="btn-fertilize-all"
-                class="btn btn-success d-none"
-                data-label="@T("dashboard.owner.cta.fertilizeall")"
-                data-success-template="@T("dashboard.owner.toast.fertilizeall.success.template")">
-            <i class="bx bx-dialpad me-1"></i>@T("dashboard.owner.cta.fertilizeall")
-        </button>
-    </div>
 
-    <!-- Section selector -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-wrap align-items-center gap-4">
-
-                <button type="button" class="dashboard-section-btn active" data-section="watering">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="bg-label-info p-2 rounded">
-                            <i class="bx bx-droplet bx-sm"></i>
-                        </span>
-                        <div class="content-right">
-                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.watering")</p>
-                            <h4 class="text-info mb-0" data-count-section="watering">@Model.WateringTab.Actions.Count</h4>
-                        </div>
-                    </div>
+        <div class="d-flex align-content-center flex-wrap gap-2">
+            <div class="px-0">
+                <a href="@Url.Action("List", "PlantInstance")" class="btn btn-label-secondary me-2">
+                    @T("dashboard.owner.cta.myplants")
+                </a>
+            </div>
+            
+            <button type="button"
+                    id="btn-water-all"
+                    class="btn btn-primary"
+                    data-label="@T("dashboard.owner.cta.waterall")"
+                    data-success-template="@T("dashboard.owner.toast.waterall.success.template")">
+                @T("dashboard.owner.cta.waterall")
+            </button>
+            <button type="button"
+                    id="btn-fertilize-all"
+                    class="btn btn-primary d-none"
+                    data-label="@T("dashboard.owner.cta.fertilizeall")"
+                    data-success-template="@T("dashboard.owner.toast.fertilizeall.success.template")">
+                @T("dashboard.owner.cta.fertilizeall")
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dashboardSpotFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span id="dashboardSpotFilterLabel">@(Model.AvailableGardenSpots.FirstOrDefault(x => x.Selected)?.Text ?? T("dashboard.owner.filter.allspots").ToString())</span>
                 </button>
-
-                <button type="button" class="dashboard-section-btn" data-section="fertilizing">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="bg-label-success p-2 rounded">
-                           @*  <i class="bx bx-flask bx-sm"></i> *@
-                           <i class="bx bx-dialpad bx-sm"></i>
-                        </span>
-                        <div class="content-right">
-                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.fertilizing")</p>
-                            <h4 class="text-success mb-0" data-count-section="fertilizing">@Model.FertilizingTab.Actions.Count</h4>
-                        </div>
-                    </div>
-                </button>
-
-                <button type="button" class="dashboard-section-btn" data-section="diseases">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="bg-label-danger p-2 rounded">
-                            <i class="bx bx-bug bx-sm"></i>
-                        </span>
-                        <div class="content-right">
-                            <p class="mb-0 text-muted">@T("dashboard.owner.tab.diseases")</p>
-                            <h4 class="text-danger mb-0">@Model.DiseaseTab.ActiveCases.Count</h4>
-                        </div>
-                    </div>
-                </button>
-
-                <div class="d-flex align-items-center gap-3 ms-auto" id="dashboard-spot-filter-wrapper">
-                    <span class="bg-label-secondary p-2 rounded">
-                        <i class="bx bx-filter-alt bx-sm"></i>
-                    </span>
-                    <div class="content-right">
-                        <p class="mb-0 text-muted">@T("dashboard.owner.filter.label")</p>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-link p-0 fw-semibold dropdown-toggle"
-                                    type="button"
-                                    id="dashboardSpotFilter"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                <span id="dashboardSpotFilterLabel">@T("dashboard.owner.filter.allspots")</span>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end" id="dashboardSpotFilterMenu" aria-labelledby="dashboardSpotFilter">
-                            </div>
-                        </div>
-                    </div>
+                <div class="dropdown-menu dropdown-menu-end" id="dashboardSpotFilterMenu" aria-labelledby="dashboardSpotFilter">
+                    @foreach (var spot in Model.AvailableGardenSpots) {
+                        <a class="dropdown-item @(spot.Selected ? "active" : string.Empty)" href="javascript:void(0);" data-spot-value="@spot.Value">@spot.Text</a>
+                    }
                 </div>
-
             </div>
         </div>
     </div>
+    <!--/ Global Actions end -->
+
+    <!-- Counters Section selector -->
+    <div class="row mb-4 g-3 counters-wrapper">
+        <div class="col-sm-4">
+            <div class="card card-border-shadow-primary active">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-start gap-3 w-100">
+                        <button type="button" class="d-flex align-items-center dashboard-section-btn gap-3" data-section="watering">
+                            <span class="badge bg-label-primary rounded-circle p-2">
+                                <svg aria-hidden="true" class="icon3 active">
+                                    <use href="#gm-icon-watering-alt" />
+                                </svg>
+                            </span>
+                            <div class="content-left">
+                                <h3 class="mb-0 active" id="watering-count">@Model.WateringTab.TodayOverdueCount</h3>
+                                <small class="active">@T("dashboard.owner.tab.watering")</small>
+                            </div>
+                        </button>
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            <small>@T("dashboard.owner.filter.showupcoming")</small>
+                            <label class="switch switch-primary me-2 pe-2 mb-0">
+                                <input type="checkbox" class="switch-input dashboard-show-upcoming" data-section="watering">
+                                <span class="switch-toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-start gap-3 w-100">
+                        <button type="button" class="d-flex align-items-center dashboard-section-btn gap-3" data-section="fertilizing">
+                            <span class="badge bg-label-primary rounded-circle p-2">
+                                <svg aria-hidden="true" class="icon3">
+                                    <use href="#gm-icon-fretilize" />
+                                </svg>
+                            </span>
+                            <div class="content-left">
+                                <h3 class="mb-0" id="fertilizing-count">@Model.FertilizingTab.TodayOverdueCount</h3>
+                                <small>@T("dashboard.owner.tab.fertilizing")</small>
+                            </div>
+                        </button>
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            <small>@T("dashboard.owner.filter.showupcoming")</small>
+                            <label class="switch switch-primary me-2 pe-2 mb-0">
+                                <input type="checkbox" class="switch-input dashboard-show-upcoming" data-section="fertilizing">
+                                <span class="switch-toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <button type="button" class="d-flex align-items-center justify-content-start gap-3 dashboard-section-btn" data-section="diseases">
+                        <span class="badge bg-label-primary rounded-circle p-2">
+                            <svg aria-hidden="true" class="icon3">
+                                <use href="#gm-icon-otl_bug" />
+                            </svg>
+                        </span>
+                        <div class="content-left">
+                            <h3 class="mb-0">@Model.DiseaseTab.ActiveCases.Count</h3>
+                            <small>@T("dashboard.owner.tab.diseases")</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Counters Section selector -->
 
     <!-- Panel content -->
     <div id="dashboard-panel-content">
         @await Html.PartialAsync("_DashboardWateringPanel", Model.WateringTab)
     </div>
-</div>
+
 
 <!-- Skip Action Modal -->
 <div class="modal fade" id="skipActionModal" tabindex="-1" aria-labelledby="skipActionModalLabel" aria-hidden="true">
@@ -139,551 +215,186 @@
     <script>
         (function () {
             'use strict';
-
-            var activeSection = 'watering';
-
-            var sectionUrls = {
+            var state = { section: 'watering', spotId: '@(Model.Query.SpotId?.ToString() ?? string.Empty)' };
+            var urls = {
                 watering: '@Url.Action("DashboardWateringPanel", "Home")',
                 fertilizing: '@Url.Action("DashboardFertilizingPanel", "Home")',
-                diseases: '@Url.Action("DashboardDiseasesPanel", "Home")'
+                diseases: '@Url.Action("DashboardDiseasesPanel", "Home")',
+                skip: '@Url.Action("SkipAction", "ActionLog")',
+                bulkWatering: '@Url.Action("WateringAll", "ActionLog")',
+                bulkFertilizing: '@Url.Action("FertilizingAll", "ActionLog")'
             };
+            var msg = {
+                loading: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.loading")))',
+                error: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.error")))',
+                failed: 'Request failed. Please try again.',
+                empty: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("dashboard.owner.todayactions.empty")))'
+            };
+            var $doc = $(document), $panel = $('#dashboard-panel-content'), $modal = $('#skipActionModal');
 
-            function notifyStateChanged() {
-                if (window.jQuery) {
-                    window.jQuery(document).trigger('dashboard:state-changed');
-                }
+            function token() { return $('#dashboard-anti-forgery-token input[name="__RequestVerificationToken"]').val() || ''; }
+
+            function toast(type, text) {
+                var $c = $('#dashboard-toast-container');
+                if (!$c.length) $c = $('<div id="dashboard-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:1100"></div>').appendTo('body');
+                var $t = $('<div class="toast align-items-center text-white ' + (type === 'success' ? 'bg-success' : 'bg-danger') + ' border-0" role="alert"><div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>');
+                $t.find('.toast-body').text(text || '');
+                $c.append($t);
+                new bootstrap.Toast($t[0], { delay: 3200 }).show();
+                $t.on('hidden.bs.toast', function () { $t.remove(); });
+            }
+
+            function setActive(section) {
+                $('.counters-wrapper .card').removeClass('card-border-shadow-primary active');
+                $('.counters-wrapper .content-left h4, .counters-wrapper small, .icon3').removeClass('active');
+                var $btn = $('.dashboard-section-btn[data-section="' + section + '"]').first();
+                $btn.closest('.card').addClass('card-border-shadow-primary active');
+                $btn.find('h4, small, .icon3').addClass('active');
+            }
+
+            function syncTop() {
+                $('#btn-water-all').toggleClass('d-none', state.section !== 'watering');
+                $('#btn-fertilize-all').toggleClass('d-none', state.section !== 'fertilizing');
+                $('#dashboardSpotFilter').closest('.dropdown').toggleClass('d-none', state.section === 'diseases');
+            }
+
+            function bulkBtns(type) {
+                return $panel.find('[data-bulk-eligible="true"] .btn-action-done[data-action-type="' + type + '"]');
+            }
+
+            function syncBulk() {
+                if (state.section === 'watering') $('#btn-water-all').prop('disabled', !bulkBtns('watering').length);
+                if (state.section === 'fertilizing') $('#btn-fertilize-all').prop('disabled', !bulkBtns('fertilizing').length);
+            }
+
+            function removeCard($row, counterId) {
+                $row.addClass('opacity-50').fadeOut(220, function () {
+                    $row.remove();
+                    if (counterId) {
+                        var $c = $('#' + counterId), n = parseInt($c.text(), 10);
+                        if (!isNaN(n) && n > 0) $c.text(n - 1);
+                    }
+                    syncBulk();
+                    if (!$panel.find('[data-dashboard-action-item]:visible').length && !$panel.find('#actions-empty-msg').length)
+                        $panel.append('<p id="actions-empty-msg" class="text-muted p-4 mb-0">' + msg.empty + '</p>');
+                });
             }
 
             function loadSection(section) {
-                var panel = document.getElementById('dashboard-panel-content');
-                if (!panel) return;
-
-                var url = sectionUrls[section];
-                if (!url) return;
-
-                panel.innerHTML =
-                    '<div class="p-4 text-center">' +
-                    '<div class="spinner-border text-primary" role="status">' +
-                    '<span class="visually-hidden">@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.loading")))</span>' +
-                    '</div></div>';
-
-                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(function (r) {
-                        if (!r.ok) throw new Error('HTTP ' + r.status);
-                        return r.text();
+                state.section = section;
+                setActive(section);
+                syncTop();
+                $panel.html('<div class="p-4 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">' + msg.loading + '</span></div></div>');
+                var url = section === 'watering' ? urls.watering : (section === 'fertilizing' ? urls.fertilizing : urls.diseases);
+                $.get(url, { spotId: state.spotId })
+                    .done(function (html) {
+                        $panel.html(html);
+                        if (section !== 'diseases') {
+                            var checked = $('.dashboard-show-upcoming[data-section="' + section + '"]').is(':checked');
+                            if (checked) $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
+                        }
+                        syncBulk();
                     })
-                    .then(function (html) {
-                        panel.innerHTML = html;
-                        activeSection = section;
-                        updateButtonStates();
-                        refreshFilter();
-                        notifyStateChanged();
+                    .fail(function () { $panel.html('<div class="p-4"><p class="text-danger mb-0">' + msg.error + '</p></div>'); });
+            }
+
+            function runDone($btn) {
+                if ($btn.prop('disabled')) return;
+                var type = $btn.data('action-type'), $row = $btn.closest('[data-dashboard-action-item]');
+                var payload = { PlantInstanceId: $btn.data('plant-instance-id'), __RequestVerificationToken: token() };
+                if (type === 'watering' && $btn.data('water-amount-l') !== '') payload.WaterAmountL = $btn.data('water-amount-l');
+                if (type === 'fertilizing') {
+                    if ($btn.data('fertilizer-quantity') !== '') payload.Quantity = $btn.data('fertilizer-quantity');
+                    if ($btn.data('fertilizer-unit') !== '') payload.Unit = $btn.data('fertilizer-unit');
+                }
+                var restore = '<i class="bx bx-check"></i> ' + ($btn.data('label-done') || 'Done');
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+                $.ajax({ url: $btn.data('url'), type: 'POST', headers: { RequestVerificationToken: token() }, data: payload })
+                    .done(function (res) {
+                        if (res && res.success) { removeCard($row, $btn.data('counter')); return; }
+                        $btn.prop('disabled', false).html(restore);
+                        toast('error', (res && res.message) || msg.failed);
                     })
-                    .catch(function () {
-                        panel.innerHTML =
-                            '<div class="p-4"><p class="text-danger mb-0">@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.error")))</p></div>';
-                    });
+                    .fail(function () { $btn.prop('disabled', false).html(restore); toast('error', msg.failed); });
             }
 
-            function updateButtonStates() {
-                document.querySelectorAll('.dashboard-section-btn').forEach(function (btn) {
-                    btn.classList.toggle('active', btn.dataset.section === activeSection);
+            function openSkipModal($btn) {
+                var $row = $btn.closest('[data-dashboard-action-item]');
+                $modal.find('.skip-plant-name').text($btn.data('plant-name'));
+                $modal.data({
+                    pid: $btn.data('plant-instance-id'),
+                    type: $btn.data('action-type'),
+                    freq: $btn.data('frequency-days') || 0,
+                    $row: $row,
+                    counter: $row.find('.btn-action-done').first().data('counter') || ''
                 });
-
-                var waterAllBtn = document.getElementById('btn-water-all');
-                if (waterAllBtn) {
-                    waterAllBtn.classList.toggle('d-none', activeSection !== 'watering');
-                }
-
-                var fertilizeAllBtn = document.getElementById('btn-fertilize-all');
-                if (fertilizeAllBtn) {
-                    fertilizeAllBtn.classList.toggle('d-none', activeSection !== 'fertilizing');
-                }
-
-                notifyStateChanged();
+                new bootstrap.Modal($modal[0]).show();
             }
 
-            function refreshFilter() {
-                var optionsEl = document.getElementById('dashboard-spot-options');
-                var menu = document.getElementById('dashboardSpotFilterMenu');
-                var label = document.getElementById('dashboardSpotFilterLabel');
-                var wrapper = document.getElementById('dashboard-spot-filter-wrapper');
-
-                if (!menu) return;
-                menu.innerHTML = '';
-
-                if (!optionsEl) {
-                    if (wrapper) wrapper.classList.add('d-none');
-                    return;
-                }
-
-                var options = [];
-                try {
-                    options = JSON.parse(optionsEl.textContent || '[]');
-                } catch (e) {
-                    return;
-                }
-
-                var hasFilter = options.length > 1;
-                if (wrapper) wrapper.classList.toggle('d-none', !hasFilter);
-                if (!hasFilter) return;
-
-                options.forEach(function (opt) {
-                    var a = document.createElement('a');
-                    a.className = 'dropdown-item' + (opt.value === '' ? ' active' : '');
-                    a.href = 'javascript:void(0);';
-                    a.dataset.spotValue = opt.value;
-                    a.textContent = opt.text;
-                    a.addEventListener('click', function () {
-                        applyFilter(opt.value, opt.text);
-                        menu.querySelectorAll('.dropdown-item').forEach(function (i) {
-                            i.classList.remove('active');
-                        });
-                        a.classList.add('active');
-                    });
-                    menu.appendChild(a);
-                });
-
-                if (label && options.length > 0) {
-                    label.textContent = options[0].text;
-                }
-            }
-
-            function applyFilter(value, text) {
-                var label = document.getElementById('dashboardSpotFilterLabel');
-                if (label) label.textContent = text;
-
-                document.querySelectorAll('[data-spot-id]').forEach(function (card) {
-                    card.style.display = (!value || card.dataset.spotId === value) ? '' : 'none';
-                });
-
-                notifyStateChanged();
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                refreshFilter();
-
-                var waterAllBtn = document.getElementById('btn-water-all');
-                if (waterAllBtn) {
-                    waterAllBtn.classList.toggle('d-none', activeSection !== 'watering');
-                }
-
-                var fertilizeAllBtn = document.getElementById('btn-fertilize-all');
-                if (fertilizeAllBtn) {
-                    fertilizeAllBtn.classList.toggle('d-none', activeSection !== 'fertilizing');
-                }
-
-                notifyStateChanged();
-
-                document.querySelectorAll('.dashboard-section-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        var section = this.dataset.section;
-                        if (section !== activeSection) {
-                            loadSection(section);
-                        }
-                    });
-                });
-            });
-        })();
-    </script>
-
-    <!-- Action Log: Handle done/skip buttons and bulk actions -->
-    <script>
-        (function () {
-            'use strict';
-
-            // Locate action item by traversing from trigger element up through DOM hierarchy
-            function resolveActionItem($trigger) {
-                var $item = $trigger.closest('[data-dashboard-action-item]');
-                if ($item.length) return $item;
-
-                $item = $trigger.closest('[data-skip-key]');
-                if ($item.length) return $item;
-
-                $item = $trigger.closest('.list-group-item');
-                if ($item.length) return $item;
-
-                $item = $trigger.closest('.col-md-6, .col-lg-4, .col-xl-4');
-                if ($item.length) return $item;
-
-                return $trigger.closest('.dashboard-action-card');
-            }
-
-            // Get all action items from container, checking multiple selector strategies
-            function getActionItems($container) {
-                var $items = $container.find('[data-dashboard-action-item]');
-                if ($items.length) return $items;
-
-                $items = $container.find('[data-skip-key]');
-                if ($items.length) return $items;
-
-                $items = $container.find('.list-group-item');
-                if ($items.length) return $items;
-
-                return $container.find('.dashboard-action-card');
-            }
-
-            // Extract CSRF token from page for AJAX requests
-            function getToken() {
-                var $tokenInput = $('#dashboard-anti-forgery-token input[name="__RequestVerificationToken"]').first();
-                if ($tokenInput.length) return $tokenInput.val();
-
-                $tokenInput = $('input[name="__RequestVerificationToken"]').first();
-                return $tokenInput.length ? $tokenInput.val() : '';
-            }
-
-            // Fade out and remove action item, update counters and empty state
-            function removeRow($row, $container) {
-                if (!$row || !$row.length) {
-                    updateEmptyState($container);
-                    $(document).trigger('dashboard:action-items-changed');
-                    return;
-                }
-
-                $row.addClass('opacity-50');
-                $row.fadeOut(400, function () {
-                    $(this).remove();
-                    updateSectionCount($container);
-                    updateEmptyState($container);
-                    $(document).trigger('dashboard:action-items-changed');
-                });
-            }
-
-            // Recount visible items of current action type and update badge
-            function updateSectionCount($container) {
-                var actionType = null;
-                $container.find('[data-dashboard-action-item] .btn-action-done').each(function () {
-                    actionType = $(this).data('action-type');
-                    return false;
-                });
-
-                if (!actionType) {
-                    actionType = $('.dashboard-section-btn.active').data('section') || null;
-                }
-
-                if (!actionType) return;
-
-                var remaining = $container.find(
-                    '[data-dashboard-action-item] .btn-action-done[data-action-type="' + actionType + '"]'
-                ).length;
-
-                $('[data-count-section="' + actionType + '"]').text(remaining);
-            }
-
-            // Display placeholder or remove items list if container is empty
-            function updateEmptyState($container) {
-                var $items = getActionItems($container);
-                var total = $items.length;
-                var visible = $items.filter(':visible').length;
-
-                if (total === 0) {
-                    var $content = $container.find('.dashboard-actions-grid').first();
-                    if (!$content.length) {
-                        $content = $container.find('.list-group').first();
-                    }
-                    if (!$content.length) {
-                        $content = $container.find('.row').first();
-                    }
-
-                    var emptyHtml =
-                        '<p class="text-muted mb-0" id="actions-empty-msg">' +
-                        ($container.data('empty-text') || 'All done for today!') +
-                        '</p>';
-
-                    if ($content.length) {
-                        $content.replaceWith(emptyHtml);
-                    } else if (!$container.find('#actions-empty-msg').length) {
-                        $container.append(emptyHtml);
-                    }
-                    return;
-                }
-
-                if (visible === 0) {
-                    $container.find('#actions-empty-msg').remove();
-                }
-            }
-
-            // Create and display a toast notification (success or error)
-            function showToast(type, message) {
-                var $toastContainer = $('#dashboard-toast-container');
-                if ($toastContainer.length === 0) {
-                    $toastContainer = $('<div id="dashboard-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:1100"></div>');
-                    $('body').append($toastContainer);
-                }
-
-                var bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
-                var $toast = $(
-                    '<div class="toast align-items-center text-white ' + bgClass + ' border-0" role="alert" aria-live="assertive" aria-atomic="true">' +
-                    '  <div class="d-flex">' +
-                    '    <div class="toast-body">' + $('<span>').text(message).html() + '</div>' +
-                    '    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
-                    '  </div>' +
-                    '</div>'
-                );
-
-                $toastContainer.append($toast);
-                var bsToast = new bootstrap.Toast($toast[0], { delay: 3500 });
-                bsToast.show();
-                $toast.on('hidden.bs.toast', function () {
-                    $(this).remove();
-                });
-            }
-
-            // Replace template {0} placeholder with count value
-            function formatCountMessage(template, count) {
-                var safeTemplate = template || '';
-                if (safeTemplate.indexOf('{0}') >= 0) {
-                    return safeTemplate.replace('{0}', count);
-                }
-                return safeTemplate + ' ' + count;
-            }
-
-            // Bind click handlers to "Done" buttons: submit action (watering/fertilizing) via AJAX
-            function bindDoneButtons($container) {
-                $container.on('click', '.btn-action-done', function () {
-                    var $btn = $(this);
-                    if ($btn.prop('disabled')) return;
-
-                    var url = $btn.data('url');
-                    var plantInstanceId = $btn.data('plant-instance-id');
-                    var actionType = $btn.data('action-type');
-                    var waterAmountL = $btn.data('water-amount-l') || null;
-                    var fertilizerQuantity = $btn.data('fertilizer-quantity') || null;
-                    var fertilizerUnit = $btn.data('fertilizer-unit');
-                    var $row = resolveActionItem($btn);
-
-                    $btn.prop('disabled', true)
-                        .html('<span class="spinner-border spinner-border-sm" role="status"></span>');
-
-                    var postData = {
-                        PlantInstanceId: plantInstanceId,
-                        __RequestVerificationToken: getToken()
-                    };
-
-                    if (actionType === 'watering' && waterAmountL !== null && waterAmountL !== '') {
-                        postData.WaterAmountL = waterAmountL;
-                    }
-                    if (actionType === 'fertilizing') {
-                        if (fertilizerQuantity !== null && fertilizerQuantity !== '') {
-                            postData.Quantity = fertilizerQuantity;
-                        }
-                        if (fertilizerUnit !== undefined && fertilizerUnit !== '') {
-                            postData.Unit = fertilizerUnit;
-                        }
-                    }
-
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        headers: { RequestVerificationToken: getToken() },
-                        data: postData,
-                        success: function (response) {
-                            if (response && response.success) {
-                                removeRow($row, $container);
-                                return;
-                            }
-
-                            var msg = (response && response.message) ? response.message : 'An error occurred.';
-                            $btn.prop('disabled', false).html('<i class="bx bx-check"></i> ' + ($btn.data('label-done') || 'Done'));
-                            showToast('error', msg);
-                        },
-                        error: function () {
-                            $btn.prop('disabled', false).html('<i class="bx bx-check"></i> ' + ($btn.data('label-done') || 'Done'));
-                            showToast('error', 'Request failed. Please try again.');
-                        }
-                    });
-                });
-            }
-
-            // Bind click handlers to "Skip" buttons: show modal to choose skip mode
-            function bindSkipButtons($container) {
-                $container.on('click', '.btn-action-skip', function () {
-                    var $btn = $(this);
-                    var plantInstanceId = $btn.data('plant-instance-id');
-                    var actionType = $btn.data('action-type');
-                    var plantName = $btn.data('plant-name');
-                    var frequencyDays = $btn.data('frequency-days');
-                    var $row = resolveActionItem($btn);
-
-                    var $modal = $('#skipActionModal');
-                    $modal.find('.skip-plant-name').text(plantName);
-                    $modal.data('plant-instance-id', plantInstanceId);
-                    $modal.data('action-type', actionType);
-                    $modal.data('frequency-days', frequencyDays);
-                    $modal.data('$row', $row);
-                    $modal.data('$container', $container);
-
-                    new bootstrap.Modal($modal[0]).show();
-                });
-
-                $(document).on('click', '#btnSkipToday', function () {
-                    executeSkip('today');
-                });
-
-                $(document).on('click', '#btnSkipNext', function () {
-                    executeSkip('next');
-                });
-            }
-
-            // Submit skip request to server: either skip today or skip until next occurrence
-            function executeSkip(mode) {
-                var $modal = $('#skipActionModal');
-                var plantInstanceId = $modal.data('plant-instance-id');
-                var actionType = $modal.data('action-type');
-                var frequencyDays = $modal.data('frequency-days') || 0;
-                var $row = $modal.data('$row');
-                var $container = $modal.data('$container');
-
-                $modal.find('#btnSkipToday, #btnSkipNext').prop('disabled', true);
-
+            function runSkip(mode) {
+                var d = $modal.data(), $btns = $modal.find('#btnSkipToday, #btnSkipNext');
+                $btns.prop('disabled', true);
                 $.ajax({
-                    url: '@Url.Action("SkipAction", "ActionLog")',
-                    type: 'POST',
-                    headers: { RequestVerificationToken: getToken() },
-                    data: {
-                        PlantInstanceId: plantInstanceId,
-                        ActionType: actionType,
-                        SkipMode: mode,
-                        FrequencyDays: frequencyDays,
-                        __RequestVerificationToken: getToken()
-                    },
-                    success: function (response) {
-                        var modalInstance = bootstrap.Modal.getInstance($modal[0]);
-                        if (modalInstance) modalInstance.hide();
-                        $modal.find('#btnSkipToday, #btnSkipNext').prop('disabled', false);
-
-                        if (response && response.success) {
-                            removeRow($row, $container);
-                            return;
-                        }
-
-                        var msg = (response && response.message) ? response.message : 'An error occurred.';
-                        showToast('error', msg);
-                    },
-                    error: function () {
-                        var modalInstance = bootstrap.Modal.getInstance($modal[0]);
-                        if (modalInstance) modalInstance.hide();
-                        $modal.find('#btnSkipToday, #btnSkipNext').prop('disabled', false);
-                        showToast('error', 'Request failed. Please try again.');
-                    }
+                    url: urls.skip, type: 'POST', headers: { RequestVerificationToken: token() },
+                    data: { PlantInstanceId: d.pid, ActionType: d.type, SkipMode: mode, FrequencyDays: d.freq, __RequestVerificationToken: token() }
+                }).done(function (res) {
+                    var inst = bootstrap.Modal.getInstance($modal[0]); if (inst) inst.hide();
+                    $btns.prop('disabled', false);
+                    if (res && res.success) { removeCard(d.$row, d.counter); return; }
+                    toast('error', (res && res.message) || msg.failed);
+                }).fail(function () {
+                    var inst = bootstrap.Modal.getInstance($modal[0]); if (inst) inst.hide();
+                    $btns.prop('disabled', false);
+                    toast('error', msg.failed);
                 });
             }
 
-            // Bind bulk action button (water-all / fertilize-all): submit all visible items and remove them
-            function bindBulkActionButton($container, options) {
-                // Enable/disable button based on visible action items of this type
-                function syncButtonState() {
-                    var $btn = $(options.buttonSelector);
-                    if (!$btn.length) return;
-
-                    var visibleCount = 0;
-                    $container.find('[data-dashboard-action-item]:visible').each(function () {
-                        if ($(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').length) {
-                            visibleCount++;
-                        }
-                    });
-
-                    $btn.prop('disabled', visibleCount === 0);
-                }
-
-                $(document).on('dashboard:state-changed dashboard:action-items-changed', syncButtonState);
-
-                $(document).on('click', options.buttonSelector, function () {
-                    var $btn = $(this);
-                    if ($btn.prop('disabled')) return;
-
-                    var ids = [];
-                    $container.find('[data-dashboard-action-item]:visible').each(function () {
-                        var id = $(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').data('plant-instance-id');
-                        if (id) ids.push(id);
-                    });
-
-                    if (ids.length === 0) return;
-
-                    $btn.prop('disabled', true)
-                        .html('<span class="spinner-border spinner-border-sm" role="status"></span>');
-
-                    var postData = { __RequestVerificationToken: getToken() };
-                    $.each(ids, function (i, id) {
-                        postData['PlantInstanceIds[' + i + ']'] = id;
-                    });
-
-                    $.ajax({
-                        url: options.url,
-                        type: 'POST',
-                        headers: { RequestVerificationToken: getToken() },
-                        data: postData,
-                        success: function (response) {
-                            $btn.prop('disabled', false)
-                                .html(options.iconHtml + ($btn.data('label') || options.defaultLabel));
-
-                            if (response && response.success) {
-                                var affectedCount = typeof response.count === 'number' ? response.count : ids.length;
-
-                                $container.find('[data-dashboard-action-item]:visible').each(function () {
-                                    if ($(this).find('.btn-action-done[data-action-type="' + options.actionType + '"]').length) {
-                                        $(this).addClass('opacity-50').fadeOut(400, function () {
-                                            $(this).remove();
-                                            updateSectionCount($container);
-                                            updateEmptyState($container);
-                                            $(document).trigger('dashboard:action-items-changed');
-                                        });
-                                    }
-                                });
-
-                                if (affectedCount > 0) {
-                                    var successTemplate = $btn.data('success-template') || options.successTemplate || 'Completed for {0} items.';
-                                    showToast('success', formatCountMessage(successTemplate, affectedCount));
-                                }
-
-                                return;
-                            }
-
-                            var msg = (response && response.message) ? response.message : 'An error occurred.';
-                            showToast('error', msg);
-                        },
-                        error: function () {
-                            $btn.prop('disabled', false)
-                                .html(options.iconHtml + ($btn.data('label') || options.defaultLabel));
-                            showToast('error', 'Request failed. Please try again.');
-                        }
-                    });
-                });
-
-                syncButtonState();
+            function runBulk(type, url, $btn) {
+                if ($btn.prop('disabled')) return;
+                var $items = bulkBtns(type), ids = $items.map(function () { return $(this).data('plant-instance-id'); }).get().filter(Boolean);
+                if (!ids.length) return;
+                var orig = $btn.html(), data = { __RequestVerificationToken: token() }, idSet = {};
+                $.each(ids, function (i, id) { data['PlantInstanceIds[' + i + ']'] = id; idSet[String(id)] = true; });
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+                $.ajax({ url: url, type: 'POST', headers: { RequestVerificationToken: token() }, data: data })
+                    .done(function (res) {
+                        $btn.prop('disabled', false).html(orig);
+                        if (!(res && res.success)) { toast('error', (res && res.message) || msg.failed); return; }
+                        bulkBtns(type).each(function () {
+                            var $d = $(this);
+                            if (idSet[String($d.data('plant-instance-id') || '')]) removeCard($d.closest('[data-dashboard-action-item]'), $d.data('counter'));
+                        });
+                        var n = typeof res.count === 'number' ? res.count : ids.length;
+                        if (n > 0) toast('success', ($btn.data('success-template') || 'Completed for {0} items.').replace('{0}', n));
+                    })
+                    .fail(function () { $btn.prop('disabled', false).html(orig); toast('error', msg.failed); });
             }
 
-            // Initialize action log handlers on DOM ready
-            $(function () {
-                var $container = $('#dashboard-today-actions');
-                if (!$container.length) {
-                    $container = $('#dashboard-panel-content');
-                }
-                if (!$container.length) {
-                    return;
-                }
-
-                bindDoneButtons($container);
-                bindSkipButtons($container);
-
-                bindBulkActionButton($container, {
-                    buttonSelector: '#btn-water-all',
-                    actionType: 'watering',
-                    url: '@Url.Action("WateringAll", "ActionLog")',
-                    iconHtml: '<i class="bx bx-droplet me-1"></i>',
-                    defaultLabel: 'Water all',
-                    successTemplate: 'Watering recorded for {0} plants.'
-                });
-
-                bindBulkActionButton($container, {
-                    buttonSelector: '#btn-fertilize-all',
-                    actionType: 'fertilizing',
-                    url: '@Url.Action("FertilizingAll", "ActionLog")',
-                    iconHtml: '<i class="bx bx-dialpad me-1"></i>',
-                    defaultLabel: 'Fertilize all',
-                    successTemplate: 'Fertilizing recorded for {0} plants.'
-                });
+            $doc.on('click', '.dashboard-section-btn', function () {
+                var s = $(this).data('section');
+                if (s && s !== state.section) loadSection(s);
             });
+            $doc.on('click', '#dashboardSpotFilterMenu .dropdown-item', function () {
+                state.spotId = String($(this).data('spot-value') || '');
+                $('#dashboardSpotFilterLabel').text($(this).text());
+                $('#dashboardSpotFilterMenu .dropdown-item').removeClass('active');
+                $(this).addClass('active');
+                loadSection(state.section);
+            });
+            $doc.on('change', '.dashboard-show-upcoming', function () {
+                var section = $(this).data('section');
+                $panel.find('.upcoming-section[data-section="' + section + '"]').toggleClass('d-none', !this.checked);
+            });
+            $doc.on('click', '.btn-action-done', function () { runDone($(this)); });
+            $doc.on('click', '.btn-action-skip', function () { openSkipModal($(this)); });
+            $doc.on('click', '#btnSkipToday', function () { runSkip('today'); });
+            $doc.on('click', '#btnSkipNext', function () { runSkip('next'); });
+            $doc.on('click', '#btn-water-all', function () { runBulk('watering', urls.bulkWatering, $(this)); });
+            $doc.on('click', '#btn-fertilize-all', function () { runBulk('fertilizing', urls.bulkFertilizing, $(this)); });
+
+            setActive(state.section);
+            syncTop();
+            syncBulk();
         })();
     </script>
 }

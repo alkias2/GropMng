@@ -6,25 +6,57 @@ namespace GropMng.Web.Models.Dashboard;
 
 public class OwnerDashboardModel
 {
+    public DashboardQueryModel Query { get; set; } = new();
+
     public DashboardWateringTabModel WateringTab { get; set; } = new();
 
     public DashboardFertilizingTabModel FertilizingTab { get; set; } = new();
 
     public DashboardDiseaseTabModel DiseaseTab { get; set; } = new();
+
+    public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
 }
 
 public class DashboardWateringTabModel
 {
-    public IList<DashboardActionModel> Actions { get; set; } = new List<DashboardActionModel>();
+    public int TodayOverdueCount { get; set; }
+
+    public int UpcomingCount { get; set; }
+
+    public IList<DashboardActionModel> TodayOverdueActions { get; set; } = new List<DashboardActionModel>();
+
+    public IList<DashboardActionGroupModel> UpcomingActionGroups { get; set; } = new List<DashboardActionGroupModel>();
 
     public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
 }
 
 public class DashboardFertilizingTabModel
 {
-    public IList<DashboardActionModel> Actions { get; set; } = new List<DashboardActionModel>();
+    public int TodayOverdueCount { get; set; }
+
+    public int UpcomingCount { get; set; }
+
+    public IList<DashboardActionModel> TodayOverdueActions { get; set; } = new List<DashboardActionModel>();
+
+    public IList<DashboardActionGroupModel> UpcomingActionGroups { get; set; } = new List<DashboardActionGroupModel>();
 
     public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
+}
+
+public class DashboardActionGroupModel
+{
+    public DateOnly DueDate { get; set; }
+
+    public int DeltaDaysFromToday { get; set; }
+
+    public string GroupLabel { get; set; } = string.Empty;
+
+    public IList<DashboardActionModel> Actions { get; set; } = new List<DashboardActionModel>();
+}
+
+public class DashboardQueryModel
+{
+    public int? SpotId { get; set; }
 }
 
 public class DashboardDiseaseTabModel
@@ -51,6 +83,8 @@ public class DashboardActionModel
     public DateOnly DueDate { get; set; }
 
     public DashboardDueStatus DueStatus { get; set; }
+
+    public int DeltaDaysFromToday { get; set; }
 
     public byte FrequencyDays { get; set; }
 

@@ -65,6 +65,7 @@ public static class DependencyInjectionExtensions
     {
         services.AddCoreFrameworkServices();
         services.Configure<OwnerBootstrapOptions>(configuration.GetSection(OwnerBootstrapOptions.SectionName));
+        services.Configure<DashboardOptions>(configuration.GetSection(DashboardOptions.SectionName));
         services.AddRequestLocalizationOptions();
         services.AddDataAccessAndDomainServices(configuration);
 

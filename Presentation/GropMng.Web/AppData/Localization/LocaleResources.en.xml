@@ -1404,6 +1404,14 @@
     <Value>Filter</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>dashboard.owner.filter.showupcoming</Name>
+    <Value>Upcoming</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.group.inxdays</Name>
+    <Value>In {0} days</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>dashboard.owner.disease.plant</Name>
     <Value>Plant</Value>
   </LocaleResource>

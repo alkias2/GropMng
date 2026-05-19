@@ -7,8 +7,10 @@ using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
+using GropMng.Web.Initialization.Options;
 using GropMng.Web.Models.Dashboard;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Options;
 
 namespace GropMng.Web.Factories.Dashboard;
 
@@ -35,6 +37,7 @@ public class DashboardModelFactory : IDashboardModelFactory
     private readonly IRepository<PlantPhoto> _plantPhotoRepository;
     private readonly IPictureService _pictureService;
     private readonly ILocalizationService _localizationService;
+    private readonly DashboardOptions _dashboardOptions;
 
     #endregion
 
@@ -55,7 +58,8 @@ public class DashboardModelFactory : IDashboardModelFactory
         IRepository<ActionSkip> actionSkipRepository,
         IRepository<PlantPhoto> plantPhotoRepository,
         IPictureService pictureService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IOptions<DashboardOptions> dashboardOptions)
     {
         _currentOwnerProvider = currentOwnerProvider;
         _plantInstanceRepository = plantInstanceRepository;
@@ -72,6 +76,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         _plantPhotoRepository = plantPhotoRepository;
         _pictureService = pictureService;
         _localizationService = localizationService;
+        _dashboardOptions = dashboardOptions.Value;
     }
 
     #endregion
@@ -79,13 +84,18 @@ public class DashboardModelFactory : IDashboardModelFactory
     #region Public
 
     /// <inheritdoc />
-    public async Task<OwnerDashboardModel> PrepareDashboardModelAsync(CancellationToken cancellationToken = default)
+    public async Task<OwnerDashboardModel> PrepareDashboardModelAsync(
+        DashboardQueryModel? query = null,
+        CancellationToken cancellationToken = default)
     {
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
         var model = new OwnerDashboardModel();
+        var dashboardQuery = NormalizeQuery(query);
+        model.Query = dashboardQuery;
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var season = ResolveCurrentSeason(today);
+        var upcomingHorizonDays = NormalizeHorizonDays(_dashboardOptions.UpcomingHorizonDays);
 
         var plantInstances = await _plantInstanceRepository.GetAllAsync(
             query => query
@@ -172,7 +182,6 @@ public class DashboardModelFactory : IDashboardModelFactory
         }
 
         var actionableWatering = wateringRows
-            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
             .Where(a => !skipSet.Contains((a.PlantInstanceId, ActionSkipType.Watering)))
             .OrderBy(a => a.DueStatus)
             .ThenBy(a => a.DueDate)
@@ -180,23 +189,50 @@ public class DashboardModelFactory : IDashboardModelFactory
             .ToList();
 
         var actionableFertilizing = fertilizingRows
-            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
             .Where(a => !skipSet.Contains((a.PlantInstanceId, ActionSkipType.Fertilizing)))
             .OrderBy(a => a.DueStatus)
             .ThenBy(a => a.DueDate)
             .ThenBy(a => a.PlantName)
             .ToList();
 
-        // Load plant photos in a single batch across both tabs
-        await PopulateActionPhotosAsync(ownerId, actionableWatering.Concat(actionableFertilizing), cancellationToken);
-
         var allSpotsText = await _localizationService.GetResourceAsync("dashboard.owner.filter.allspots");
+        var inDaysTemplate = await _localizationService.GetResourceAsync("dashboard.owner.group.inxdays");
 
-        model.WateringTab.Actions = actionableWatering;
-        model.WateringTab.AvailableGardenSpots = BuildGardenSpotFilter(actionableWatering, spotMap, allSpotsText);
+        var spotFilterSourceActions = actionableWatering.Concat(actionableFertilizing).ToList();
+        model.AvailableGardenSpots = BuildGardenSpotFilter(spotFilterSourceActions, spotMap, allSpotsText, dashboardQuery.SpotId);
 
-        model.FertilizingTab.Actions = actionableFertilizing;
-        model.FertilizingTab.AvailableGardenSpots = BuildGardenSpotFilter(actionableFertilizing, spotMap, allSpotsText);
+        if (dashboardQuery.SpotId.HasValue)
+        {
+            actionableWatering = actionableWatering
+                .Where(a => a.GardenSpotId == dashboardQuery.SpotId.Value)
+                .ToList();
+
+            actionableFertilizing = actionableFertilizing
+                .Where(a => a.GardenSpotId == dashboardQuery.SpotId.Value)
+                .ToList();
+        }
+
+        model.WateringTab = BuildWateringTabModel(
+            actionableWatering,
+            today,
+            upcomingHorizonDays,
+            inDaysTemplate);
+
+        model.FertilizingTab = BuildFertilizingTabModel(
+            actionableFertilizing,
+            today,
+            upcomingHorizonDays,
+            inDaysTemplate);
+
+        model.WateringTab.AvailableGardenSpots = model.AvailableGardenSpots;
+        model.FertilizingTab.AvailableGardenSpots = model.AvailableGardenSpots;
+
+        var actionsForPhotos = model.WateringTab.TodayOverdueActions
+            .Concat(model.FertilizingTab.TodayOverdueActions)
+            .Concat(model.WateringTab.UpcomingActionGroups.SelectMany(g => g.Actions))
+            .Concat(model.FertilizingTab.UpcomingActionGroups.SelectMany(g => g.Actions));
+
+        await PopulateActionPhotosAsync(ownerId, actionsForPhotos, cancellationToken);
 
         model.DiseaseTab = await PrepareDiseaseTabAsync(
             ownerId, plantInstanceIds, instanceMap, plantMap, spotMap, locationMap, cancellationToken);
@@ -227,6 +263,107 @@ public class DashboardModelFactory : IDashboardModelFactory
             return today;
 
         return DateOnly.FromDateTime(latestDateTime).AddDays(frequencyDays);
+    }
+
+    private static DashboardQueryModel NormalizeQuery(DashboardQueryModel? query)
+    {
+        if (query is null)
+            return new DashboardQueryModel();
+
+        return new DashboardQueryModel
+        {
+            SpotId = query.SpotId is > 0 ? query.SpotId : null
+        };
+    }
+
+    private static int NormalizeHorizonDays(int rawHorizonDays)
+    {
+        if (rawHorizonDays < 1)
+            return 14;
+
+        return rawHorizonDays > 60 ? 60 : rawHorizonDays;
+    }
+
+    private static DashboardWateringTabModel BuildWateringTabModel(
+        IList<DashboardActionModel> actions,
+        DateOnly today,
+        int horizonDays,
+        string inDaysTemplate)
+    {
+        var model = new DashboardWateringTabModel();
+
+        var todayOverdue = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
+            .OrderBy(a => a.DueStatus)
+            .ThenBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        var upcoming = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
+            .Where(a => a.DeltaDaysFromToday <= horizonDays)
+            .OrderBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        model.TodayOverdueActions = todayOverdue;
+        model.TodayOverdueCount = todayOverdue.Count;
+        model.UpcomingCount = upcoming.Count;
+        model.UpcomingActionGroups = BuildUpcomingGroups(upcoming, today, inDaysTemplate);
+
+        return model;
+    }
+
+    private static DashboardFertilizingTabModel BuildFertilizingTabModel(
+        IList<DashboardActionModel> actions,
+        DateOnly today,
+        int horizonDays,
+        string inDaysTemplate)
+    {
+        var model = new DashboardFertilizingTabModel();
+
+        var todayOverdue = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
+            .OrderBy(a => a.DueStatus)
+            .ThenBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        var upcoming = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
+            .Where(a => a.DeltaDaysFromToday <= horizonDays)
+            .OrderBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        model.TodayOverdueActions = todayOverdue;
+        model.TodayOverdueCount = todayOverdue.Count;
+        model.UpcomingCount = upcoming.Count;
+        model.UpcomingActionGroups = BuildUpcomingGroups(upcoming, today, inDaysTemplate);
+
+        return model;
+    }
+
+    private static IList<DashboardActionGroupModel> BuildUpcomingGroups(
+        IList<DashboardActionModel> upcoming,
+        DateOnly today,
+        string inDaysTemplate)
+    {
+        return upcoming
+            .GroupBy(a => a.DueDate)
+            .OrderBy(g => g.Key)
+            .Select(g =>
+            {
+                var deltaDays = g.Key.DayNumber - today.DayNumber;
+                return new DashboardActionGroupModel
+                {
+                    DueDate = g.Key,
+                    DeltaDaysFromToday = deltaDays,
+                    GroupLabel = string.Format(inDaysTemplate, deltaDays),
+                    Actions = g.ToList()
+                };
+            })
+            .ToList();
     }
 
     private static DashboardActionModel BuildActionRow(
@@ -267,6 +404,7 @@ public class DashboardModelFactory : IDashboardModelFactory
             Season = season,
             DueDate = dueDate,
             DueStatus = dueStatus,
+            DeltaDaysFromToday = dueDate.DayNumber - today.DayNumber,
             WaterAmountL = waterAmountL,
             FertilizerQuantity = fertilizerQuantity,
             FertilizerQuantityUnit = fertilizerUnit
@@ -276,11 +414,12 @@ public class DashboardModelFactory : IDashboardModelFactory
     private static IList<SelectListItem> BuildGardenSpotFilter(
         IList<DashboardActionModel> actions,
         IReadOnlyDictionary<int, GardenSpot> spotMap,
-        string allSpotsText)
+        string allSpotsText,
+        int? selectedSpotId)
     {
         var items = new List<SelectListItem>
         {
-            new() { Value = "", Text = allSpotsText, Selected = true }
+            new() { Value = "", Text = allSpotsText, Selected = !selectedSpotId.HasValue }
         };
 
         var distinctSpots = actions
@@ -290,7 +429,12 @@ public class DashboardModelFactory : IDashboardModelFactory
             .OrderBy(x => x.Name)
             .ToList();
 
-        items.AddRange(distinctSpots.Select(x => new SelectListItem { Value = x.id.ToString(), Text = x.Name }));
+        items.AddRange(distinctSpots.Select(x => new SelectListItem
+        {
+            Value = x.id.ToString(),
+            Text = x.Name,
+            Selected = selectedSpotId.HasValue && x.id == selectedSpotId.Value
+        }));
 
         return items;
     }

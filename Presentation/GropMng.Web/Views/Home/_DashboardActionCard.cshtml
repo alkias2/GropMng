@@ -2,19 +2,13 @@
 @using GropMng.Web.Models.Dashboard
 @using GropMng.Core.Domain.Garden.Enums
 @{
-    var badgeClass = Model.DueStatus switch
-    {
-        DashboardDueStatus.Overdue => "danger",
-        DashboardDueStatus.Today => "warning",
-        _ => "info"
-    };
-
     var actionTypeStr = Model.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
     var skipKey = $"{Model.PlantInstanceId}:{actionTypeStr}";
     var plantDisplayName = string.IsNullOrWhiteSpace(Model.Nickname) ? Model.PlantName : $"{Model.PlantName} ({Model.Nickname})";
     var overdueDays = Model.DueStatus == DashboardDueStatus.Overdue
         ? DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - Model.DueDate.DayNumber
         : 0;
+    var isCountable = Model.DueStatus != DashboardDueStatus.Upcoming;
 
     var logUrl = Model.ActionType == DashboardActionType.Watering
         ? Url.Action("LogWatering", "ActionLog")
@@ -34,98 +28,124 @@
     var quantityDisplay = Model.ActionType == DashboardActionType.Watering
         ? (Model.WaterAmountL.HasValue ? $"{Model.WaterAmountL:0.##}" : "—")
         : (Model.FertilizerQuantity.HasValue ? $"{Model.FertilizerQuantity:0.##} {unitStr}".Trim() : "—");
+
+    var locationDisplay = string.IsNullOrWhiteSpace(Model.GardenSpotName) ? Model.LocationName : Model.GardenSpotName;
 }
 
 <div class="col-md-6 col-lg-4 col-xl-4 mb-4"
      data-dashboard-action-item="true"
      data-skip-key="@skipKey"
-     data-spot-id="@Model.GardenSpotId">
+    data-spot-id="@Model.GardenSpotId"
+    data-due-status="@Model.DueStatus.ToString().ToLowerInvariant()"
+    data-bulk-eligible="@(isCountable ? "true" : "false")">
     <div class="card h-100 dashboard-action-card">
-        <div class="card-body d-flex flex-column">
-            <div class="rounded-3 text-center mb-3 pt-3 pb-2 dashboard-action-card__media">
-                @if (!string.IsNullOrEmpty(Model.PlantMainImageUrl))
-                {
-                    <img src="@Model.PlantMainImageUrl" alt="@Model.PlantName" class="img-fluid dashboard-action-card__image" />
-                }
-                else
-                {
-                    <div class="dashboard-action-card__fallback"><i class="bx bx-leaf"></i></div>
-                }
+        <div class="dashboard-action-card__image-wrap">
+            @if (!string.IsNullOrEmpty(Model.PlantMainImageUrl))
+            {
+                <img src="@Model.PlantMainImageUrl" alt="@Model.PlantName" class="dashboard-action-card__image" />
+            }
+            else
+            {
+                <div class="dashboard-action-card__fallback">
+                    <svg class="dashboard-action-card__icon" aria-hidden="true" focusable="false">
+                        <use href="#gm-icon-leaf"></use>
+                    </svg>
+                </div>
+            }
+            <div class="dashboard-action-card__title-overlay">
+                <h4 class="mb-1">@Model.PlantName</h4>
+                <p class="mb-0">@(Model.Nickname ?? string.Empty)</p>
             </div>
+        </div>
 
-            <h5 class="mb-1">@Model.PlantName</h5>
-            <p class="text-muted mb-1">@Model.LocationName</p>
-            <p class="text-muted mb-3">@Model.GardenSpotName</p>
+        <div class="card-body d-flex flex-column">
+            <h5 class="dashboard-action-card__spot mb-3">@locationDisplay</h5>
 
-            <div class="row mt-auto mb-3 g-2">
+            <div class="row g-2 mb-3 dashboard-action-card__meta">
                 <div class="col-4">
-                    <div class="d-flex">
-                        <div class="avatar flex-shrink-0 me-2">
-                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-calendar-exclamation"></i></span>
-                        </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <svg class="dashboard-action-card__icon dashboard-action-card__icon--meta" aria-hidden="true" focusable="false">
+                            <use href="@(Model.ActionType == DashboardActionType.Watering ? "#gm-icon-droplet" : "#gm-icon-flask")"></use>
+                        </svg>
                         <div>
                             <h6 class="mb-0 text-nowrap">@Model.DueDate.ToString("yyyy-MM-dd")</h6>
-                            @if (Model.DueStatus != DashboardDueStatus.Overdue)
-                            {
-                                <small>@T("dashboard.owner.status.today")</small>
-                            }
-                            @if (Model.DueStatus == DashboardDueStatus.Overdue)
-                            {
-                                <small class="text-danger d-block">@overdueDays @T("dashboard.owner.daysago")</small>
-                            }
+                            <small class="dashboard-action-card__meta-accent d-block">
+                                @if (Model.DueStatus == DashboardDueStatus.Today)
+                                {
+                                    @T("dashboard.owner.status.today")
+                                }
+                                else if (Model.DueStatus == DashboardDueStatus.Overdue)
+                                {
+                                    @overdueDays @T("dashboard.owner.daysago")
+                                }
+                                else
+                                {
+                                    @string.Format(T("dashboard.owner.group.inxdays").ToString(), Model.DeltaDaysFromToday)
+                                }
+                            </small>
                         </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="d-flex">
-                        <div class="avatar flex-shrink-0 mx-2">
-                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-time-five"></i></span>
-                        </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <svg class="dashboard-action-card__icon dashboard-action-card__icon--meta" aria-hidden="true" focusable="false">
+                            <use href="#gm-icon-clock"></use>
+                        </svg>
                         <div>
                             <h6 class="mb-0 text-nowrap">@Model.FrequencyDays @T("dashboard.owner.days")</h6>
-                            <small>@T("dashboard.owner.frequency")</small>
+                            <small class="d-block">@T("dashboard.owner.frequency")</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="d-flex">
-                        <div class="avatar flex-shrink-0 me-2">
-                            <span class="avatar-initial rounded bg-label-info">
-                                <i class="bx @(Model.ActionType == DashboardActionType.Watering ? "bx-droplet" : "bx-flask")"></i>
-                            </span>
-                        </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <svg class="dashboard-action-card__icon dashboard-action-card__icon--meta" aria-hidden="true" focusable="false">
+                            <use href="@(Model.ActionType == DashboardActionType.Watering ? "#gm-icon-droplet" : "#gm-icon-flask")"></use>
+                        </svg>
                         <div>
                             <h6 class="mb-0 text-nowrap">@quantityDisplay</h6>
-                            <small>@T(Model.ActionType == DashboardActionType.Watering ? "dashboard.owner.amountL" : "dashboard.owner.quantity")</small>
+                            <small class="d-block">@T(Model.ActionType == DashboardActionType.Watering ? "dashboard.owner.amountL" : "dashboard.owner.quantity")</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex align-items-center justify-content-between mt-auto dashboard-action-card__actions">
                 <button type="button"
-                        class="btn btn-sm btn-success btn-action-done"
+                        class="btn btn-sm btn-icon btn-label-secondary btn-action-done dashboard-action-card__action-btn"
                         data-url="@logUrl"
                         data-plant-instance-id="@Model.PlantInstanceId"
                         data-action-type="@actionTypeStr"
                         data-water-amount-l="@Model.WaterAmountL"
                         data-fertilizer-quantity="@Model.FertilizerQuantity"
                         data-fertilizer-unit="@((int?)Model.FertilizerQuantityUnit)"
+                        data-counter="@(isCountable ? actionTypeStr + "-count" : "")"
                         data-label-done="@T("dashboard.owner.action.done")"
+                        aria-label="@T("dashboard.owner.action.done")"
                         title="@T("dashboard.owner.action.done")">
-                    <i class="bx bx-check"></i> @T("dashboard.owner.action.done")
+                    <svg class="dashboard-action-card__icon dashboard-action-card__icon--action" aria-hidden="true" focusable="false">
+                        <use href="#gm-icon-check"></use>
+                    </svg>
                 </button>
                 <button type="button"
-                        class="btn btn-sm btn-outline-warning btn-action-skip"
+                        class="btn btn-sm btn-icon btn-label-secondary btn-action-skip dashboard-action-card__action-btn"
                         data-plant-instance-id="@Model.PlantInstanceId"
                         data-action-type="@actionTypeStr"
                         data-plant-name="@plantDisplayName"
                         data-frequency-days="@Model.FrequencyDays"
+                        aria-label="@T("dashboard.owner.action.skip")"
                         title="@T("dashboard.owner.action.skip")">
-                    <i class="bx bxs-bell-ring"></i> @T("dashboard.owner.action.skip")
+                    <svg class="dashboard-action-card__icon dashboard-action-card__icon--action" aria-hidden="true" focusable="false">
+                        <use href="#gm-icon-snooze"></use>
+                    </svg>
                 </button>
-                <a href="@Url.Action("Edit", "PlantInstance", new { id = Model.PlantInstanceId })" class="btn btn-sm btn-outline-secondary">
-                    @T("common.details")
+                <a href="@Url.Action("Edit", "PlantInstance", new { id = Model.PlantInstanceId })"
+                   class="btn btn-sm btn-icon btn-label-secondary dashboard-action-card__action-btn"
+                   aria-label="@T("common.details")"
+                   title="@T("common.details")">
+                    <svg class="dashboard-action-card__icon dashboard-action-card__icon--action" aria-hidden="true" focusable="false">
+                        <use href="#gm-icon-info"></use>
+                    </svg>
                 </a>
             </div>
         </div>

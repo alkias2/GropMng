@@ -1402,6 +1402,14 @@
     <Value>Φίλτρο</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>dashboard.owner.filter.showupcoming</Name>
+    <Value>Επερχόμενα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>dashboard.owner.group.inxdays</Name>
+    <Value>Σε {0} ημέρες</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>dashboard.owner.disease.plant</Name>
     <Value>Φυτό</Value>
   </LocaleResource>
