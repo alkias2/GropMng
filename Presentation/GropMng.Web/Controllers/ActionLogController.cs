@@ -77,6 +77,14 @@ public class ActionLogController : Controller
             WaterAmountL = request.WaterAmountL
         }, cancellationToken: cancellationToken);
 
+        await CreateSuppressionForDashboardDoneAsync(
+            ownerId,
+            instance.Id,
+            ActionSkipType.Watering,
+            request.DueStatus,
+            request.DueDate,
+            cancellationToken);
+
         return Json(new { success = true });
     }
 
@@ -114,6 +122,14 @@ public class ActionLogController : Controller
             Quantity = request.Quantity ?? schedule.Quantity,
             Unit = request.Unit ?? schedule.Unit
         }, cancellationToken: cancellationToken);
+
+        await CreateSuppressionForDashboardDoneAsync(
+            ownerId,
+            instance.Id,
+            ActionSkipType.Fertilizing,
+            request.DueStatus,
+            request.DueDate,
+            cancellationToken);
 
         return Json(new { success = true });
     }
@@ -168,6 +184,14 @@ public class ActionLogController : Controller
                 WateredAtUtc = DateTime.UtcNow,
                 WaterAmountL = schedule?.WaterAmountL
             }, cancellationToken: cancellationToken);
+
+            await CreateSuppressionForDashboardDoneAsync(
+                ownerId,
+                instance.Id,
+                ActionSkipType.Watering,
+                dueStatus: "today",
+                dueDate: null,
+                cancellationToken);
 
             count++;
         }
@@ -229,6 +253,14 @@ public class ActionLogController : Controller
                 Unit = schedule.Unit
             }, cancellationToken: cancellationToken);
 
+            await CreateSuppressionForDashboardDoneAsync(
+                ownerId,
+                instance.Id,
+                ActionSkipType.Fertilizing,
+                dueStatus: "today",
+                dueDate: null,
+                cancellationToken);
+
             count++;
         }
 
@@ -285,6 +317,39 @@ public class ActionLogController : Controller
             >= 9 and <= 11 => GardenSeason.Autumn,
             _ => GardenSeason.Winter
         };
+
+    /// <summary>
+    /// Applies suppression after a dashboard "done" action:
+    /// - upcoming early completion: suppress until original due date
+    /// - today/overdue completion: suppress for the rest of today
+    /// </summary>
+    private async Task CreateSuppressionForDashboardDoneAsync(
+        Guid ownerId,
+        int plantInstanceId,
+        ActionSkipType actionType,
+        string? dueStatus,
+        DateOnly? dueDate,
+        CancellationToken cancellationToken)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var activeUntil = today;
+
+        if (string.Equals(dueStatus, "upcoming", StringComparison.OrdinalIgnoreCase)
+            && dueDate.HasValue
+            && dueDate.Value > today)
+        {
+            activeUntil = dueDate.Value;
+        }
+
+        await _actionSkipRepository.CreateAsync(new ActionSkip
+        {
+            OwnerId = ownerId,
+            PlantInstanceId = plantInstanceId,
+            ActionType = actionType,
+            SkippedAtUtc = DateTime.UtcNow,
+            ActiveUntilDate = activeUntil
+        }, cancellationToken: cancellationToken);
+    }
 
     #endregion
 }

@@ -155,6 +155,9 @@ public class PlantInstanceService : IPlantInstanceService
 
         var createdPlantInstance = await _plantInstanceRepository.CreateAsync(plantInstance, saveNow: false, cancellationToken: cancellationToken);
 
+        // Persist first so the database-generated PlantInstance Id is available for Container FK assignment.
+        await _plantInstanceRepository.SaveChangesAsync(cancellationToken);
+
         await SyncContainerAssignmentAsync(createdPlantInstance.Id, createdPlantInstance.OwnerId, requestedContainerId, cancellationToken);
         await _plantInstanceRepository.SaveChangesAsync(cancellationToken);
 

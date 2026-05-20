@@ -117,6 +117,8 @@
                        data-water-amount-l="@Model.WaterAmountL"
                        data-fertilizer-quantity="@Model.FertilizerQuantity"
                        data-fertilizer-unit="@((int?)Model.FertilizerQuantityUnit)"
+                       data-due-status="@Model.DueStatus.ToString().ToLowerInvariant()"
+                       data-due-date="@Model.DueDate.ToString("yyyy-MM-dd")"
                        data-counter="@(isCountable ? actionTypeStr + "-count" : "")"
                        data-label-done="@T("dashboard.owner.action.done")"
                        aria-label="@T("dashboard.owner.action.done")"

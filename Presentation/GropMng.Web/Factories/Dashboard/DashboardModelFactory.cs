@@ -20,6 +20,16 @@ namespace GropMng.Web.Factories.Dashboard;
 /// </summary>
 public class DashboardModelFactory : IDashboardModelFactory
 {
+    /// <summary>
+    /// Internal split result used to keep today/overdue actions and upcoming actions clearly separated.
+    /// </summary>
+    private sealed class ActionBuckets
+    {
+        public IList<DashboardActionModel> TodayOverdueActions { get; init; } = new List<DashboardActionModel>();
+
+        public IList<DashboardActionModel> UpcomingActions { get; init; } = new List<DashboardActionModel>();
+    }
+
     #region Fields
 
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
@@ -88,15 +98,18 @@ public class DashboardModelFactory : IDashboardModelFactory
         DashboardQueryModel? query = null,
         CancellationToken cancellationToken = default)
     {
+        // 1) Resolve owner/context and normalize UI query input.
         var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
         var model = new OwnerDashboardModel();
         var dashboardQuery = NormalizeQuery(query);
         model.Query = dashboardQuery;
 
+        // 2) Resolve time boundaries used for due-date classification.
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var season = ResolveCurrentSeason(today);
         var upcomingHorizonDays = NormalizeHorizonDays(_dashboardOptions.UpcomingHorizonDays);
 
+        // 3) Load plant instances first; if none exist, return an empty dashboard model.
         var plantInstances = await _plantInstanceRepository.GetAllAsync(
             query => query
                 .Where(pi => pi.OwnerId == ownerId && pi.IsActive)
@@ -110,6 +123,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         var plantIds = plantInstances.Select(pi => pi.PlantId).Distinct().ToList();
         var spotIds = plantInstances.Select(pi => pi.GardenSpotId).Distinct().ToList();
 
+        // 4) Load lookup dictionaries required to project dashboard rows.
         var plants = await _plantRepository.GetByIdsAsync(plantIds, cancellationToken: cancellationToken);
         var spots = await _gardenSpotRepository.GetByIdsAsync(spotIds, cancellationToken: cancellationToken);
         var locationIds = spots.Select(s => s.LocationId).Distinct().ToList();
@@ -120,7 +134,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         var locationMap = locations.ToDictionary(l => l.Id);
         var instanceMap = plantInstances.ToDictionary(pi => pi.Id);
 
-        // Schedules
+        // 5) Load seasonal schedules for watering and fertilizing.
         var wateringSchedules = await _wateringScheduleRepository.GetAllAsync(
             query => query.Where(s => s.OwnerId == ownerId
                 && plantInstanceIds.Contains(s.PlantInstanceId)
@@ -133,7 +147,7 @@ public class DashboardModelFactory : IDashboardModelFactory
                 && (s.Season == season || s.Season == GardenSeason.AllYear)),
             cancellationToken: cancellationToken);
 
-        // Last log dates
+        // 6) Load latest execution logs used to calculate next due dates.
         var wateringLogs = await _wateringLogRepository.GetAllAsync(
             query => query.Where(l => l.OwnerId == ownerId && plantInstanceIds.Contains(l.PlantInstanceId)),
             cancellationToken: cancellationToken);
@@ -150,7 +164,7 @@ public class DashboardModelFactory : IDashboardModelFactory
             .GroupBy(l => l.PlantInstanceId)
             .ToDictionary(g => g.Key, g => g.MaxBy(x => x.AppliedAtUtc)!.AppliedAtUtc);
 
-        // Active skips
+        // 7) Load active skips and build a fast lookup to hide skipped actions.
         var activeSkips = await _actionSkipRepository.GetAllAsync(
             query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
             cancellationToken: cancellationToken);
@@ -159,7 +173,7 @@ public class DashboardModelFactory : IDashboardModelFactory
             .Select(s => (s.PlantInstanceId, s.ActionType))
             .ToHashSet();
 
-        // Build watering action rows
+        // 8) Build raw watering action rows.
         var wateringRows = new List<DashboardActionModel>();
         foreach (var schedule in wateringSchedules)
         {
@@ -170,7 +184,7 @@ public class DashboardModelFactory : IDashboardModelFactory
                 dueDate, today, plantMap, spotMap, locationMap));
         }
 
-        // Build fertilizing action rows
+        // 9) Build raw fertilizing action rows.
         var fertilizingRows = new List<DashboardActionModel>();
         foreach (var schedule in fertilizingSchedules)
         {
@@ -181,6 +195,7 @@ public class DashboardModelFactory : IDashboardModelFactory
                 dueDate, today, plantMap, spotMap, locationMap));
         }
 
+        // 10) Remove skipped actions and sort by urgency.
         var actionableWatering = wateringRows
             .Where(a => !skipSet.Contains((a.PlantInstanceId, ActionSkipType.Watering)))
             .OrderBy(a => a.DueStatus)
@@ -198,9 +213,11 @@ public class DashboardModelFactory : IDashboardModelFactory
         var allSpotsText = await _localizationService.GetResourceAsync("dashboard.owner.filter.allspots");
         var inDaysTemplate = await _localizationService.GetResourceAsync("dashboard.owner.group.inxdays");
 
+        // 11) Build spot filter options from actionable rows.
         var spotFilterSourceActions = actionableWatering.Concat(actionableFertilizing).ToList();
         model.AvailableGardenSpots = BuildGardenSpotFilter(spotFilterSourceActions, spotMap, allSpotsText, dashboardQuery.SpotId);
 
+        // 12) Apply optional spot filter to all actionable rows.
         if (dashboardQuery.SpotId.HasValue)
         {
             actionableWatering = actionableWatering
@@ -212,16 +229,20 @@ public class DashboardModelFactory : IDashboardModelFactory
                 .ToList();
         }
 
+        // 13) EXPLICIT CALCULATION: today's/overdue and upcoming actions for watering.
+        var wateringBuckets = SplitActionRowsByTodayAndUpcoming(actionableWatering, upcomingHorizonDays);
+
+        // 14) EXPLICIT CALCULATION: today's/overdue and upcoming actions for fertilizing.
+        var fertilizingBuckets = SplitActionRowsByTodayAndUpcoming(actionableFertilizing, upcomingHorizonDays);
+
         model.WateringTab = BuildWateringTabModel(
-            actionableWatering,
+            wateringBuckets,
             today,
-            upcomingHorizonDays,
             inDaysTemplate);
 
         model.FertilizingTab = BuildFertilizingTabModel(
-            actionableFertilizing,
+            fertilizingBuckets,
             today,
-            upcomingHorizonDays,
             inDaysTemplate);
 
         model.WateringTab.AvailableGardenSpots = model.AvailableGardenSpots;
@@ -234,8 +255,9 @@ public class DashboardModelFactory : IDashboardModelFactory
 
         await PopulateActionPhotosAsync(ownerId, actionsForPhotos, cancellationToken);
 
+        // 15) EXPLICIT CALCULATION: disease actions/cases for today and upcoming.
         model.DiseaseTab = await PrepareDiseaseTabAsync(
-            ownerId, plantInstanceIds, instanceMap, plantMap, spotMap, locationMap, cancellationToken);
+            ownerId, today, plantInstanceIds, instanceMap, plantMap, spotMap, locationMap, cancellationToken);
 
         return model;
     }
@@ -244,6 +266,9 @@ public class DashboardModelFactory : IDashboardModelFactory
 
     #region Private
 
+    /// <summary>
+    /// Maps current date to a season used by seasonal schedules.
+    /// </summary>
     private static GardenSeason ResolveCurrentSeason(DateOnly today)
         => today.Month switch
         {
@@ -253,6 +278,9 @@ public class DashboardModelFactory : IDashboardModelFactory
             _ => GardenSeason.Winter
         };
 
+    /// <summary>
+    /// Calculates next due date from the latest action log or defaults to today when no history exists.
+    /// </summary>
     private static DateOnly CalculateDueDate(
         IReadOnlyDictionary<int, DateTime> latestByInstance,
         int plantInstanceId,
@@ -265,6 +293,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         return DateOnly.FromDateTime(latestDateTime).AddDays(frequencyDays);
     }
 
+    /// <summary>
+    /// Normalizes the dashboard query to avoid invalid spot selections.
+    /// </summary>
     private static DashboardQueryModel NormalizeQuery(DashboardQueryModel? query)
     {
         if (query is null)
@@ -276,6 +307,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         };
     }
 
+    /// <summary>
+    /// Ensures upcoming horizon configuration stays within safe UI bounds.
+    /// </summary>
     private static int NormalizeHorizonDays(int rawHorizonDays)
     {
         if (rawHorizonDays < 1)
@@ -284,66 +318,73 @@ public class DashboardModelFactory : IDashboardModelFactory
         return rawHorizonDays > 60 ? 60 : rawHorizonDays;
     }
 
-    private static DashboardWateringTabModel BuildWateringTabModel(
+    /// <summary>
+    /// Splits action rows into today's/overdue bucket and upcoming bucket (bounded by horizon days).
+    /// </summary>
+    private static ActionBuckets SplitActionRowsByTodayAndUpcoming(
         IList<DashboardActionModel> actions,
+        int horizonDays)
+    {
+        var todayOverdue = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
+            .OrderBy(a => a.DueStatus)
+            .ThenBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        var upcoming = actions
+            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
+            .Where(a => a.DeltaDaysFromToday <= horizonDays)
+            .OrderBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
+            .ToList();
+
+        return new ActionBuckets
+        {
+            TodayOverdueActions = todayOverdue,
+            UpcomingActions = upcoming
+        };
+    }
+
+    /// <summary>
+    /// Builds watering tab model from already split action buckets.
+    /// </summary>
+    private static DashboardWateringTabModel BuildWateringTabModel(
+        ActionBuckets buckets,
         DateOnly today,
-        int horizonDays,
         string inDaysTemplate)
     {
         var model = new DashboardWateringTabModel();
 
-        var todayOverdue = actions
-            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
-            .OrderBy(a => a.DueStatus)
-            .ThenBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        var upcoming = actions
-            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
-            .Where(a => a.DeltaDaysFromToday <= horizonDays)
-            .OrderBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        model.TodayOverdueActions = todayOverdue;
-        model.TodayOverdueCount = todayOverdue.Count;
-        model.UpcomingCount = upcoming.Count;
-        model.UpcomingActionGroups = BuildUpcomingGroups(upcoming, today, inDaysTemplate);
+        model.TodayOverdueActions = buckets.TodayOverdueActions;
+        model.TodayOverdueCount = buckets.TodayOverdueActions.Count;
+        model.UpcomingCount = buckets.UpcomingActions.Count;
+        model.UpcomingActionGroups = BuildUpcomingGroups(buckets.UpcomingActions, today, inDaysTemplate);
 
         return model;
     }
 
+    /// <summary>
+    /// Builds fertilizing tab model from already split action buckets.
+    /// </summary>
     private static DashboardFertilizingTabModel BuildFertilizingTabModel(
-        IList<DashboardActionModel> actions,
+        ActionBuckets buckets,
         DateOnly today,
-        int horizonDays,
         string inDaysTemplate)
     {
         var model = new DashboardFertilizingTabModel();
 
-        var todayOverdue = actions
-            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
-            .OrderBy(a => a.DueStatus)
-            .ThenBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        var upcoming = actions
-            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
-            .Where(a => a.DeltaDaysFromToday <= horizonDays)
-            .OrderBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        model.TodayOverdueActions = todayOverdue;
-        model.TodayOverdueCount = todayOverdue.Count;
-        model.UpcomingCount = upcoming.Count;
-        model.UpcomingActionGroups = BuildUpcomingGroups(upcoming, today, inDaysTemplate);
+        model.TodayOverdueActions = buckets.TodayOverdueActions;
+        model.TodayOverdueCount = buckets.TodayOverdueActions.Count;
+        model.UpcomingCount = buckets.UpcomingActions.Count;
+        model.UpcomingActionGroups = BuildUpcomingGroups(buckets.UpcomingActions, today, inDaysTemplate);
 
         return model;
     }
 
+    /// <summary>
+    /// Groups upcoming actions by due date and creates localized group captions.
+    /// </summary>
     private static IList<DashboardActionGroupModel> BuildUpcomingGroups(
         IList<DashboardActionModel> upcoming,
         DateOnly today,
@@ -366,6 +407,9 @@ public class DashboardModelFactory : IDashboardModelFactory
             .ToList();
     }
 
+    /// <summary>
+    /// Projects a single action schedule row into the common dashboard action model.
+    /// </summary>
     private static DashboardActionModel BuildActionRow(
         PlantInstance instance,
         DashboardActionType type,
@@ -411,6 +455,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         };
     }
 
+    /// <summary>
+    /// Builds garden spot filter options from the currently actionable rows.
+    /// </summary>
     private static IList<SelectListItem> BuildGardenSpotFilter(
         IList<DashboardActionModel> actions,
         IReadOnlyDictionary<int, GardenSpot> spotMap,
@@ -439,6 +486,9 @@ public class DashboardModelFactory : IDashboardModelFactory
         return items;
     }
 
+    /// <summary>
+    /// Resolves and attaches main plant photos to each action row.
+    /// </summary>
     private async Task PopulateActionPhotosAsync(
         Guid ownerId,
         IEnumerable<DashboardActionModel> actions,
@@ -466,8 +516,12 @@ public class DashboardModelFactory : IDashboardModelFactory
         }
     }
 
+    /// <summary>
+    /// Loads active disease records and explicitly splits them into today/upcoming buckets.
+    /// </summary>
     private async Task<DashboardDiseaseTabModel> PrepareDiseaseTabAsync(
         Guid ownerId,
+        DateOnly today,
         HashSet<int> plantInstanceIds,
         IReadOnlyDictionary<int, PlantInstance> instanceMap,
         IReadOnlyDictionary<int, Plant> plantMap,
@@ -512,7 +566,25 @@ public class DashboardModelFactory : IDashboardModelFactory
             });
         }
 
+        // Keep ActiveCases for backward compatibility with existing views.
         tab.ActiveCases = activeCases;
+
+        // Explicit disease split for dashboard analytics parity with other tabs.
+        tab.TodayCases = activeCases
+            .Where(c => c.DiagnosedOn <= today)
+            .OrderByDescending(c => c.DiagnosedOn)
+            .ThenBy(c => c.PlantName)
+            .ToList();
+
+        tab.UpcomingCases = activeCases
+            .Where(c => c.DiagnosedOn > today)
+            .OrderBy(c => c.DiagnosedOn)
+            .ThenBy(c => c.PlantName)
+            .ToList();
+
+        tab.TodayCount = tab.TodayCases.Count;
+        tab.UpcomingCount = tab.UpcomingCases.Count;
+
         return tab;
     }
 

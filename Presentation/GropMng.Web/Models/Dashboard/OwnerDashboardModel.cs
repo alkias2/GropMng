@@ -61,7 +61,16 @@ public class DashboardQueryModel
 
 public class DashboardDiseaseTabModel
 {
+    // Backward-compatible list consumed by the current dashboard UI.
     public IList<DashboardDiseaseModel> ActiveCases { get; set; } = new List<DashboardDiseaseModel>();
+
+    // Explicitly grouped disease cases diagnosed today or earlier.
+    public int TodayCount { get; set; }
+    public IList<DashboardDiseaseModel> TodayCases { get; set; } = new List<DashboardDiseaseModel>();
+
+    // Explicitly grouped disease cases with a future diagnosed date.
+    public int UpcomingCount { get; set; }
+    public IList<DashboardDiseaseModel> UpcomingCases { get; set; } = new List<DashboardDiseaseModel>();
 }
 
 public class DashboardActionModel

@@ -311,7 +311,12 @@
             function runDone($btn) {
                 if ($btn.prop('disabled')) return;
                 var type = $btn.data('action-type'), $row = $btn.closest('[data-dashboard-action-item]');
-                var payload = { PlantInstanceId: $btn.data('plant-instance-id'), __RequestVerificationToken: token() };
+                var payload = {
+                    PlantInstanceId: $btn.data('plant-instance-id'),
+                    DueStatus: String($btn.data('due-status') || ''),
+                    DueDate: String($btn.data('due-date') || ''),
+                    __RequestVerificationToken: token()
+                };
                 if (type === 'watering' && $btn.data('water-amount-l') !== '') payload.WaterAmountL = $btn.data('water-amount-l');
                 if (type === 'fertilizing') {
                     if ($btn.data('fertilizer-quantity') !== '') payload.Quantity = $btn.data('fertilizer-quantity');

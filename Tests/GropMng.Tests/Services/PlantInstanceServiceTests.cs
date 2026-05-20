@@ -14,6 +14,96 @@ namespace GropMng.Tests.Services;
 public class PlantInstanceServiceTests
 {
     [Fact]
+    public async Task CreatePlantInstanceAsync_PersistsPlantBeforeContainerAssignment()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var plantInstanceRepository = new Mock<IRepository<PlantInstance>>();
+        var plantRepository = new Mock<IRepository<Plant>>();
+        var gardenSpotRepository = new Mock<IRepository<GardenSpot>>();
+        var containerRepository = new Mock<IRepository<Container>>();
+
+        var containers = new List<Container>
+        {
+            new() { Id = 153, OwnerId = ownerId, PlantInstanceId = null, ContainerType = GardenContainerType.Pot }
+        };
+
+        PlantInstance? createdEntity = null;
+        var saveChangesCount = 0;
+
+        plantInstanceRepository
+            .Setup(repository => repository.CreateAsync(It.IsAny<PlantInstance>(), false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((PlantInstance entity, bool _, CancellationToken _) =>
+            {
+                createdEntity = entity;
+                return entity;
+            });
+
+        plantInstanceRepository
+            .Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns((CancellationToken _) =>
+            {
+                saveChangesCount++;
+                if (saveChangesCount == 1 && createdEntity is not null)
+                    createdEntity.Id = 501;
+
+                return Task.CompletedTask;
+            });
+
+        plantRepository
+            .Setup(repository => repository.GetByIdAsync(22, false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Plant { Id = 22, CommonName = "Aloe Vera", ScientificName = "Aloe vera" });
+
+        gardenSpotRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<GardenSpot, bool>>>(), false, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GardenSpot { Id = 10, OwnerId = ownerId, Name = "Balcony" });
+
+        containerRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Container, bool>>>(), false, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((System.Linq.Expressions.Expression<Func<Container, bool>> predicate, bool _, bool _, CancellationToken _) => containers.FirstOrDefault(predicate.Compile()));
+
+        containerRepository
+            .Setup(repository => repository.UpdateAsync(It.IsAny<Container>(), false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Container entity, bool _, CancellationToken _) => entity);
+
+        var service = new PlantInstanceService(
+            plantInstanceRepository.Object,
+            plantRepository.Object,
+            gardenSpotRepository.Object,
+            containerRepository.Object,
+            Mock.Of<IRepository<SoilMix>>(),
+            Mock.Of<IRepository<WateringSchedule>>(),
+            Mock.Of<IRepository<WateringLog>>(),
+            Mock.Of<IRepository<FertilizingSchedule>>(),
+            Mock.Of<IRepository<FertilizingLog>>(),
+            Mock.Of<IRepository<RepottingLog>>(),
+            Mock.Of<IRepository<PlantPhoto>>(),
+            Mock.Of<IRepository<PlantNote>>(),
+            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
+            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
+            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
+            Mock.Of<IRepository<Fertilizer>>());
+
+        var plantInstance = new PlantInstance
+        {
+            OwnerId = ownerId,
+            PlantId = 22,
+            GardenSpotId = 10,
+            ContainerId = 153,
+            HealthStatus = PlantHealthStatus.Good,
+            IsActive = true
+        };
+
+        // Act
+        var created = await service.CreatePlantInstanceAsync(plantInstance);
+
+        // Assert
+        Assert.Equal(501, created.Id);
+        Assert.Equal(501, containers[0].PlantInstanceId);
+        Assert.Equal(2, saveChangesCount);
+    }
+
+    [Fact]
     public async Task UpdatePlantInstanceAsync_SyncsContainerAssignmentThroughContainerEntity()
     {
         // Arrange
