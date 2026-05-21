@@ -29,6 +29,10 @@
         ? (Model.WaterAmountL.HasValue ? $"{Model.WaterAmountL:0.##}" : "—")
         : (Model.FertilizerQuantity.HasValue ? $"{Model.FertilizerQuantity:0.##} {unitStr}".Trim() : "—");
 
+    var fertilizerLabel = !string.IsNullOrWhiteSpace(Model.FertilizerName)
+        ? Model.FertilizerName
+        : T("dashboard.owner.quantity").ToString();
+
     var locationDisplay = string.IsNullOrWhiteSpace(Model.GardenSpotName) ? Model.LocationName : Model.GardenSpotName;
 }
 
@@ -101,7 +105,21 @@
                    </svg>
                    <div>
                        <div class="fw-bold" style="font-size:13px;">@quantityDisplay</div>
-                       <div style="font-size:12px; color:#e8a832;">@T(Model.ActionType == DashboardActionType.Watering ? "dashboard.owner.amountL" : "dashboard.owner.quantity")</div>
+                       @if (Model.ActionType == DashboardActionType.Watering)
+                       {
+                           <div class="qty-label">@T("dashboard.owner.amountL")</div>
+                       }
+                       else
+                       {
+                           <div class="qty-label qty-label--fert">
+                               <span class="qty-label-text">@fertilizerLabel.TruncateAtWord(20)</span>
+                               <i class="bx bx-info-circle qty-label-tip"
+                                  aria-hidden="true"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="top"
+                                  data-bs-title="@fertilizerLabel"></i>
+                           </div>
+                       }
                    </div>
                </div>
            </div>

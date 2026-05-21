@@ -39,6 +39,7 @@ public class DashboardModelFactory : IDashboardModelFactory
     private readonly IRepository<Location> _locationRepository;
     private readonly IRepository<WateringSchedule> _wateringScheduleRepository;
     private readonly IRepository<FertilizingSchedule> _fertilizingScheduleRepository;
+    private readonly IRepository<Fertilizer> _fertilizerRepository;
     private readonly IRepository<WateringLog> _wateringLogRepository;
     private readonly IRepository<FertilizingLog> _fertilizingLogRepository;
     private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
@@ -61,6 +62,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         IRepository<Location> locationRepository,
         IRepository<WateringSchedule> wateringScheduleRepository,
         IRepository<FertilizingSchedule> fertilizingScheduleRepository,
+        IRepository<Fertilizer> fertilizerRepository,
         IRepository<WateringLog> wateringLogRepository,
         IRepository<FertilizingLog> fertilizingLogRepository,
         IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
@@ -78,6 +80,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         _locationRepository = locationRepository;
         _wateringScheduleRepository = wateringScheduleRepository;
         _fertilizingScheduleRepository = fertilizingScheduleRepository;
+        _fertilizerRepository = fertilizerRepository;
         _wateringLogRepository = wateringLogRepository;
         _fertilizingLogRepository = fertilizingLogRepository;
         _plantDiseaseRecordRepository = plantDiseaseRecordRepository;
@@ -147,6 +150,10 @@ public class DashboardModelFactory : IDashboardModelFactory
                 && (s.Season == season || s.Season == GardenSeason.AllYear)),
             cancellationToken: cancellationToken);
 
+        var fertilizerIds = fertilizingSchedules.Select(s => s.FertilizerId).Distinct().ToList();
+        var fertilizers = await _fertilizerRepository.GetByIdsAsync(fertilizerIds, cancellationToken: cancellationToken);
+        var fertilizerMap = fertilizers.ToDictionary(f => f.Id, f => f.Name);
+
         // 6) Load latest execution logs used to calculate next due dates.
         var wateringLogs = await _wateringLogRepository.GetAllAsync(
             query => query.Where(l => l.OwnerId == ownerId && plantInstanceIds.Contains(l.PlantInstanceId)),
@@ -181,6 +188,7 @@ public class DashboardModelFactory : IDashboardModelFactory
             var dueDate = CalculateDueDate(latestWateringByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
             wateringRows.Add(BuildActionRow(instance, DashboardActionType.Watering, schedule.FrequencyDays, schedule.Season,
                 waterAmountL: schedule.WaterAmountL, fertilizerQuantity: null, fertilizerUnit: null,
+                fertilizerName: null,
                 dueDate, today, plantMap, spotMap, locationMap));
         }
 
@@ -192,6 +200,7 @@ public class DashboardModelFactory : IDashboardModelFactory
             var dueDate = CalculateDueDate(latestFertilizingByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
             fertilizingRows.Add(BuildActionRow(instance, DashboardActionType.Fertilizing, schedule.FrequencyDays, schedule.Season,
                 waterAmountL: null, fertilizerQuantity: schedule.Quantity, fertilizerUnit: schedule.Unit,
+                fertilizerName: fertilizerMap.TryGetValue(schedule.FertilizerId, out var fertilizerName) ? fertilizerName : null,
                 dueDate, today, plantMap, spotMap, locationMap));
         }
 
@@ -418,6 +427,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         decimal? waterAmountL,
         decimal? fertilizerQuantity,
         GropMng.Core.Domain.Garden.Enums.FertilizerQuantityUnit? fertilizerUnit,
+        string? fertilizerName,
         DateOnly dueDate,
         DateOnly today,
         IReadOnlyDictionary<int, Plant> plantMap,
@@ -451,7 +461,8 @@ public class DashboardModelFactory : IDashboardModelFactory
             DeltaDaysFromToday = dueDate.DayNumber - today.DayNumber,
             WaterAmountL = waterAmountL,
             FertilizerQuantity = fertilizerQuantity,
-            FertilizerQuantityUnit = fertilizerUnit
+            FertilizerQuantityUnit = fertilizerUnit,
+            FertilizerName = fertilizerName
         };
     }
 

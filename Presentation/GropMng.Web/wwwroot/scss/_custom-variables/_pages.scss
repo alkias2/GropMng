@@ -336,6 +336,34 @@
             font-size: 1.2rem;
         }
 
+        .qty-label {
+            font-size: 12px;
+            color: #e8a832;
+        }
+
+        .qty-label--fert {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .qty-label-text {
+            display: block;
+            max-width: 12rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .qty-label-tip {
+            font-size: 0.9rem;
+            line-height: 1;
+            color: #e8a832;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
         .icon {
             width: 36px;
             height: 36px;
@@ -382,4 +410,10 @@
         height: 4rem;
     }
 
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-action-card .card-body .qty-label-text {
+        max-width: 8.5rem;
+    }
 }

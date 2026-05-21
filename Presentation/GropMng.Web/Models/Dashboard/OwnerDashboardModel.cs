@@ -105,6 +105,7 @@ public class DashboardActionModel
     public decimal? WaterAmountL { get; set; }
     public decimal? FertilizerQuantity { get; set; }
     public FertilizerQuantityUnit? FertilizerQuantityUnit { get; set; }
+    public string? FertilizerName { get; set; }
 }
 
 public class DashboardDiseaseModel

@@ -19433,6 +19433,30 @@ html:not(.layout-footer-fixed) .content-wrapper {
 .dashboard-action-card .card-body .fw-normal {
   font-size: 1.2rem;
 }
+.dashboard-action-card .card-body .qty-label {
+  font-size: 12px;
+  color: #e8a832;
+}
+.dashboard-action-card .card-body .qty-label--fert {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.dashboard-action-card .card-body .qty-label-text {
+  display: block;
+  max-width: 12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dashboard-action-card .card-body .qty-label-tip {
+  font-size: 0.9rem;
+  line-height: 1;
+  color: #e8a832;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
 .dashboard-action-card .card-body .icon {
   width: 36px;
   height: 36px;
@@ -19472,6 +19496,11 @@ html:not(.layout-footer-fixed) .content-wrapper {
   height: 4rem;
 }
 
+@media (max-width: 767.98px) {
+  .dashboard-action-card .card-body .qty-label-text {
+    max-width: 8.5rem;
+  }
+}
 .app-brand {
   display: flex;
   flex-grow: 0;

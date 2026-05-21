@@ -277,6 +277,16 @@
                 if (state.section === 'fertilizing') $('#btn-fertilize-all').prop('disabled', !bulkBtns('fertilizing').length);
             }
 
+            function initTooltips($scope) {
+                if (!window.bootstrap || !bootstrap.Tooltip) return;
+
+                ($scope || $(document)).find('[data-bs-toggle="tooltip"]').each(function () {
+                    var existing = bootstrap.Tooltip.getInstance(this);
+                    if (existing) existing.dispose();
+                    new bootstrap.Tooltip(this);
+                });
+            }
+
             function removeCard($row, counterId) {
                 $row.addClass('opacity-50').fadeOut(220, function () {
                     $row.remove();
@@ -304,6 +314,7 @@
                             if (checked) $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
                         }
                         syncBulk();
+                        initTooltips($panel);
                     })
                     .fail(function () { $panel.html('<div class="p-4"><p class="text-danger mb-0">' + msg.error + '</p></div>'); });
             }
@@ -410,6 +421,7 @@
             setActive(state.section);
             syncTop();
             syncBulk();
+            initTooltips($panel);
         })();
     </script>
 }
