@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>84e91793-e22e-4fc1-a30e-405ce7f6743c</UserSecretsId>
     <!-- Exclude reference files and the wwwroot/node_modules folder (npm artefacts) from the build -->
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+    <CopyRazorGenerateFilesToPublishDirectory>true</CopyRazorGenerateFilesToPublishDirectory>
+
     <DefaultItemExcludes>$(DefaultItemExcludes);_ReferenceFiles\**;wwwroot\node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 

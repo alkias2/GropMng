@@ -98,6 +98,7 @@ Presentation/GropMng.Web/_ReferenceFiles/
 docs/
 Presentation/GropMng.Web/docs/
 Presentation/GropMng.Web/App_Data/
+Presentation/GropMng.Web/Properties/PublishProfiles/FolderProfile.pubxml
 .github/copilot-instructions.md
 
 # ==============================
