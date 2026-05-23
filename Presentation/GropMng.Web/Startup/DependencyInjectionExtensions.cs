@@ -1,3 +1,4 @@
+using System.IO;
 using FluentValidation;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Configuration;
@@ -41,6 +42,7 @@ using GropMng.Web.Areas.Admin.Factories.User;
 using GropMng.Web.Factories.Dashboard;
 using GropMng.Web.Infrastructure.ModelBinding;
 using GropMng.Web.Infrastructure.Navigation;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -61,9 +63,10 @@ public static class DependencyInjectionExtensions
     /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
-        services.AddCoreFrameworkServices();
+        services.AddCoreFrameworkServices(hostEnvironment);
         services.Configure<OwnerBootstrapOptions>(configuration.GetSection(OwnerBootstrapOptions.SectionName));
         services.Configure<DashboardOptions>(configuration.GetSection(DashboardOptions.SectionName));
         services.AddRequestLocalizationOptions();
@@ -77,8 +80,13 @@ public static class DependencyInjectionExtensions
     /// </summary>
     /// <param name="services">The service collection being configured.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
-    public static IServiceCollection AddCoreFrameworkServices(this IServiceCollection services)
+    public static IServiceCollection AddCoreFrameworkServices(
+        this IServiceCollection services,
+        IHostEnvironment hostEnvironment)
     {
+        var dataProtectionKeyDirectory = Path.Combine(hostEnvironment.ContentRootPath, "App_Data", "DataProtectionKeys");
+        Directory.CreateDirectory(dataProtectionKeyDirectory);
+
         services
             .AddControllersWithViews(options =>
             {
@@ -87,11 +95,15 @@ public static class DependencyInjectionExtensions
             .AddRazorRuntimeCompilation();
         services.AddMemoryCache();
         services.AddHttpContextAccessor();
-        services.AddDataProtection();
+        services.AddDataProtection()
+            .SetApplicationName("GropMng.Web")
+            .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyDirectory));
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
                 options.Cookie.Name = "GropMng.OwnerAuth";
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 options.LoginPath = "/owner/auth/login";
                 options.AccessDeniedPath = "/Common/Error";
                 options.SlidingExpiration = true;

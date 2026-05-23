@@ -5,7 +5,7 @@ using GropMng.Web.Startup;
 var builder = WebApplication.CreateBuilder(args);
 
 // Project extension method: registers application services and DI modules.
-builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
 
 // Built-in app construction from the configured host builder (.NET).
 var app = builder.Build();
