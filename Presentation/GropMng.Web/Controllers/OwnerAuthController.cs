@@ -33,12 +33,14 @@ public class OwnerAuthController : Controller
 	[HttpGet("login", Name = "Owner.Auth.Login")]
 	public IActionResult Login(string? returnUrl = null)
 	{
+		var normalizedReturnUrl = NormalizeReturnUrl(returnUrl);
+
 		if (User.Identity?.IsAuthenticated == true)
-			return RedirectToLocal(returnUrl);
+			return RedirectToLocal(normalizedReturnUrl);
 
 		return View(new OwnerLoginModel
 		{
-			ReturnUrl = returnUrl
+			ReturnUrl = normalizedReturnUrl
 		});
 	}
 
@@ -218,9 +220,31 @@ public class OwnerAuthController : Controller
 
 	private IActionResult RedirectToLocal(string? returnUrl)
 	{
-		if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-			return Redirect(returnUrl);
+		var normalizedReturnUrl = NormalizeReturnUrl(returnUrl);
+		if (!string.IsNullOrWhiteSpace(normalizedReturnUrl))
+			return LocalRedirect(normalizedReturnUrl);
 
 		return RedirectToAction("Dashboard", "Home");
+	}
+
+	private string? NormalizeReturnUrl(string? returnUrl)
+	{
+		if (string.IsNullOrWhiteSpace(returnUrl))
+			return null;
+
+		if (!Url.IsLocalUrl(returnUrl))
+			return null;
+
+		// Guard against redirect recursion and excessively long returnUrl values.
+		if (returnUrl.Length > 2048)
+			return null;
+
+		if (returnUrl.StartsWith("/owner/auth/login", StringComparison.OrdinalIgnoreCase))
+			return null;
+
+		if (returnUrl.Contains("returnUrl=", StringComparison.OrdinalIgnoreCase))
+			return null;
+
+		return returnUrl;
 	}
 }

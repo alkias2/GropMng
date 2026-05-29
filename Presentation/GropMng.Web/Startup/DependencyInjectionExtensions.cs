@@ -114,6 +114,25 @@ public static class DependencyInjectionExtensions
                 options.AccessDeniedPath = "/Common/Error";
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.Events = new CookieAuthenticationEvents
+                {
+                    OnRedirectToLogin = context =>
+                    {
+                        var requestPath = context.Request.Path.Value ?? string.Empty;
+                        var redirectUri = context.RedirectUri ?? string.Empty;
+
+                        if (requestPath.StartsWith("/owner/auth/login", StringComparison.OrdinalIgnoreCase)
+                            || redirectUri.Contains("returnUrl=%2Fowner%2Fauth%2Flogin", StringComparison.OrdinalIgnoreCase)
+                            || redirectUri.Contains("returnUrl=/owner/auth/login", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Response.Redirect("/owner/auth/login");
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect(redirectUri);
+                        return Task.CompletedTask;
+                    }
+                };
             });
         services.AddAuthorization();
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
