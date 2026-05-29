@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace GropMng.Services.Services.User;
 
@@ -77,16 +76,9 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
             return null;
 
         var normalizedEmail = email.Trim();
-        var owner = await _ownerRepository.FirstOrDefaultAsync(
-            entity => entity.Email == normalizedEmail && entity.IsActive,
-            cancellationToken: cancellationToken);
-
-        owner ??= await LoadOwnerSecurityContextByEmailAsync(normalizedEmail, cancellationToken);
+        var owner = await LoadOwnerSecurityContextByEmailAsync(normalizedEmail, cancellationToken);
         if (owner is null)
             return null;
-
-        if (owner.Passwords.Count == 0 || owner.OwnerRoles.Count == 0)
-            owner = await LoadOwnerSecurityContextByEmailAsync(normalizedEmail, cancellationToken) ?? owner;
 
         if (owner.Status != OwnerAccountStatus.Active || !owner.IsActive)
             return null;
@@ -135,25 +127,161 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
             return owner;
 
         var query = _ownerRepository.TableNoTracking
-            .Include(entity => entity.OwnerRoles)
-                .ThenInclude(role => role.PermissionRecords);
+            .AsSplitQuery()
+            .Where(entity => entity.OwnerId == owner.OwnerId)
+            .Select(entity => new OwnerSecuritySnapshot
+            {
+                OwnerId = entity.OwnerId,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                DisplayName = entity.DisplayName,
+                Email = entity.Email,
+                PasswordHash = entity.PasswordHash,
+                Status = entity.Status,
+                IsActive = entity.IsActive,
+                OwnerRoles = entity.OwnerRoles
+                    .Select(role => new OwnerRoleSnapshot
+                    {
+                        SystemName = role.SystemName,
+                        IsActive = role.IsActive
+                    })
+                    .ToList()
+            })
+            .Select(snapshot => snapshot.ToOwner());
 
-        if (query.Provider is IAsyncQueryProvider)
-            return await query.FirstOrDefaultAsync(entity => entity.OwnerId == owner.OwnerId, cancellationToken);
+        if (query is IAsyncEnumerable<Owner>)
+        {
+            try
+            {
+                return await query.FirstOrDefaultAsync(cancellationToken);
+            }
+            catch (InvalidOperationException)
+            {
+                // Fallback for unit tests that provide non-EF IQueryable providers.
+            }
+        }
 
-        return query.FirstOrDefault(entity => entity.OwnerId == owner.OwnerId);
+        return query.FirstOrDefault();
     }
 
     private async Task<Owner?> LoadOwnerSecurityContextByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
     {
         var query = _ownerRepository.TableNoTracking
-            .Include(entity => entity.OwnerRoles)
-                .ThenInclude(role => role.PermissionRecords)
-            .Include(entity => entity.Passwords);
+            .AsSplitQuery()
+            .Where(entity => entity.Email == normalizedEmail && entity.IsActive)
+            .Select(entity => new OwnerSecuritySnapshot
+            {
+                OwnerId = entity.OwnerId,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                DisplayName = entity.DisplayName,
+                Email = entity.Email,
+                PasswordHash = entity.PasswordHash,
+                Status = entity.Status,
+                IsActive = entity.IsActive,
+                OwnerRoles = entity.OwnerRoles
+                    .Select(role => new OwnerRoleSnapshot
+                    {
+                        SystemName = role.SystemName,
+                        IsActive = role.IsActive
+                    })
+                    .ToList(),
+                Passwords = entity.Passwords
+                    .Select(passwordEntry => new OwnerPasswordSnapshot
+                    {
+                        PasswordHash = passwordEntry.PasswordHash,
+                        PasswordSalt = passwordEntry.PasswordSalt,
+                        CreatedAtUtc = passwordEntry.CreatedAtUtc,
+                        IsCurrent = passwordEntry.IsCurrent
+                    })
+                    .ToList()
+            })
+            .Select(snapshot => snapshot.ToOwner());
 
-        if (query.Provider is IAsyncQueryProvider)
-            return await query.FirstOrDefaultAsync(entity => entity.Email == normalizedEmail && entity.IsActive, cancellationToken);
+        if (query is IAsyncEnumerable<Owner>)
+        {
+            try
+            {
+                return await query.FirstOrDefaultAsync(cancellationToken);
+            }
+            catch (InvalidOperationException)
+            {
+                // Fallback for unit tests that provide non-EF IQueryable providers.
+            }
+        }
 
-        return query.FirstOrDefault(entity => entity.Email == normalizedEmail && entity.IsActive);
+        return query.FirstOrDefault();
+    }
+
+    private sealed class OwnerSecuritySnapshot
+    {
+        public Guid OwnerId { get; init; }
+
+        public string FirstName { get; init; } = string.Empty;
+
+        public string LastName { get; init; } = string.Empty;
+
+        public string DisplayName { get; init; } = string.Empty;
+
+        public string Email { get; init; } = string.Empty;
+
+        public string PasswordHash { get; init; } = string.Empty;
+
+        public OwnerAccountStatus Status { get; init; }
+
+        public bool IsActive { get; init; }
+
+        public List<OwnerRoleSnapshot> OwnerRoles { get; init; } = [];
+
+        public List<OwnerPasswordSnapshot> Passwords { get; init; } = [];
+
+        public Owner ToOwner()
+        {
+            return new Owner
+            {
+                OwnerId = OwnerId,
+                FirstName = FirstName,
+                LastName = LastName,
+                DisplayName = DisplayName,
+                Email = Email,
+                PasswordHash = PasswordHash,
+                Status = Status,
+                IsActive = IsActive,
+                OwnerRoles = OwnerRoles
+                    .Select(role => new OwnerRole
+                    {
+                        SystemName = role.SystemName,
+                        IsActive = role.IsActive
+                    })
+                    .ToList(),
+                Passwords = Passwords
+                    .Select(passwordEntry => new OwnerPassword
+                    {
+                        PasswordHash = passwordEntry.PasswordHash,
+                        PasswordSalt = passwordEntry.PasswordSalt,
+                        CreatedAtUtc = passwordEntry.CreatedAtUtc,
+                        IsCurrent = passwordEntry.IsCurrent
+                    })
+                    .ToList()
+            };
+        }
+    }
+
+    private sealed class OwnerRoleSnapshot
+    {
+        public string SystemName { get; init; } = string.Empty;
+
+        public bool IsActive { get; init; }
+    }
+
+    private sealed class OwnerPasswordSnapshot
+    {
+        public string PasswordHash { get; init; } = string.Empty;
+
+        public string PasswordSalt { get; init; } = string.Empty;
+
+        public DateTime CreatedAtUtc { get; init; }
+
+        public bool IsCurrent { get; init; }
     }
 }

@@ -1,5 +1,6 @@
 using System.IO;
 using FluentValidation;
+using GropMng.Core.Caching;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Configuration;
 using GropMng.Core.Interfaces.Services.Garden.AI;
@@ -15,6 +16,7 @@ using GropMng.Core.Interfaces.Services.User;
 using GropMng.Data.DbContext;
 using GropMng.Data.Repositories;
 using GropMng.Services.Services.Configuration;
+using GropMng.Services.Caching;
 using GropMng.Services.Services.Garden.AI;
 using GropMng.Services.Services.Garden.Care;
 using GropMng.Services.Services.Garden.Health;
@@ -94,6 +96,10 @@ public static class DependencyInjectionExtensions
             })
             .AddRazorRuntimeCompilation();
         services.AddMemoryCache();
+        services.AddSingleton<IGropCacheKeyManager, GropCacheKeyManager>();
+        services.AddSingleton<IGropStaticCacheManager, GropMemoryCacheManager>();
+        services.AddScoped<IGropShortTermCacheManager, GropPerRequestCacheManager>();
+        services.AddScoped<IGropCacheKeyService>(serviceProvider => serviceProvider.GetRequiredService<IGropStaticCacheManager>());
         services.AddHttpContextAccessor();
         services.AddDataProtection()
             .SetApplicationName("GropMng.Web")

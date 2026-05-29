@@ -1,10 +1,10 @@
 using System.ComponentModel;
 using System.Reflection;
+using GropMng.Core.Caching;
 using GropMng.Core.Configuration;
 using GropMng.Core.Domain.Configuration;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Configuration;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace GropMng.Services.Services.Configuration;
 
@@ -13,15 +13,19 @@ namespace GropMng.Services.Services.Configuration;
 /// </summary>
 public class SettingService : ISettingService
 {
-    private const string SettingsCacheKey = "grop.settings.all";
+    private const string SettingsCachePrefix = "Grop.settings.";
+    private static readonly GropCacheKey SettingsCacheKey = new("Grop.settings.all.v1", SettingsCachePrefix)
+    {
+        CacheTime = 30
+    };
 
     private readonly IRepository<Setting> _settingRepository;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
-    public SettingService(IRepository<Setting> settingRepository, IMemoryCache memoryCache)
+    public SettingService(IRepository<Setting> settingRepository, IGropStaticCacheManager staticCacheManager)
     {
         _settingRepository = settingRepository;
-        _memoryCache = memoryCache;
+        _staticCacheManager = staticCacheManager;
     }
 
     public async Task<TSettings> LoadAsync<TSettings>(CancellationToken cancellationToken = default)
@@ -58,7 +62,7 @@ public class SettingService : ISettingService
             await SetByKeyInternalAsync(key, value, cancellationToken);
         }
 
-        InvalidateCache();
+        await InvalidateCacheAsync();
     }
 
     public async Task<TValue> GetByKeyAsync<TValue>(string key, TValue defaultValue = default!, CancellationToken cancellationToken = default)
@@ -79,7 +83,7 @@ public class SettingService : ISettingService
     public async Task SetByKeyAsync<TValue>(string key, TValue value, CancellationToken cancellationToken = default)
     {
         await SetByKeyInternalAsync(key, value, cancellationToken);
-        InvalidateCache();
+        await InvalidateCacheAsync();
     }
 
     public async Task<IReadOnlyDictionary<string, string>> GetAllByPrefixAsync(string keyPrefix, CancellationToken cancellationToken = default)
@@ -120,20 +124,19 @@ public class SettingService : ISettingService
 
     private async Task<Dictionary<string, string>> GetAllSettingsDictionaryAsync(CancellationToken cancellationToken)
     {
-        if (_memoryCache.TryGetValue(SettingsCacheKey, out Dictionary<string, string>? cached) && cached != null)
-            return cached;
+        return await _staticCacheManager.GetAsync(
+            SettingsCacheKey,
+            async () =>
+            {
+                var all = await _settingRepository.GetAllAsync(
+                    queryShaper: query => query.OrderBy(s => s.Name),
+                    includeDeleted: false,
+                    cancellationToken: cancellationToken);
 
-        var all = await _settingRepository.GetAllAsync(
-            queryShaper: query => query.OrderBy(s => s.Name),
-            includeDeleted: false,
-            cancellationToken: cancellationToken);
-
-        var dictionary = all
-            .GroupBy(s => NormalizeKey(s.Name))
-            .ToDictionary(g => g.Key, g => g.Last().Value ?? string.Empty);
-
-        _memoryCache.Set(SettingsCacheKey, dictionary, TimeSpan.FromMinutes(30));
-        return dictionary;
+                return all
+                    .GroupBy(s => NormalizeKey(s.Name))
+                    .ToDictionary(g => g.Key, g => g.Last().Value ?? string.Empty);
+            });
     }
 
     private static IEnumerable<PropertyInfo> GetPersistableProperties(Type type)
@@ -172,8 +175,8 @@ public class SettingService : ISettingService
         return converter.ConvertFromInvariantString(rawValue);
     }
 
-    private void InvalidateCache()
+    private Task InvalidateCacheAsync()
     {
-        _memoryCache.Remove(SettingsCacheKey);
+        return _staticCacheManager.RemoveByPrefixAsync(SettingsCachePrefix);
     }
 }

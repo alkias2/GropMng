@@ -2,11 +2,14 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using GropMng.Core.Domain.Garden.Owners;
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Security;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.User;
+using GropMng.Services.Caching;
 using GropMng.Services.Services.User;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
@@ -106,39 +109,38 @@ public class UserAuthenticationServiceTests
             .ReturnsAsync(ownerBusinessId);
 
         ownerRepository
-            .Setup(repository => repository.FirstOrDefaultAsync(
-                It.IsAny<System.Linq.Expressions.Expression<Func<Owner, bool>>>(),
-                false,
-                true,
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Owner
+            .SetupGet(repository => repository.TableNoTracking)
+            .Returns(new List<Owner>
             {
-                OwnerId = ownerBusinessId,
-                FirstName = "System",
-                LastName = "Admin",
-                DisplayName = "System Admin",
-                Email = "admin@gropmng.local",
-                PasswordHash = "irrelevant",
-                IsActive = true,
-                OwnerRoles =
-                [
-                    new OwnerRole
-                    {
-                        Name = "Administrator",
-                        SystemName = "Administrator",
-                        IsActive = true,
-                        PermissionRecords =
-                        [
-                            new PermissionRecord
-                            {
-                                Name = "Manage Owners",
-                                SystemName = "ManageOwners",
-                                Category = "Owners"
-                            }
-                        ]
-                    }
-                ]
-            });
+                new()
+                {
+                    OwnerId = ownerBusinessId,
+                    FirstName = "System",
+                    LastName = "Admin",
+                    DisplayName = "System Admin",
+                    Email = "admin@gropmng.local",
+                    PasswordHash = "irrelevant",
+                    IsActive = true,
+                    OwnerRoles =
+                    [
+                        new OwnerRole
+                        {
+                            Name = "Administrator",
+                            SystemName = "Administrator",
+                            IsActive = true,
+                            PermissionRecords =
+                            [
+                                new PermissionRecord
+                                {
+                                    Name = "Manage Owners",
+                                    SystemName = "ManageOwners",
+                                    Category = "Owners"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }.AsQueryable());
 
         var service = new PermissionService(ownerRepository.Object, currentOwnerProvider.Object);
 
@@ -155,7 +157,10 @@ public class UserAuthenticationServiceTests
         // Arrange
         var ownerBusinessId = Guid.NewGuid();
         var ownerRepository = new Mock<IRepository<Owner>>();
-        var memoryCache = new MemoryCache(new MemoryCacheOptions());
+        var staticCacheManager = new GropMemoryCacheManager(
+            new MemoryCache(new MemoryCacheOptions()),
+            new GropCacheKeyManager(),
+            NullLogger<GropMemoryCacheManager>.Instance);
         var httpContextAccessor = new HttpContextAccessor
         {
             HttpContext = new DefaultHttpContext
@@ -170,7 +175,7 @@ public class UserAuthenticationServiceTests
             }
         };
 
-        var provider = new CurrentOwnerProvider(ownerRepository.Object, memoryCache, httpContextAccessor);
+        var provider = new CurrentOwnerProvider(ownerRepository.Object, staticCacheManager, httpContextAccessor);
 
         // Act
         var result = await provider.GetCurrentOwnerIdAsync();
@@ -184,5 +189,55 @@ public class UserAuthenticationServiceTests
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCurrentOwnerIdAsync_WhenFallbackPathIsUsed_CachesOwnerIdForNextCall()
+    {
+        // Arrange
+        var ownerBusinessId = Guid.NewGuid();
+        var ownerRepository = new Mock<IRepository<Owner>>();
+        var staticCacheManager = new GropMemoryCacheManager(
+            new MemoryCache(new MemoryCacheOptions()),
+            new GropCacheKeyManager(),
+            NullLogger<GropMemoryCacheManager>.Instance);
+        var httpContextAccessor = new HttpContextAccessor
+        {
+            HttpContext = new DefaultHttpContext()
+        };
+
+        ownerRepository
+            .Setup(repository => repository.FirstOrDefaultAsync(
+                It.IsAny<System.Linq.Expressions.Expression<Func<Owner, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Owner
+            {
+                OwnerId = ownerBusinessId,
+                FirstName = "Fallback",
+                LastName = "Owner",
+                DisplayName = "Fallback Owner",
+                Email = "fallback@gropmng.local",
+                PasswordHash = "irrelevant",
+                IsActive = true
+            });
+
+        var provider = new CurrentOwnerProvider(ownerRepository.Object, staticCacheManager, httpContextAccessor);
+
+        // Act
+        var first = await provider.GetCurrentOwnerIdAsync();
+        var second = await provider.GetCurrentOwnerIdAsync();
+
+        // Assert
+        Assert.Equal(ownerBusinessId, first);
+        Assert.Equal(ownerBusinessId, second);
+        ownerRepository.Verify(
+            repository => repository.FirstOrDefaultAsync(
+                It.IsAny<System.Linq.Expressions.Expression<Func<Owner, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

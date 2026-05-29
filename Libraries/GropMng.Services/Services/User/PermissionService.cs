@@ -2,7 +2,6 @@ using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.User;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace GropMng.Services.Services.User;
 
@@ -26,10 +25,13 @@ public class PermissionService : IPermissionService
     /// <inheritdoc />
     public async Task<bool> AuthorizeAsync(string permissionSystemName, CancellationToken cancellationToken = default)
     {
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-        var owner = await GetOwnerWithPermissionsAsync(ownerId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(permissionSystemName))
+            return false;
 
-        return owner is not null && await AuthorizeAsync(permissionSystemName, owner, cancellationToken);
+        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
+        var permissionSystemNames = await GetActivePermissionSystemNamesAsync(ownerId, cancellationToken);
+
+        return permissionSystemNames.Any(permission => string.Equals(permission, permissionSystemName, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <inheritdoc />
@@ -46,25 +48,27 @@ public class PermissionService : IPermissionService
         return Task.FromResult(isAuthorized);
     }
 
-    private async Task<Owner?> GetOwnerWithPermissionsAsync(Guid ownerId, CancellationToken cancellationToken)
+    private async Task<string[]> GetActivePermissionSystemNamesAsync(Guid ownerId, CancellationToken cancellationToken)
     {
-        var owner = await _ownerRepository.FirstOrDefaultAsync(
-            entity => entity.OwnerId == ownerId && entity.IsActive,
-            cancellationToken: cancellationToken);
-
-        if (owner is null)
-            return null;
-
-        if (owner.OwnerRoles.Count != 0 && owner.OwnerRoles.Any(role => role.PermissionRecords.Count != 0))
-            return owner;
-
         var query = _ownerRepository.TableNoTracking
-            .Include(entity => entity.OwnerRoles)
-                .ThenInclude(role => role.PermissionRecords);
+            .Where(entity => entity.OwnerId == ownerId && entity.IsActive)
+            .SelectMany(entity => entity.OwnerRoles
+                .Where(role => role.IsActive)
+                .SelectMany(role => role.PermissionRecords.Select(permission => permission.SystemName)))
+            .Distinct();
 
-        if (query.Provider is IAsyncQueryProvider)
-            return await query.FirstOrDefaultAsync(entity => entity.OwnerId == ownerId && entity.IsActive, cancellationToken);
+        if (query is IAsyncEnumerable<string>)
+        {
+            try
+            {
+                return await query.ToArrayAsync(cancellationToken);
+            }
+            catch (InvalidOperationException)
+            {
+                // Fallback for unit tests that provide non-EF IQueryable providers.
+            }
+        }
 
-        return query.FirstOrDefault(entity => entity.OwnerId == ownerId && entity.IsActive);
+        return query.ToArray();
     }
 }

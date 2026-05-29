@@ -1,12 +1,15 @@
 using System.Text;
 using System.Xml;
 using GropMng.Core.Common.Exceptions;
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Localization;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
+using GropMng.Services.Caching;
 using GropMng.Services.Services.Localization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace GropMng.Tests.Services;
@@ -199,7 +202,10 @@ public class LocalizationServiceTests
         var resourceRepository = new Mock<IRepository<LocaleStringResource>>();
         var languageService = new Mock<ILanguageService>();
         var currentLanguageContext = new Mock<ICurrentLanguageContext>();
-        var memoryCache = new MemoryCache(new MemoryCacheOptions());
+        var staticCacheManager = new GropMemoryCacheManager(
+            new MemoryCache(new MemoryCacheOptions()),
+            new GropCacheKeyManager(),
+            NullLogger<GropMemoryCacheManager>.Instance);
         var logger = Mock.Of<ILogger<LocalizationService>>();
 
         resourceRepository
@@ -241,7 +247,7 @@ public class LocalizationServiceTests
             resourceRepository.Object,
             languageService.Object,
             currentLanguageContext.Object,
-            memoryCache,
+            staticCacheManager,
             logger);
     }
 

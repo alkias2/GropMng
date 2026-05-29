@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using GropMng.Core.Common.Exceptions;
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.User;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace GropMng.Services.Services.User;
 
@@ -13,7 +13,11 @@ namespace GropMng.Services.Services.User;
 /// </summary>
 public class CurrentOwnerProvider : ICurrentOwnerProvider
 {
-    private const string FallbackCurrentOwnerCacheKey = "grop.current-owner-id:fallback";
+    private const string CurrentOwnerCachePrefix = "Grop.current-owner.";
+    private static readonly GropCacheKey FallbackCurrentOwnerCacheKey = new("Grop.current-owner.id.fallback.v1", CurrentOwnerCachePrefix)
+    {
+        CacheTime = 15
+    };
 
     /// <summary>
     /// The custom claim type that stores the authenticated owner business identifier.
@@ -21,7 +25,7 @@ public class CurrentOwnerProvider : ICurrentOwnerProvider
     public const string OwnerIdClaimType = "grop.owner-id";
 
     private readonly IRepository<Owner> _ownerRepository;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IGropStaticCacheManager _staticCacheManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
@@ -32,11 +36,11 @@ public class CurrentOwnerProvider : ICurrentOwnerProvider
     /// <param name="httpContextAccessor">The HTTP context accessor.</param>
     public CurrentOwnerProvider(
         IRepository<Owner> ownerRepository,
-        IMemoryCache memoryCache,
+        IGropStaticCacheManager staticCacheManager,
         IHttpContextAccessor httpContextAccessor)
     {
         _ownerRepository = ownerRepository ?? throw new ArgumentNullException(nameof(ownerRepository));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
 
@@ -47,18 +51,19 @@ public class CurrentOwnerProvider : ICurrentOwnerProvider
         if (authenticatedOwnerId != Guid.Empty)
             return authenticatedOwnerId;
 
-        if (_memoryCache.TryGetValue(FallbackCurrentOwnerCacheKey, out Guid ownerId) && ownerId != Guid.Empty)
-            return ownerId;
+        return await _staticCacheManager.GetAsync(
+            FallbackCurrentOwnerCacheKey,
+            async () =>
+            {
+                var owner = await _ownerRepository.FirstOrDefaultAsync(
+                    entity => entity.IsActive,
+                    cancellationToken: cancellationToken);
 
-        var owner = await _ownerRepository.FirstOrDefaultAsync(
-            entity => entity.IsActive,
-            cancellationToken: cancellationToken);
+                if (owner is null)
+                    throw new DomainException("No active owner was found.");
 
-        if (owner is null)
-            throw new DomainException("No active owner was found.");
-
-        _memoryCache.Set(FallbackCurrentOwnerCacheKey, owner.OwnerId, TimeSpan.FromMinutes(15));
-        return owner.OwnerId;
+                return owner.OwnerId;
+            });
     }
 
     private Guid ResolveAuthenticatedOwnerId()
