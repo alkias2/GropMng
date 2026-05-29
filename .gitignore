@@ -98,8 +98,15 @@ Presentation/GropMng.Web/_ReferenceFiles/
 docs/
 Presentation/GropMng.Web/docs/
 Presentation/GropMng.Web/App_Data/
-Presentation/GropMng.Web/Properties/PublishProfiles/FolderProfile.pubxml
+Presentation/GropMng.Web/Properties/
 .github/copilot-instructions.md
+
+# Generated build diagnostics (local investigation outputs)
+/msbuild-content-items.txt
+/msbuild-none-items.txt
+/msbuild-staticwebasset-items.txt
+/GropMng.Web.preprocessed.xml
+/build-diagnostics/
 
 # ==============================
 # Project-specific images
