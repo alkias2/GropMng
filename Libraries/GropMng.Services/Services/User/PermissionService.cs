@@ -1,3 +1,4 @@
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.User;
@@ -10,16 +11,26 @@ namespace GropMng.Services.Services.User;
 /// </summary>
 public class PermissionService : IPermissionService
 {
+    internal const string PermissionsByOwnerCachePrefix = "Grop.permissions.byowner.";
+
+    private static readonly GropCacheKey PermissionsByOwnerCacheKey =
+        new("Grop.permissions.byowner.v1.{0}", PermissionsByOwnerCachePrefix) { CacheTime = 10 };
+
     private readonly IRepository<Owner> _ownerRepository;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PermissionService"/> class.
     /// </summary>
-    public PermissionService(IRepository<Owner> ownerRepository, ICurrentOwnerProvider currentOwnerProvider)
+    public PermissionService(
+        IRepository<Owner> ownerRepository,
+        ICurrentOwnerProvider currentOwnerProvider,
+        IGropStaticCacheManager staticCacheManager)
     {
         _ownerRepository = ownerRepository ?? throw new ArgumentNullException(nameof(ownerRepository));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
     }
 
     /// <inheritdoc />
@@ -48,7 +59,13 @@ public class PermissionService : IPermissionService
         return Task.FromResult(isAuthorized);
     }
 
-    private async Task<string[]> GetActivePermissionSystemNamesAsync(Guid ownerId, CancellationToken cancellationToken)
+    private Task<string[]> GetActivePermissionSystemNamesAsync(Guid ownerId, CancellationToken cancellationToken)
+    {
+        var cacheKey = _staticCacheManager.PrepareKey(PermissionsByOwnerCacheKey, ownerId.ToString("N"));
+        return _staticCacheManager.GetAsync(cacheKey, () => GetActivePermissionSystemNamesCoreAsync(ownerId, cancellationToken));
+    }
+
+    private async Task<string[]> GetActivePermissionSystemNamesCoreAsync(Guid ownerId, CancellationToken cancellationToken)
     {
         var query = _ownerRepository.TableNoTracking
             .Where(entity => entity.OwnerId == ownerId && entity.IsActive)

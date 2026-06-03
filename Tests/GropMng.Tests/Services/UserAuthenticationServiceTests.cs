@@ -86,7 +86,14 @@ public class UserAuthenticationServiceTests
                 }
             }.AsQueryable());
 
-        var service = new OwnerAuthenticationService(httpContextAccessor, ownerRepository.Object, passwordService);
+        var service = new OwnerAuthenticationService(
+            httpContextAccessor,
+            ownerRepository.Object,
+            passwordService,
+            new GropMemoryCacheManager(
+                new MemoryCache(new MemoryCacheOptions()),
+                new GropCacheKeyManager(),
+                NullLogger<GropMemoryCacheManager>.Instance));
 
         // Act
         var owner = await service.ValidateCredentialsAsync("admin@gropmng.local", "StrongPass123!");
@@ -142,7 +149,13 @@ public class UserAuthenticationServiceTests
                 }
             }.AsQueryable());
 
-        var service = new PermissionService(ownerRepository.Object, currentOwnerProvider.Object);
+        var service = new PermissionService(
+            ownerRepository.Object,
+            currentOwnerProvider.Object,
+            new GropMemoryCacheManager(
+                new MemoryCache(new MemoryCacheOptions()),
+                new GropCacheKeyManager(),
+                NullLogger<GropMemoryCacheManager>.Instance));
 
         // Act
         var isAuthorized = await service.AuthorizeAsync("ManageOwners");

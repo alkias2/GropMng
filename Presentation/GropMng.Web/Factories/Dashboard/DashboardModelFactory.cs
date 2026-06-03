@@ -3,10 +3,12 @@ using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
+using GropMng.Core.Caching;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
+using GropMng.Services.Caching.Dashboard;
 using GropMng.Web.Initialization.Options;
 using GropMng.Web.Models.Dashboard;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -46,6 +48,7 @@ public class DashboardModelFactory : IDashboardModelFactory
     private readonly IRepository<Disease> _diseaseRepository;
     private readonly IRepository<ActionSkip> _actionSkipRepository;
     private readonly IRepository<PlantPhoto> _plantPhotoRepository;
+    private readonly IGropStaticCacheManager _staticCacheManager;
     private readonly IPictureService _pictureService;
     private readonly ILocalizationService _localizationService;
     private readonly DashboardOptions _dashboardOptions;
@@ -69,6 +72,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         IRepository<Disease> diseaseRepository,
         IRepository<ActionSkip> actionSkipRepository,
         IRepository<PlantPhoto> plantPhotoRepository,
+        IGropStaticCacheManager staticCacheManager,
         IPictureService pictureService,
         ILocalizationService localizationService,
         IOptions<DashboardOptions> dashboardOptions)
@@ -87,6 +91,7 @@ public class DashboardModelFactory : IDashboardModelFactory
         _diseaseRepository = diseaseRepository;
         _actionSkipRepository = actionSkipRepository;
         _plantPhotoRepository = plantPhotoRepository;
+        _staticCacheManager = staticCacheManager;
         _pictureService = pictureService;
         _localizationService = localizationService;
         _dashboardOptions = dashboardOptions.Value;
@@ -113,11 +118,13 @@ public class DashboardModelFactory : IDashboardModelFactory
         var upcomingHorizonDays = NormalizeHorizonDays(_dashboardOptions.UpcomingHorizonDays);
 
         // 3) Load plant instances first; if none exist, return an empty dashboard model.
-        var plantInstances = await _plantInstanceRepository.GetAllAsync(
-            query => query
-                .Where(pi => pi.OwnerId == ownerId && pi.IsActive)
-                .OrderBy(pi => pi.Id),
-            cancellationToken: cancellationToken);
+        var plantInstances = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.PlantInstancesCacheKey, ownerId.ToString("N")),
+            () => _plantInstanceRepository.GetAllAsync(
+                query => query
+                    .Where(pi => pi.OwnerId == ownerId && pi.IsActive)
+                    .OrderBy(pi => pi.Id),
+                cancellationToken: cancellationToken));
 
         if (plantInstances.Count == 0)
             return model;
@@ -127,10 +134,22 @@ public class DashboardModelFactory : IDashboardModelFactory
         var spotIds = plantInstances.Select(pi => pi.GardenSpotId).Distinct().ToList();
 
         // 4) Load lookup dictionaries required to project dashboard rows.
-        var plants = await _plantRepository.GetByIdsAsync(plantIds, cancellationToken: cancellationToken);
-        var spots = await _gardenSpotRepository.GetByIdsAsync(spotIds, cancellationToken: cancellationToken);
+        var plantsLookupToken = BuildIntSetToken(plantIds);
+        var spotsLookupToken = BuildIntSetToken(spotIds);
+
+        var plants = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.PlantsLookupCacheKey, plantsLookupToken),
+            () => _plantRepository.GetByIdsAsync(plantIds, cancellationToken: cancellationToken));
+
+        var spots = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.GardenSpotsLookupCacheKey, spotsLookupToken),
+            () => _gardenSpotRepository.GetByIdsAsync(spotIds, cancellationToken: cancellationToken));
+
         var locationIds = spots.Select(s => s.LocationId).Distinct().ToList();
-        var locations = await _locationRepository.GetByIdsAsync(locationIds, cancellationToken: cancellationToken);
+        var locationsLookupToken = BuildIntSetToken(locationIds);
+        var locations = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.LocationsLookupCacheKey, locationsLookupToken),
+            () => _locationRepository.GetByIdsAsync(locationIds, cancellationToken: cancellationToken));
 
         var plantMap = plants.ToDictionary(p => p.Id);
         var spotMap = spots.ToDictionary(s => s.Id);
@@ -138,30 +157,58 @@ public class DashboardModelFactory : IDashboardModelFactory
         var instanceMap = plantInstances.ToDictionary(pi => pi.Id);
 
         // 5) Load seasonal schedules for watering and fertilizing.
-        var wateringSchedules = await _wateringScheduleRepository.GetAllAsync(
-            query => query.Where(s => s.OwnerId == ownerId
-                && plantInstanceIds.Contains(s.PlantInstanceId)
-                && (s.Season == season || s.Season == GardenSeason.AllYear)),
-            cancellationToken: cancellationToken);
+        var ownerToken = ownerId.ToString("N");
+        var seasonToken = season.ToString();
 
-        var fertilizingSchedules = await _fertilizingScheduleRepository.GetAllAsync(
-            query => query.Where(s => s.OwnerId == ownerId
-                && plantInstanceIds.Contains(s.PlantInstanceId)
-                && (s.Season == season || s.Season == GardenSeason.AllYear)),
-            cancellationToken: cancellationToken);
+        var wateringSchedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringSchedulesCacheKey, ownerToken, seasonToken),
+            () => _wateringScheduleRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == ownerId
+                    && (s.Season == season || s.Season == GardenSeason.AllYear)),
+                cancellationToken: cancellationToken));
+
+        wateringSchedules = wateringSchedules
+            .Where(schedule => plantInstanceIds.Contains(schedule.PlantInstanceId))
+            .ToList();
+
+        var fertilizingSchedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingSchedulesCacheKey, ownerToken, seasonToken),
+            () => _fertilizingScheduleRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == ownerId
+                    && (s.Season == season || s.Season == GardenSeason.AllYear)),
+                cancellationToken: cancellationToken));
+
+        fertilizingSchedules = fertilizingSchedules
+            .Where(schedule => plantInstanceIds.Contains(schedule.PlantInstanceId))
+            .ToList();
 
         var fertilizerIds = fertilizingSchedules.Select(s => s.FertilizerId).Distinct().ToList();
-        var fertilizers = await _fertilizerRepository.GetByIdsAsync(fertilizerIds, cancellationToken: cancellationToken);
+        var fertilizersLookupToken = BuildIntSetToken(fertilizerIds);
+        var fertilizers = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizersLookupCacheKey, fertilizersLookupToken),
+            () => _fertilizerRepository.GetByIdsAsync(fertilizerIds, cancellationToken: cancellationToken));
         var fertilizerMap = fertilizers.ToDictionary(f => f.Id, f => f.Name);
 
         // 6) Load latest execution logs used to calculate next due dates.
-        var wateringLogs = await _wateringLogRepository.GetAllAsync(
-            query => query.Where(l => l.OwnerId == ownerId && plantInstanceIds.Contains(l.PlantInstanceId)),
-            cancellationToken: cancellationToken);
+        var wateringLogs = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringLogsCacheKey, ownerToken),
+            () => _wateringLogRepository.GetAllAsync(
+                query => query.Where(l => l.OwnerId == ownerId),
+                cancellationToken: cancellationToken));
 
-        var fertilizingLogs = await _fertilizingLogRepository.GetAllAsync(
-            query => query.Where(l => l.OwnerId == ownerId && plantInstanceIds.Contains(l.PlantInstanceId)),
-            cancellationToken: cancellationToken);
+        wateringLogs = wateringLogs
+            .Where(log => plantInstanceIds.Contains(log.PlantInstanceId))
+            .ToList();
+
+        var fertilizingLogs = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingLogsCacheKey, ownerToken),
+            () => _fertilizingLogRepository.GetAllAsync(
+                query => query.Where(l => l.OwnerId == ownerId),
+                cancellationToken: cancellationToken));
+
+        fertilizingLogs = fertilizingLogs
+            .Where(log => plantInstanceIds.Contains(log.PlantInstanceId))
+            .ToList();
 
         var latestWateringByInstance = wateringLogs
             .GroupBy(l => l.PlantInstanceId)
@@ -172,9 +219,11 @@ public class DashboardModelFactory : IDashboardModelFactory
             .ToDictionary(g => g.Key, g => g.MaxBy(x => x.AppliedAtUtc)!.AppliedAtUtc);
 
         // 7) Load active skips and build a fast lookup to hide skipped actions.
-        var activeSkips = await _actionSkipRepository.GetAllAsync(
-            query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
-            cancellationToken: cancellationToken);
+        var activeSkips = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.ActiveSkipsCacheKey, ownerToken, today.ToString("yyyyMMdd")),
+            () => _actionSkipRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
+                cancellationToken: cancellationToken));
 
         var skipSet = activeSkips
             .Select(s => (s.PlantInstanceId, s.ActionType))
@@ -597,6 +646,18 @@ public class DashboardModelFactory : IDashboardModelFactory
         tab.UpcomingCount = tab.UpcomingCases.Count;
 
         return tab;
+    }
+
+    private static string BuildIntSetToken(IEnumerable<int> ids)
+    {
+        var values = ids
+            .Distinct()
+            .OrderBy(id => id)
+            .ToArray();
+
+        return values.Length == 0
+            ? "none"
+            : string.Join('-', values);
     }
 
     #endregion

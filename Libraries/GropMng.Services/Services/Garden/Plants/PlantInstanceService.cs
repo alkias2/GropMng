@@ -845,7 +845,9 @@ public class PlantInstanceService : IPlantInstanceService
         {
             currentContainer.PlantInstanceId = null;
             StampForUpdate(currentContainer);
-            await _containerRepository.UpdateAsync(currentContainer, saveNow: false, cancellationToken: cancellationToken);
+            // Must persist the clear immediately: SQL Server evaluates UX_Container_PlantInstanceId
+            // per-statement, so the old assignment must be committed before the new one is written.
+            await _containerRepository.UpdateAsync(currentContainer, saveNow: true, cancellationToken: cancellationToken);
         }
 
         if (requestedContainer is not null)

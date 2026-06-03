@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using GropMng.Core.Caching;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Owners;
@@ -16,9 +17,19 @@ namespace GropMng.Services.Services.User;
 /// </summary>
 public class OwnerAuthenticationService : IOwnerAuthenticationService
 {
+    internal const string OwnerSecurityContextByEmailCachePrefix = "Grop.auth.owner.byemail.";
+    internal const string OwnerSecurityContextByIdCachePrefix = "Grop.auth.owner.byid.";
+
+    private static readonly GropCacheKey OwnerSecurityContextByEmailCacheKey =
+        new("Grop.auth.owner.byemail.v1.{0}", OwnerSecurityContextByEmailCachePrefix) { CacheTime = 5 };
+
+    private static readonly GropCacheKey OwnerSecurityContextByIdCacheKey =
+        new("Grop.auth.owner.byid.v1.{0}", OwnerSecurityContextByIdCachePrefix) { CacheTime = 5 };
+
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRepository<Owner> _ownerRepository;
     private readonly IOwnerPasswordService _ownerPasswordService;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OwnerAuthenticationService"/> class.
@@ -26,11 +37,13 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
     public OwnerAuthenticationService(
         IHttpContextAccessor httpContextAccessor,
         IRepository<Owner> ownerRepository,
-        IOwnerPasswordService ownerPasswordService)
+        IOwnerPasswordService ownerPasswordService,
+        IGropStaticCacheManager staticCacheManager)
     {
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         _ownerRepository = ownerRepository ?? throw new ArgumentNullException(nameof(ownerRepository));
         _ownerPasswordService = ownerPasswordService ?? throw new ArgumentNullException(nameof(ownerPasswordService));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
     }
 
     /// <inheritdoc />
@@ -102,6 +115,16 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
         var httpContext = _httpContextAccessor.HttpContext
             ?? throw new DomainException("Unable to sign out without an active HTTP context.");
 
+        // Invalidate security-context caches before the cookie is cleared so we still have the claims.
+        var ownerIdClaim = httpContext.User?.FindFirstValue(CurrentOwnerProvider.OwnerIdClaimType);
+        var emailClaim = httpContext.User?.FindFirstValue(ClaimTypes.Email);
+
+        if (Guid.TryParse(ownerIdClaim, out var ownerId))
+            await _staticCacheManager.RemoveAsync(OwnerSecurityContextByIdCacheKey, ownerId.ToString("N"));
+
+        if (!string.IsNullOrWhiteSpace(emailClaim))
+            await _staticCacheManager.RemoveAsync(OwnerSecurityContextByEmailCacheKey, emailClaim);
+
         await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
@@ -121,11 +144,17 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
             cancellationToken: cancellationToken);
     }
 
-    private async Task<Owner?> EnsureOwnerWithRolesAsync(Owner owner, CancellationToken cancellationToken)
+    private Task<Owner?> EnsureOwnerWithRolesAsync(Owner owner, CancellationToken cancellationToken)
     {
         if (owner.OwnerRoles.Count != 0)
-            return owner;
+            return Task.FromResult<Owner?>(owner);
 
+        var cacheKey = _staticCacheManager.PrepareKey(OwnerSecurityContextByIdCacheKey, owner.OwnerId.ToString("N"));
+        return _staticCacheManager.GetAsync<Owner?>(cacheKey, () => EnsureOwnerWithRolesCoreAsync(owner, cancellationToken));
+    }
+
+    private async Task<Owner?> EnsureOwnerWithRolesCoreAsync(Owner owner, CancellationToken cancellationToken)
+    {
         var query = _ownerRepository.TableNoTracking
             .AsSplitQuery()
             .Where(entity => entity.OwnerId == owner.OwnerId)
@@ -164,7 +193,13 @@ public class OwnerAuthenticationService : IOwnerAuthenticationService
         return query.FirstOrDefault();
     }
 
-    private async Task<Owner?> LoadOwnerSecurityContextByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    private Task<Owner?> LoadOwnerSecurityContextByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    {
+        var cacheKey = _staticCacheManager.PrepareKey(OwnerSecurityContextByEmailCacheKey, normalizedEmail);
+        return _staticCacheManager.GetAsync<Owner?>(cacheKey, () => LoadOwnerSecurityContextByEmailCoreAsync(normalizedEmail, cancellationToken));
+    }
+
+    private async Task<Owner?> LoadOwnerSecurityContextByEmailCoreAsync(string normalizedEmail, CancellationToken cancellationToken)
     {
         var query = _ownerRepository.TableNoTracking
             .AsSplitQuery()

@@ -1,6 +1,15 @@
 using System.IO;
 using FluentValidation;
 using GropMng.Core.Caching;
+using GropMng.Core.Domain.Garden.Care;
+using GropMng.Core.Domain.Garden.Health;
+using GropMng.Core.Domain.Garden.Locations;
+using GropMng.Core.Domain.Garden.Plants;
+using GropMng.Core.Domain.Garden.Preferences;
+using GropMng.Core.Domain.Localization;
+using GropMng.Core.Domain.Media;
+using GropMng.Core.Domain.Security;
+using GropMng.Core.Events;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Configuration;
 using GropMng.Core.Interfaces.Services.Garden.AI;
@@ -17,6 +26,9 @@ using GropMng.Data.DbContext;
 using GropMng.Data.Repositories;
 using GropMng.Services.Services.Configuration;
 using GropMng.Services.Caching;
+using GropMng.Services.Caching.Garden;
+using GropMng.Services.Caching.System;
+using GropMng.Services.Events;
 using GropMng.Services.Services.Garden.AI;
 using GropMng.Services.Services.Garden.Care;
 using GropMng.Services.Services.Garden.Health;
@@ -189,8 +201,98 @@ public static class DependencyInjectionExtensions
         services.AddDbContext<GropContext>(options =>
             options.UseSqlServer(sqlServerSettings.ConnectionString));
 
+        services.AddScoped<IEventPublisher, DefaultEventPublisher>();
+
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<ISqlQueryExecutor, SqlQueryExecutor>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<WateringSchedule>>, WateringScheduleCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<WateringSchedule>>, WateringScheduleCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<WateringSchedule>>, WateringScheduleCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<WateringLog>>, WateringLogCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<WateringLog>>, WateringLogCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<WateringLog>>, WateringLogCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<FertilizingSchedule>>, FertilizingScheduleCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<FertilizingSchedule>>, FertilizingScheduleCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<FertilizingSchedule>>, FertilizingScheduleCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<FertilizingLog>>, FertilizingLogCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<FertilizingLog>>, FertilizingLogCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<FertilizingLog>>, FertilizingLogCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<ActionSkip>>, ActionSkipCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<ActionSkip>>, ActionSkipCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<ActionSkip>>, ActionSkipCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<PlantInstance>>, PlantInstanceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<PlantInstance>>, PlantInstanceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<PlantInstance>>, PlantInstanceCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Plant>>, PlantCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Plant>>, PlantCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Plant>>, PlantCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<GardenSpot>>, GardenSpotCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<GardenSpot>>, GardenSpotCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<GardenSpot>>, GardenSpotCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Location>>, LocationCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Location>>, LocationCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Location>>, LocationCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<PlantPhoto>>, PlantPhotoCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<PlantPhoto>>, PlantPhotoCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<PlantPhoto>>, PlantPhotoCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Fertilizer>>, FertilizerCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Fertilizer>>, FertilizerCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Fertilizer>>, FertilizerCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Container>>, ContainerCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Container>>, ContainerCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Container>>, ContainerCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<SoilMix>>, SoilMixCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<SoilMix>>, SoilMixCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<SoilMix>>, SoilMixCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Disease>>, DiseaseCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Disease>>, DiseaseCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Disease>>, DiseaseCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Language>>, LanguageCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Language>>, LanguageCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Language>>, LanguageCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<LocaleStringResource>>, LocaleStringResourceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<LocaleStringResource>>, LocaleStringResourceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<LocaleStringResource>>, LocaleStringResourceCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<PermissionRecord>>, PermissionRecordCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<PermissionRecord>>, PermissionRecordCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<PermissionRecord>>, PermissionRecordCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<UserPreference>>, UserPreferenceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<UserPreference>>, UserPreferenceCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<UserPreference>>, UserPreferenceCacheEventConsumer>();
+
+        services.AddScoped<IConsumer<EntityInsertedEvent<Picture>>, PictureCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityUpdatedEvent<Picture>>, PictureCacheEventConsumer>();
+        services.AddScoped<IConsumer<EntityDeletedEvent<Picture>>, PictureCacheEventConsumer>();
 
         services.AddScoped<IAppLogService, AppLogService>();
 

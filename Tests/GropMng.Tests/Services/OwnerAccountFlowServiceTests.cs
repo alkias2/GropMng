@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Configuration;
 using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Owners;
@@ -78,7 +79,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         // Act
         var result = await service.RegisterAsync(new OwnerRegistrationRequest(
@@ -139,7 +141,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         var token = service.GenerateEmailConfirmationToken(owner);
 
@@ -231,7 +234,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         var request = await service.RequestPasswordResetAsync(owner.Email);
 
@@ -319,7 +323,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         // Act
         var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(owner.OwnerId, "NewStrongPass456!"));
@@ -395,7 +400,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         // Act
         var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(owner.OwnerId, "SamePass123!"));
@@ -430,7 +436,8 @@ public class OwnerAccountFlowServiceTests
             passwordRepository.Object,
             settingService.Object,
             passwordService,
-            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"));
+            DataProtectionProvider.Create("GropMng.OwnerAccountFlow.Tests"),
+            new Moq.Mock<IGropStaticCacheManager>().Object);
 
         // Act
         var result = await service.ChangeOwnerPasswordAsync(new ChangeOwnerPasswordRequest(Guid.NewGuid(), "AnyPass123!"));

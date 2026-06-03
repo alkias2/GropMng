@@ -1,4 +1,5 @@
 using System.Text;
+using GropMng.Core.Caching;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Configuration;
 using GropMng.Core.Domain.Garden.Enums;
@@ -29,6 +30,7 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
     private readonly ISettingService _settingService;
     private readonly IOwnerPasswordService _ownerPasswordService;
     private readonly IDataProtector _emailTokenProtector;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OwnerAccountFlowService"/> class.
@@ -39,7 +41,8 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
         IRepository<OwnerPassword> ownerPasswordRepository,
         ISettingService settingService,
         IOwnerPasswordService ownerPasswordService,
-        IDataProtectionProvider dataProtectionProvider)
+        IDataProtectionProvider dataProtectionProvider,
+        IGropStaticCacheManager staticCacheManager)
     {
         _ownerRepository = ownerRepository ?? throw new ArgumentNullException(nameof(ownerRepository));
         _ownerRoleRepository = ownerRoleRepository ?? throw new ArgumentNullException(nameof(ownerRoleRepository));
@@ -48,6 +51,7 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
         _ownerPasswordService = ownerPasswordService ?? throw new ArgumentNullException(nameof(ownerPasswordService));
         ArgumentNullException.ThrowIfNull(dataProtectionProvider);
         _emailTokenProtector = dataProtectionProvider.CreateProtector("GropMng.Owner.EmailConfirmation.v1");
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
     }
 
     /// <inheritdoc />
@@ -236,6 +240,9 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
             IsCurrent = true
         }, cancellationToken: cancellationToken);
 
+        // Invalidate cached security context so the next login uses the new password hash.
+        await _staticCacheManager.RemoveByPrefixAsync(OwnerAuthenticationService.OwnerSecurityContextByEmailCachePrefix);
+
         return true;
     }
 
@@ -305,6 +312,9 @@ public class OwnerAccountFlowService : IOwnerAccountFlowService
             CreatedAtUtc = DateTime.UtcNow,
             IsCurrent = true
         }, cancellationToken: cancellationToken);
+
+        // Invalidate cached security context so the next login uses the new password hash.
+        await _staticCacheManager.RemoveByPrefixAsync(OwnerAuthenticationService.OwnerSecurityContextByEmailCachePrefix);
 
         return result;
     }

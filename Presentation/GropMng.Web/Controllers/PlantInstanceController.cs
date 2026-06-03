@@ -1,3 +1,4 @@
+using System.Globalization;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Care;
 using GropMng.Core.Domain.Garden.Enums;
@@ -90,20 +91,22 @@ public class PlantInstanceController : Controller
         var spotMap = gardenSpots.ToDictionary(s => s.Id);
         var locationMap = locations.ToDictionary(l => l.Id);
 
-        var rows = plantInstances
-            .Where(p => plantMap.ContainsKey(p.PlantId) && spotMap.ContainsKey(p.GardenSpotId))
-            .Select(p => new PlantInstanceListRowModel
+        var rows = new List<PlantInstanceListRowModel>();
+        foreach (var p in plantInstances.Where(p => plantMap.ContainsKey(p.PlantId) && spotMap.ContainsKey(p.GardenSpotId)))
         {
-            Id = p.Id,
-            PlantName = plantMap[p.PlantId].ScientificName,
-            Nickname = p.Nickname,
-            GardenSpotName = spotMap[p.GardenSpotId].Name,
-            LocationName = locationMap.TryGetValue(spotMap[p.GardenSpotId].LocationId, out var location) ? location.Name : "—",
-            ContainerInfo = p.Container != null ? $"{p.Container.ContainerType}" : null,
-            HealthStatus = p.HealthStatus,
-            AgeYears = p.AgeYears,
-            IsActive = p.IsActive
-        }).ToList();
+            rows.Add(new PlantInstanceListRowModel
+            {
+                Id = p.Id,
+                PlantName = plantMap[p.PlantId].ScientificName,
+                Nickname = p.Nickname,
+                GardenSpotName = spotMap[p.GardenSpotId].Name,
+                LocationName = locationMap.TryGetValue(spotMap[p.GardenSpotId].LocationId, out var location) ? location.Name : "—",
+                ContainerInfo = p.Container is not null ? await BuildContainerDisplayNameAsync(p.Container) : null,
+                HealthStatus = p.HealthStatus,
+                AgeYears = p.AgeYears,
+                IsActive = p.IsActive
+            });
+        }
 
         // Load main photo thumbnail URL (500px) for each plant instance row
         foreach (var row in rows)
@@ -337,14 +340,18 @@ public class PlantInstanceController : Controller
             .ToList();
 
         var containers = await _plantInstanceService.GetContainersAsync(ownerId, cancellationToken);
-        model.AvailableContainers = new List<SelectListItem> { new() { Value = "", Text = "— None —" } }
-            .Concat(containers.Select(c => new SelectListItem
+        var availableContainers = new List<SelectListItem> { new() { Value = "", Text = "— None —" } };
+        foreach (var container in containers)
+        {
+            availableContainers.Add(new SelectListItem
             {
-                Value = c.Id.ToString(),
-                Text = $"{c.ContainerType} {(c.Color != null ? $"({c.Color})" : "")}",
-                Selected = model.ContainerId == c.Id
-            }))
-            .ToList();
+                Value = container.Id.ToString(),
+                Text = await BuildContainerDisplayNameAsync(container),
+                Selected = model.ContainerId == container.Id
+            });
+        }
+
+        model.AvailableContainers = availableContainers;
 
         var soilMixes = await _plantInstanceService.GetSoilMixesAsync(cancellationToken);
         model.AvailableSoilMixes = new List<SelectListItem> { new() { Value = "", Text = "— None —" } }
@@ -1074,8 +1081,61 @@ public class PlantInstanceController : Controller
     private async Task<string> BuildContainerDisplayNameAsync(Container container)
     {
         var localizedContainerType = await _enumLocalizationHelper.GetLocalizedNameAsync(container.ContainerType);
-        var colorLabel = string.IsNullOrWhiteSpace(container.Color) ? string.Empty : $" ({container.Color})";
-        return $"{localizedContainerType}{colorLabel}";
+
+        var prefix = !string.IsNullOrWhiteSpace(container.Material)
+            ? container.Material
+            : localizedContainerType;
+
+        var parts = new List<string>();
+
+        if (container.ContainerType == GardenContainerType.Bed)
+        {
+            var length = FormatRoundedLength(container.LengthCm);
+            var width = FormatRoundedLength(container.WidthCm);
+
+            if (length is not null && width is not null)
+                parts.Add($"{length}x{width}");
+        }
+        else
+        {
+            if (container.VolumeL.HasValue && container.VolumeL.Value > 0)
+                parts.Add($"{container.VolumeL.Value.ToString("0.##", CultureInfo.InvariantCulture)} λίτρα");
+
+            var baseDiameter = FormatRoundedDiameter(container.BaseCircumferenceCm);
+            if (baseDiameter is not null)
+                parts.Add($"Β{baseDiameter}");
+
+            var rimDiameter = FormatRoundedDiameter(container.RimCircumferenceCm);
+            if (rimDiameter is not null)
+                parts.Add($"Χ{rimDiameter}");
+
+            var height = FormatRoundedLength(container.HeightCm);
+            if (height is not null)
+                parts.Add($"Υ{height}");
+        }
+
+        parts.Add(container.PlantInstanceId.HasValue ? "Κατειλημμένη" : "Κενή");
+
+        return parts.Count == 0
+            ? prefix
+            : $"{prefix}, {string.Join(", ", parts)}";
+    }
+
+    private static string? FormatRoundedLength(decimal? value)
+    {
+        if (!value.HasValue || value.Value <= 0)
+            return null;
+
+        return Math.Round(value.Value, MidpointRounding.AwayFromZero).ToString(CultureInfo.InvariantCulture);
+    }
+
+    private static string? FormatRoundedDiameter(decimal? circumferenceCm)
+    {
+        if (!circumferenceCm.HasValue || circumferenceCm.Value <= 0)
+            return null;
+
+        var diameter = circumferenceCm.Value / (decimal)Math.PI;
+        return Math.Round(diameter, MidpointRounding.AwayFromZero).ToString(CultureInfo.InvariantCulture);
     }
 
     #endregion

@@ -89,6 +89,7 @@
             <div class="col-md-2 d-flex align-items-end">
                 <div class="form-check mb-2 w-100">
                     <input type="checkbox" class="form-check-input" id="activeOnly" name="activeOnly" value="true" @(filter?.ActiveOnly == true ? "checked" : "") />
+                    <input type="hidden" name="activeOnly" value="false" />
                     <label class="form-check-label" for="activeOnly">@T("mygarden.plantinstance.filter.activeonly")</label>
                 </div>
             </div>
@@ -120,6 +121,7 @@
                             <th>@T("mygarden.plantinstance.field.nickname")</th>
                             <th>@T("mygarden.plantinstance.field.location")</th>
                             <th>@T("mygarden.plantinstance.field.gardenspot")</th>
+                            <th>@T("mygarden.plantinstance.field.container")</th>
                             <th>@T("mygarden.plantinstance.field.age")</th>
                             <th>@T("mygarden.plantinstance.field.health")</th>
                             <th>@T("mygarden.plantinstance.field.active")</th>
@@ -150,6 +152,7 @@
                                 <td>@(row.Nickname ?? "—")</td>
                                 <td>@row.LocationName</td>
                                 <td>@row.GardenSpotName</td>
+                                <td>@(row.ContainerInfo ?? "—")</td>
                                 <td>@(row.AgeYears.HasValue ? $"{row.AgeYears} y" : "—")</td>
                                 <td><span class="badge bg-label-@(row.HealthStatus switch { GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Excellent => "success", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Good => "info", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Fair => "warning", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Poor or GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Critical => "danger", _ => "secondary" })">@row.HealthStatus</span></td>
                                 <td>

@@ -1,3 +1,4 @@
+using GropMng.Core.Caching;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Owners;
 using GropMng.Core.Interfaces.Repositories;
@@ -12,14 +13,19 @@ public class OwnerService : IOwnerService
 {
     private readonly IRepository<Owner> _ownerRepository;
     private readonly IRepository<OwnerRole> _ownerRoleRepository;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OwnerService"/> class.
     /// </summary>
-    public OwnerService(IRepository<Owner> ownerRepository, IRepository<OwnerRole> ownerRoleRepository)
+    public OwnerService(
+        IRepository<Owner> ownerRepository,
+        IRepository<OwnerRole> ownerRoleRepository,
+        IGropStaticCacheManager staticCacheManager)
     {
         _ownerRepository = ownerRepository ?? throw new ArgumentNullException(nameof(ownerRepository));
         _ownerRoleRepository = ownerRoleRepository ?? throw new ArgumentNullException(nameof(ownerRoleRepository));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
     }
 
     /// <inheritdoc />
@@ -80,5 +86,10 @@ public class OwnerService : IOwnerService
         owner.UpdatedAtUtc = DateTime.UtcNow;
 
         await _ownerRepository.UpdateAsync(owner, cancellationToken: cancellationToken);
+
+        // Invalidate security-context and permission caches so the next login/check reflects the new roles.
+        await _staticCacheManager.RemoveByPrefixAsync(OwnerAuthenticationService.OwnerSecurityContextByIdCachePrefix);
+        await _staticCacheManager.RemoveByPrefixAsync(OwnerAuthenticationService.OwnerSecurityContextByEmailCachePrefix);
+        await _staticCacheManager.RemoveByPrefixAsync(PermissionService.PermissionsByOwnerCachePrefix);
     }
 }
