@@ -1,4 +1,5 @@
 ﻿using GropMng.Web.Factories.Dashboard;
+using GropMng.Web.Models.Dashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,8 +30,19 @@ namespace GropMng.Web.Controllers
             int? spotId,
             CancellationToken cancellationToken = default)
         {
-            var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
+            var query = new DashboardQueryModel { SpotId = spotId };
+
+            var counters = await _dashboardModelFactory.PrepareCountersAsync(cancellationToken);
+            var watering = await _dashboardModelFactory.PrepareWateringTabAsync(query, cancellationToken);
+
+            var model = new OwnerDashboardModel
+            {
+                Query = query,
+                Counters = counters,
+                WateringTab = watering,
+                AvailableGardenSpots = watering.AvailableGardenSpots
+            };
+
             return View(model);
         }
 

@@ -115,6 +115,128 @@ public class DashboardModelFactory : IDashboardModelFactory
 
     #region Public
 
+    /// <summary>
+    /// Loads only the counts needed for the dashboard counter cards.
+    /// No projections, no photos, no SelectListItems, no group building.
+    /// Uses the same cache keys as the individual tab methods to avoid duplicate DB queries.
+    /// </summary>
+    public async Task<DashboardCountersModel> PrepareCountersAsync(CancellationToken ct = default)
+    {
+        var model = new DashboardCountersModel();
+
+        var context = await LoadDashboardContextAsync(ct);
+        if (context is null)
+            return model;
+
+        var ownerToken = context.OwnerId.ToString("N");
+        var seasonToken = context.Season.ToString();
+        var todayToken = context.Today.ToString("yyyyMMdd");
+        var plantInstanceIds = context.PlantInstanceIds;
+
+        // ── Watering schedules ───────────────────────────────────────────────
+        // Identical cache key to PrepareWateringTabAsync — cache hit guaranteed
+        // if watering tab was already loaded in the same request cycle.
+        var wateringSchedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringSchedulesCacheKey, ownerToken, seasonToken),
+            () => _wateringScheduleRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == context.OwnerId
+                    && (s.Season == context.Season || s.Season == GardenSeason.AllYear)),
+                cancellationToken: ct));
+
+        wateringSchedules = wateringSchedules
+            .Where(s => plantInstanceIds.Contains(s.PlantInstanceId))
+            .ToList();
+
+        // ── Fertilizing schedules ─────────────────────────────────────────────
+        // Identical cache key to PrepareFertilizingTabAsync.
+        var fertilizingSchedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingSchedulesCacheKey, ownerToken, seasonToken),
+            () => _fertilizingScheduleRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == context.OwnerId
+                    && (s.Season == context.Season || s.Season == GardenSeason.AllYear)),
+                cancellationToken: ct));
+
+        fertilizingSchedules = fertilizingSchedules
+            .Where(s => plantInstanceIds.Contains(s.PlantInstanceId))
+            .ToList();
+
+        // ── Watering logs ─────────────────────────────────────────────────────
+        var wateringLogs = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringLogsCacheKey, ownerToken),
+            () => _wateringLogRepository.GetAllAsync(
+                query => query.Where(l => l.OwnerId == context.OwnerId),
+                cancellationToken: ct));
+
+        wateringLogs = wateringLogs
+            .Where(l => plantInstanceIds.Contains(l.PlantInstanceId))
+            .ToList();
+
+        // ── Fertilizing logs ──────────────────────────────────────────────────
+        var fertilizingLogs = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingLogsCacheKey, ownerToken),
+            () => _fertilizingLogRepository.GetAllAsync(
+                query => query.Where(l => l.OwnerId == context.OwnerId),
+                cancellationToken: ct));
+
+        fertilizingLogs = fertilizingLogs
+            .Where(l => plantInstanceIds.Contains(l.PlantInstanceId))
+            .ToList();
+
+        // ── Active skips ──────────────────────────────────────────────────────
+        // Identical cache key to both tab methods.
+        var activeSkips = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.ActiveSkipsCacheKey, ownerToken, todayToken),
+            () => _actionSkipRepository.GetAllAsync(
+                query => query.Where(s => s.OwnerId == context.OwnerId && s.ActiveUntilDate >= context.Today),
+                cancellationToken: ct));
+
+        var skipSet = activeSkips
+            .Select(s => (s.PlantInstanceId, s.ActionType))
+            .ToHashSet();
+
+        // ── Watering counter ──────────────────────────────────────────────────
+        // Replicates exactly the due date logic of PrepareWateringTabAsync
+        // but projects only to a count instead of full DashboardActionModel.
+        var latestWateringByInstance = wateringLogs
+            .GroupBy(l => l.PlantInstanceId)
+            .ToDictionary(g => g.Key, g => g.MaxBy(x => x.WateredAtUtc)!.WateredAtUtc);
+
+        model.WateringTodayOverdueCount = wateringSchedules
+            .Where(s => !skipSet.Contains((s.PlantInstanceId, ActionSkipType.Watering)))
+            .Count(s =>
+            {
+                var dueDate = CalculateDueDate(latestWateringByInstance, s.PlantInstanceId, s.FrequencyDays, context.Today);
+                return dueDate <= context.Today;
+            });
+
+        // ── Fertilizing counter ───────────────────────────────────────────────
+        var latestFertilizingByInstance = fertilizingLogs
+            .GroupBy(l => l.PlantInstanceId)
+            .ToDictionary(g => g.Key, g => g.MaxBy(x => x.AppliedAtUtc)!.AppliedAtUtc);
+
+        model.FertilizingTodayOverdueCount = fertilizingSchedules
+            .Where(s => !skipSet.Contains((s.PlantInstanceId, ActionSkipType.Fertilizing)))
+            .Count(s =>
+            {
+                var dueDate = CalculateDueDate(latestFertilizingByInstance, s.PlantInstanceId, s.FrequencyDays, context.Today);
+                return dueDate <= context.Today;
+            });
+
+        // ── Disease counter ───────────────────────────────────────────────────
+        // Replicates the query of PrepareDiseaseTabInternalAsync
+        // but projects only to a count — no disease name lookup needed.
+        var diseaseRecords = await _plantDiseaseRecordRepository.GetAllAsync(
+            query => query.Where(r => r.OwnerId == context.OwnerId
+                && plantInstanceIds.Contains(r.PlantInstanceId)
+                && (r.Outcome == null || r.Outcome == PlantDiseaseOutcome.Ongoing)),
+            cancellationToken: ct);
+
+        model.DiseaseTodayCount = diseaseRecords
+            .Count(r => r.DetectedDate <= context.Today);
+
+        return model;
+    }
+
     /// <inheritdoc />
     public async Task<DashboardWateringTabModel> PrepareWateringTabAsync(
         DashboardQueryModel? query = null,
@@ -323,196 +445,6 @@ public class DashboardModelFactory : IDashboardModelFactory
             context.SpotMap,
             context.LocationMap,
             ct);
-    }
-
-    /// <inheritdoc />
-    public async Task<OwnerDashboardModel> PrepareDashboardModelAsync(
-        DashboardQueryModel? query = null,
-        CancellationToken cancellationToken = default)
-    {
-        // 1) Normalize UI query input.
-        var model = new OwnerDashboardModel();
-        var dashboardQuery = NormalizeQuery(query);
-        model.Query = dashboardQuery;
-
-        // 2-4) Load owner context and lookup dictionaries.
-        var context = await LoadDashboardContextAsync(cancellationToken);
-        if (context is null)
-            return model;
-
-        var ownerId = context.OwnerId;
-        var today = context.Today;
-        var season = context.Season;
-        var upcomingHorizonDays = context.HorizonDays;
-        var plantInstances = context.PlantInstances;
-        var plantInstanceIds = context.PlantInstanceIds;
-        var plantMap = context.PlantMap;
-        var spotMap = context.SpotMap;
-        var locationMap = context.LocationMap;
-        var instanceMap = plantInstances.ToDictionary(pi => pi.Id);
-
-        // 5) Load seasonal schedules for watering and fertilizing.
-        var ownerToken = ownerId.ToString("N");
-        var seasonToken = season.ToString();
-
-        var wateringSchedules = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringSchedulesCacheKey, ownerToken, seasonToken),
-            () => _wateringScheduleRepository.GetAllAsync(
-                query => query.Where(s => s.OwnerId == ownerId
-                    && (s.Season == season || s.Season == GardenSeason.AllYear)),
-                cancellationToken: cancellationToken));
-
-        wateringSchedules = wateringSchedules
-            .Where(schedule => plantInstanceIds.Contains(schedule.PlantInstanceId))
-            .ToList();
-
-        var fertilizingSchedules = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingSchedulesCacheKey, ownerToken, seasonToken),
-            () => _fertilizingScheduleRepository.GetAllAsync(
-                query => query.Where(s => s.OwnerId == ownerId
-                    && (s.Season == season || s.Season == GardenSeason.AllYear)),
-                cancellationToken: cancellationToken));
-
-        fertilizingSchedules = fertilizingSchedules
-            .Where(schedule => plantInstanceIds.Contains(schedule.PlantInstanceId))
-            .ToList();
-
-        var fertilizerIds = fertilizingSchedules.Select(s => s.FertilizerId).Distinct().ToList();
-        var fertilizersLookupToken = BuildIntSetToken(fertilizerIds);
-        var fertilizers = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizersLookupCacheKey, fertilizersLookupToken),
-            () => _fertilizerRepository.GetByIdsAsync(fertilizerIds, cancellationToken: cancellationToken));
-        var fertilizerMap = fertilizers.ToDictionary(f => f.Id, f => f.Name);
-
-        // 6) Load latest execution logs used to calculate next due dates.
-        var wateringLogs = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.WateringLogsCacheKey, ownerToken),
-            () => _wateringLogRepository.GetAllAsync(
-                query => query.Where(l => l.OwnerId == ownerId),
-                cancellationToken: cancellationToken));
-
-        wateringLogs = wateringLogs
-            .Where(log => plantInstanceIds.Contains(log.PlantInstanceId))
-            .ToList();
-
-        var fertilizingLogs = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.FertilizingLogsCacheKey, ownerToken),
-            () => _fertilizingLogRepository.GetAllAsync(
-                query => query.Where(l => l.OwnerId == ownerId),
-                cancellationToken: cancellationToken));
-
-        fertilizingLogs = fertilizingLogs
-            .Where(log => plantInstanceIds.Contains(log.PlantInstanceId))
-            .ToList();
-
-        var latestWateringByInstance = wateringLogs
-            .GroupBy(l => l.PlantInstanceId)
-            .ToDictionary(g => g.Key, g => g.MaxBy(x => x.WateredAtUtc)!.WateredAtUtc);
-
-        var latestFertilizingByInstance = fertilizingLogs
-            .GroupBy(l => l.PlantInstanceId)
-            .ToDictionary(g => g.Key, g => g.MaxBy(x => x.AppliedAtUtc)!.AppliedAtUtc);
-
-        // 7) Load active skips and build a fast lookup to hide skipped actions.
-        var activeSkips = await _staticCacheManager.GetAsync(
-            _staticCacheManager.PrepareKey(DashboardCacheDefaults.ActiveSkipsCacheKey, ownerToken, today.ToString("yyyyMMdd")),
-            () => _actionSkipRepository.GetAllAsync(
-                query => query.Where(s => s.OwnerId == ownerId && s.ActiveUntilDate >= today),
-                cancellationToken: cancellationToken));
-
-        var skipSet = activeSkips
-            .Select(s => (s.PlantInstanceId, s.ActionType))
-            .ToHashSet();
-
-        // 8) Build raw watering action rows.
-        var wateringRows = new List<DashboardActionModel>();
-        foreach (var schedule in wateringSchedules)
-        {
-            if (!instanceMap.TryGetValue(schedule.PlantInstanceId, out var instance)) continue;
-            var dueDate = CalculateDueDate(latestWateringByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
-            wateringRows.Add(BuildActionRow(instance, DashboardActionType.Watering, schedule.FrequencyDays, schedule.Season,
-                waterAmountL: schedule.WaterAmountL, fertilizerQuantity: null, fertilizerUnit: null,
-                fertilizerName: null,
-                dueDate, today, plantMap, spotMap, locationMap));
-        }
-
-        // 9) Build raw fertilizing action rows.
-        var fertilizingRows = new List<DashboardActionModel>();
-        foreach (var schedule in fertilizingSchedules)
-        {
-            if (!instanceMap.TryGetValue(schedule.PlantInstanceId, out var instance)) continue;
-            var dueDate = CalculateDueDate(latestFertilizingByInstance, schedule.PlantInstanceId, schedule.FrequencyDays, today);
-            fertilizingRows.Add(BuildActionRow(instance, DashboardActionType.Fertilizing, schedule.FrequencyDays, schedule.Season,
-                waterAmountL: null, fertilizerQuantity: schedule.Quantity, fertilizerUnit: schedule.Unit,
-                fertilizerName: fertilizerMap.TryGetValue(schedule.FertilizerId, out var fertilizerName) ? fertilizerName : null,
-                dueDate, today, plantMap, spotMap, locationMap));
-        }
-
-        // 10) Remove skipped actions and sort by urgency.
-        var actionableWatering = wateringRows
-            .Where(a => !skipSet.Contains((a.PlantInstanceId, ActionSkipType.Watering)))
-            .OrderBy(a => a.DueStatus)
-            .ThenBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        var actionableFertilizing = fertilizingRows
-            .Where(a => !skipSet.Contains((a.PlantInstanceId, ActionSkipType.Fertilizing)))
-            .OrderBy(a => a.DueStatus)
-            .ThenBy(a => a.DueDate)
-            .ThenBy(a => a.PlantName)
-            .ToList();
-
-        var allSpotsText = await _localizationService.GetResourceAsync("dashboard.owner.filter.allspots");
-        var inDaysTemplate = await _localizationService.GetResourceAsync("dashboard.owner.group.inxdays");
-
-        // 11) Build spot filter options from actionable rows.
-        var spotFilterSourceActions = actionableWatering.Concat(actionableFertilizing).ToList();
-        model.AvailableGardenSpots = BuildGardenSpotFilter(spotFilterSourceActions, spotMap, allSpotsText, dashboardQuery.SpotId);
-
-        // 12) Apply optional spot filter to all actionable rows.
-        if (dashboardQuery.SpotId.HasValue)
-        {
-            actionableWatering = actionableWatering
-                .Where(a => a.GardenSpotId == dashboardQuery.SpotId.Value)
-                .ToList();
-
-            actionableFertilizing = actionableFertilizing
-                .Where(a => a.GardenSpotId == dashboardQuery.SpotId.Value)
-                .ToList();
-        }
-
-        // 13) EXPLICIT CALCULATION: today's/overdue and upcoming actions for watering.
-        var wateringBuckets = SplitActionRowsByTodayAndUpcoming(actionableWatering, upcomingHorizonDays);
-
-        // 14) EXPLICIT CALCULATION: today's/overdue and upcoming actions for fertilizing.
-        var fertilizingBuckets = SplitActionRowsByTodayAndUpcoming(actionableFertilizing, upcomingHorizonDays);
-
-        model.WateringTab = BuildWateringTabModel(
-            wateringBuckets,
-            today,
-            inDaysTemplate);
-
-        model.FertilizingTab = BuildFertilizingTabModel(
-            fertilizingBuckets,
-            today,
-            inDaysTemplate);
-
-        model.WateringTab.AvailableGardenSpots = model.AvailableGardenSpots;
-        model.FertilizingTab.AvailableGardenSpots = model.AvailableGardenSpots;
-
-        var actionsForPhotos = model.WateringTab.TodayOverdueActions
-            .Concat(model.FertilizingTab.TodayOverdueActions)
-            .Concat(model.WateringTab.UpcomingActionGroups.SelectMany(g => g.Actions))
-            .Concat(model.FertilizingTab.UpcomingActionGroups.SelectMany(g => g.Actions));
-
-        await PopulateActionPhotosAsync(ownerId, actionsForPhotos, cancellationToken);
-
-        // 15) EXPLICIT CALCULATION: disease actions/cases for today and upcoming.
-        model.DiseaseTab = await PrepareDiseaseTabInternalAsync(
-            ownerId, today, plantInstanceIds, instanceMap, plantMap, spotMap, locationMap, cancellationToken);
-
-        return model;
     }
 
     #endregion

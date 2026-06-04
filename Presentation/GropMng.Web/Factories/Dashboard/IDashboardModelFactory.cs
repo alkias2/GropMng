@@ -7,6 +7,8 @@ namespace GropMng.Web.Factories.Dashboard;
 /// </summary>
 public interface IDashboardModelFactory
 {
+    Task<DashboardCountersModel> PrepareCountersAsync(CancellationToken ct);
+
     Task<DashboardWateringTabModel> PrepareWateringTabAsync(
         DashboardQueryModel? query,
         CancellationToken ct);
@@ -18,11 +20,4 @@ public interface IDashboardModelFactory
     Task<DashboardDiseaseTabModel> PrepareDiseaseTabAsync(
         CancellationToken ct);
 
-    /// <summary>
-    /// Prepares the full owner dashboard model, including today's watering, fertilizing,
-    /// and active disease tab data.
-    /// </summary>
-    Task<OwnerDashboardModel> PrepareDashboardModelAsync(
-        DashboardQueryModel? query = null,
-        CancellationToken cancellationToken = default);
 }

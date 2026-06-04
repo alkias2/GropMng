@@ -1,4 +1,4 @@
-using GropMng.Core.Domain.Garden.Enums;
+﻿using GropMng.Core.Domain.Garden.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using GropMng.Core.Domain.Garden.Care;
 
@@ -7,14 +7,19 @@ namespace GropMng.Web.Models.Dashboard;
 public class OwnerDashboardModel
 {
     public DashboardQueryModel Query { get; set; } = new();
-
+    public DashboardCountersModel Counters { get; set; } = new();  // ← νέο
     public DashboardWateringTabModel WateringTab { get; set; } = new();
 
-    public DashboardFertilizingTabModel FertilizingTab { get; set; } = new();
-
-    public DashboardDiseaseTabModel DiseaseTab { get; set; } = new();
+    // FertilizingTab και DiseaseTab δεν χρειάζονται πλέον εδώ
 
     public IList<SelectListItem> AvailableGardenSpots { get; set; } = new List<SelectListItem>();
+}
+
+public class DashboardCountersModel
+{
+    public int WateringTodayOverdueCount { get; set; }
+    public int FertilizingTodayOverdueCount { get; set; }
+    public int DiseaseTodayCount { get; set; }
 }
 
 public class DashboardWateringTabModel

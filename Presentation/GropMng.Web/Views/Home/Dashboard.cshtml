@@ -125,7 +125,7 @@
                                 </svg>
                             </span>
                             <div class="content-left">
-                                <h3 class="mb-0 active" id="watering-count">@Model.WateringTab.TodayOverdueCount</h3>
+                                <h3 id="watering-count">@Model.Counters.WateringTodayOverdueCount</h3>
                                 <small class="active">@T("dashboard.owner.tab.watering")</small>
                             </div>
                         </button>
@@ -151,7 +151,7 @@
                                 </svg>
                             </span>
                             <div class="content-left">
-                                <h3 class="mb-0" id="fertilizing-count">@Model.FertilizingTab.TodayOverdueCount</h3>
+                                <h3 id="fertilizing-count">@Model.Counters.FertilizingTodayOverdueCount</h3>
                                 <small>@T("dashboard.owner.tab.fertilizing")</small>
                             </div>
                         </button>
@@ -176,7 +176,7 @@
                             </svg>
                         </span>
                         <div class="content-left">
-                            <h3 class="mb-0">@Model.DiseaseTab.TodayCount</h3>
+                            <h3 id="diseases-count">@Model.Counters.DiseaseTodayCount</h3>
                             <small>@T("dashboard.owner.tab.diseases")</small>
                         </div>
                     </button>
@@ -225,61 +225,157 @@
     <script>
         (function () {
             'use strict';
-            var state = { section: 'watering', spotId: '@(Model.Query.SpotId?.ToString() ?? string.Empty)' };
-            var urls = {
-                watering: '@Url.Action("DashboardWateringPanel", "Home")',
-                fertilizing: '@Url.Action("DashboardFertilizingPanel", "Home")',
-                diseases: '@Url.Action("DashboardDiseasesPanel", "Home")',
-                skip: '@Url.Action("SkipAction", "ActionLog")',
-                bulkWatering: '@Url.Action("WateringAll", "ActionLog")',
-                bulkFertilizing: '@Url.Action("FertilizingAll", "ActionLog")'
+
+            // ─────────────────────────────────────────────
+            // STATE
+            // Κεντρικό state object του dashboard.
+            // section: το ενεργό tab ('watering' | 'fertilizing' | 'diseases')
+            // spotId:  το επιλεγμένο garden spot filter (κενό = όλα)
+            //          Αρχικοποιείται από το server-side model ώστε
+            //          το filter να παραμένει μετά από page reload.
+            // ─────────────────────────────────────────────
+            var state = {
+                section: 'watering',
+                spotId: '@(Model.Query.SpotId?.ToString() ?? string.Empty)'
             };
+
+            // ─────────────────────────────────────────────
+            // URLS
+            // Τα server-side URLs για τα Ajax calls.
+            // Παράγονται από Razor ώστε να σέβονται το app base path.
+            // ─────────────────────────────────────────────
+            var urls = {
+                watering:       '@Url.Action("DashboardWateringPanel",   "Home")',
+                fertilizing:    '@Url.Action("DashboardFertilizingPanel", "Home")',
+                diseases:       '@Url.Action("DashboardDiseasesPanel",   "Home")',
+                skip:           '@Url.Action("SkipAction",   "ActionLog")',
+                bulkWatering:   '@Url.Action("WateringAll",  "ActionLog")',
+                bulkFertilizing:'@Url.Action("FertilizingAll","ActionLog")'
+            };
+
+            // ─────────────────────────────────────────────
+            // MESSAGES
+            // UI strings που παράγονται server-side (localized).
+            // JavaScriptEncoder.Default.Encode αποτρέπει XSS
+            // όταν το localized string περιέχει quotes ή special chars.
+            // ─────────────────────────────────────────────
             var msg = {
                 loading: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.loading")))',
-                error: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.error")))',
-                failed: 'Request failed. Please try again.',
-                empty: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("dashboard.owner.todayactions.empty")))'
+                error:   '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("common.error")))',
+                failed:  'Request failed. Please try again.',
+                empty:   '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(T("dashboard.owner.todayactions.empty")))'
             };
-            var $doc = $(document), $panel = $('#dashboard-panel-content'), $modal = $('#skipActionModal');
 
-            function token() { return $('#dashboard-anti-forgery-token input[name="__RequestVerificationToken"]').val() || ''; }
+            // ─────────────────────────────────────────────
+            // SHORTHAND REFERENCES
+            // Cached jQuery references για αντικείμενα που
+            // χρησιμοποιούνται συχνά ώστε να αποφεύγεται
+            // επαναλαμβανόμενο DOM lookup.
+            // ─────────────────────────────────────────────
+            var $doc   = $(document),
+                $panel = $('#dashboard-panel-content'),  // container των partial views
+                $modal = $('#skipActionModal');           // modal για skip action
 
+            // ─────────────────────────────────────────────
+            // token()
+            // Διαβάζει το ASP.NET Core Anti-Forgery token από το hidden div.
+            // Αποστέλλεται στα POST requests ως header ΚΑΙ ως form field
+            // για να γίνεται validate από το [ValidateAntiForgeryToken].
+            // ─────────────────────────────────────────────
+            function token() {
+                return $('#dashboard-anti-forgery-token input[name="__RequestVerificationToken"]').val() || '';
+            }
+
+            // ─────────────────────────────────────────────
+            // toast(type, text)
+            // Εμφανίζει ένα Bootstrap toast notification.
+            // Δημιουργεί dynamically τον container αν δεν υπάρχει ήδη.
+            // type: 'success' | 'error'  →  πράσινο / κόκκινο background
+            // Αφαιρεί αυτόματα το toast από το DOM μετά το hide (memory cleanup).
+            // ─────────────────────────────────────────────
             function toast(type, text) {
                 var $c = $('#dashboard-toast-container');
-                if (!$c.length) $c = $('<div id="dashboard-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:1100"></div>').appendTo('body');
-                var $t = $('<div class="toast align-items-center text-white ' + (type === 'success' ? 'bg-success' : 'bg-danger') + ' border-0" role="alert"><div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>');
+                if (!$c.length)
+                    $c = $('<div id="dashboard-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:1100"></div>').appendTo('body');
+
+                var $t = $('<div class="toast align-items-center text-white '
+                    + (type === 'success' ? 'bg-success' : 'bg-danger')
+                    + ' border-0" role="alert">'
+                    + '<div class="d-flex"><div class="toast-body"></div>'
+                    + '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>'
+                    + '</div></div>');
+
                 $t.find('.toast-body').text(text || '');
                 $c.append($t);
                 new bootstrap.Toast($t[0], { delay: 3200 }).show();
                 $t.on('hidden.bs.toast', function () { $t.remove(); });
             }
 
+            // ─────────────────────────────────────────────
+            // setActive(section)
+            // Ενημερώνει το UI των counter cards ώστε να δείχνει
+            // ποιο tab είναι ενεργό.
+            // Αφαιρεί πρώτα όλες τις active classes και μετά
+            // προσθέτει στην κάρτα που αντιστοιχεί στο section.
+            // ─────────────────────────────────────────────
             function setActive(section) {
+                // Reset όλων των cards
                 $('.counters-wrapper .card').removeClass('card-border-shadow-primary active');
-                $('.counters-wrapper .content-left h4, .counters-wrapper small, .icon3').removeClass('active');
+                $('.counters-wrapper .content-left h3, .counters-wrapper small, .icon3').removeClass('active');
+
+                // Ενεργοποίηση της κάρτας του τρέχοντος section
                 var $btn = $('.dashboard-section-btn[data-section="' + section + '"]').first();
                 $btn.closest('.card').addClass('card-border-shadow-primary active');
                 $btn.find('h3, small, .icon3').addClass('active');
             }
 
+            // ─────────────────────────────────────────────
+            // syncTop()
+            // Συγχρονίζει τα στοιχεία της toolbar (bulk buttons + spot filter)
+            // με το ενεργό section:
+            // - "Water All" εμφανίζεται μόνο στο watering tab
+            // - "Fertilize All" εμφανίζεται μόνο στο fertilizing tab
+            // - Το spot filter κρύβεται στο diseases tab (δεν έχει spot filter)
+            // ─────────────────────────────────────────────
             function syncTop() {
                 $('#btn-water-all').toggleClass('d-none', state.section !== 'watering');
                 $('#btn-fertilize-all').toggleClass('d-none', state.section !== 'fertilizing');
                 $('#dashboardSpotFilter').closest('.dropdown').toggleClass('d-none', state.section === 'diseases');
             }
 
+            // ─────────────────────────────────────────────
+            // bulkBtns(type)
+            // Επιστρέφει τα "Done" buttons που είναι eligible για bulk action.
+            // Μόνο τα cards με data-bulk-eligible="true" συμμετέχουν
+            // (δηλαδή τα today/overdue — όχι τα upcoming).
+            // ─────────────────────────────────────────────
             function bulkBtns(type) {
                 return $panel.find('[data-bulk-eligible="true"] .btn-action-done[data-action-type="' + type + '"]');
             }
 
+            // ─────────────────────────────────────────────
+            // syncBulk()
+            // Ενεργοποιεί ή απενεργοποιεί τα bulk buttons
+            // ανάλογα με το αν υπάρχουν eligible actions στο panel.
+            // Έτσι αποτρέπεται το κλικ σε "Water All" όταν δεν υπάρχει
+            // τίποτα να ποτιστεί.
+            // ─────────────────────────────────────────────
             function syncBulk() {
-                if (state.section === 'watering') $('#btn-water-all').prop('disabled', !bulkBtns('watering').length);
-                if (state.section === 'fertilizing') $('#btn-fertilize-all').prop('disabled', !bulkBtns('fertilizing').length);
+                if (state.section === 'watering')
+                    $('#btn-water-all').prop('disabled', !bulkBtns('watering').length);
+                if (state.section === 'fertilizing')
+                    $('#btn-fertilize-all').prop('disabled', !bulkBtns('fertilizing').length);
             }
 
+            // ─────────────────────────────────────────────
+            // initTooltips($scope)
+            // Αρχικοποιεί τα Bootstrap tooltips μέσα στο $scope.
+            // Κάνει dispose τυχόν υπαρχόντων πριν δημιουργήσει νέα,
+            // ώστε να αποφεύγονται duplicate tooltips μετά από
+            // Ajax reload του panel.
+            // ─────────────────────────────────────────────
             function initTooltips($scope) {
                 if (!window.bootstrap || !bootstrap.Tooltip) return;
-
                 ($scope || $(document)).find('[data-bs-toggle="tooltip"]').each(function () {
                     var existing = bootstrap.Tooltip.getInstance(this);
                     if (existing) existing.dispose();
@@ -287,119 +383,252 @@
                 });
             }
 
+            // ─────────────────────────────────────────────
+            // removeCard($row, counterId)
+            // Αφαιρεί ένα action card από το DOM μετά από επιτυχή
+            // ενέργεια (done ή skip).
+            // - Κάνει fade out για ομαλή εμφάνιση
+            // - Μειώνει τον counter στην αντίστοιχη κάρτα
+            // - Ελέγχει αν έμειναν ορατά cards· αν όχι, δείχνει
+            //   το "empty" μήνυμα
+            // - Καλεί syncBulk() για να ενημερωθεί το bulk button
+            // ─────────────────────────────────────────────
             function removeCard($row, counterId) {
                 $row.addClass('opacity-50').fadeOut(220, function () {
                     $row.remove();
+
+                    // Μείωση του counter στην αντίστοιχη κάρτα
                     if (counterId) {
                         var $c = $('#' + counterId), n = parseInt($c.text(), 10);
                         if (!isNaN(n) && n > 0) $c.text(n - 1);
                     }
+
                     syncBulk();
-                    if (!$panel.find('[data-dashboard-action-item]:visible').length && !$panel.find('#actions-empty-msg').length)
+
+                    // Αν δεν υπάρχουν πλέον ορατά action cards, εμφάνισε empty state
+                    if (!$panel.find('[data-dashboard-action-item]:visible').length
+                        && !$panel.find('#actions-empty-msg').length)
                         $panel.append('<p id="actions-empty-msg" class="text-muted p-4 mb-0">' + msg.empty + '</p>');
                 });
             }
 
+            // ─────────────────────────────────────────────
+            // loadSection(section)
+            // Φορτώνει Ajax το partial view του επιλεγμένου section
+            // και το εγχέει στο #dashboard-panel-content.
+            // - Ενημερώνει το state
+            // - Δείχνει spinner κατά τη φόρτωση
+            // - Μετά το load, αν το "Show upcoming" toggle είναι
+            //   ενεργό, εμφανίζει αμέσως την upcoming section
+            //   (χωρίς δεύτερο request)
+            // - Αρχικοποιεί tooltips στο νέο content
+            // ─────────────────────────────────────────────
             function loadSection(section) {
                 state.section = section;
                 setActive(section);
                 syncTop();
-                $panel.html('<div class="p-4 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">' + msg.loading + '</span></div></div>');
-                var url = section === 'watering' ? urls.watering : (section === 'fertilizing' ? urls.fertilizing : urls.diseases);
+
+                // Spinner placeholder
+                $panel.html('<div class="p-4 text-center"><div class="spinner-border text-primary" role="status">'
+                    + '<span class="visually-hidden">' + msg.loading + '</span></div></div>');
+
+                var url = section === 'watering'    ? urls.watering
+                        : section === 'fertilizing' ? urls.fertilizing
+                        : urls.diseases;
+
                 $.get(url, { spotId: state.spotId })
                     .done(function (html) {
                         $panel.html(html);
+
+                        // Αν το "Show upcoming" toggle ήταν ενεργό πριν το reload,
+                        // διατήρησε την κατάσταση του χωρίς να χρειαστεί ο χρήστης
+                        // να το ξανακλικάρει
                         if (section !== 'diseases') {
                             var checked = $('.dashboard-show-upcoming[data-section="' + section + '"]').is(':checked');
-                            if (checked) $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
+                            if (checked)
+                                $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
                         }
+
                         syncBulk();
                         initTooltips($panel);
                     })
-                    .fail(function () { $panel.html('<div class="p-4"><p class="text-danger mb-0">' + msg.error + '</p></div>'); });
+                    .fail(function () {
+                        $panel.html('<div class="p-4"><p class="text-danger mb-0">' + msg.error + '</p></div>');
+                    });
             }
 
+            // ─────────────────────────────────────────────
+            // runDone($btn)
+            // Εκτελεί POST για να καταγραφεί μια φροντίδα ως "done".
+            // - Διαβάζει τα data attributes του button για το payload
+            // - Στέλνει WaterAmountL ή FertilizerQuantity/Unit
+            //   μόνο αν έχουν τιμή (optional fields)
+            // - Κατά την εκτέλεση: disable button + spinner
+            // - Σε επιτυχία: αφαιρεί το card με removeCard()
+            // - Σε αποτυχία: επαναφέρει το button στην αρχική κατάσταση
+            // ─────────────────────────────────────────────
             function runDone($btn) {
                 if ($btn.prop('disabled')) return;
-                var type = $btn.data('action-type'), $row = $btn.closest('[data-dashboard-action-item]');
+
+                var type = $btn.data('action-type'),
+                    $row = $btn.closest('[data-dashboard-action-item]');
+
                 var payload = {
-                    PlantInstanceId: $btn.data('plant-instance-id'),
-                    DueStatus: String($btn.data('due-status') || ''),
-                    DueDate: String($btn.data('due-date') || ''),
+                    PlantInstanceId:        $btn.data('plant-instance-id'),
+                    DueStatus:              String($btn.data('due-status') || ''),
+                    DueDate:                String($btn.data('due-date') || ''),
                     __RequestVerificationToken: token()
                 };
-                if (type === 'watering' && $btn.data('water-amount-l') !== '') payload.WaterAmountL = $btn.data('water-amount-l');
+
+                // Optional fields — αποστέλλονται μόνο αν έχουν τιμή
+                if (type === 'watering' && $btn.data('water-amount-l') !== '')
+                    payload.WaterAmountL = $btn.data('water-amount-l');
                 if (type === 'fertilizing') {
                     if ($btn.data('fertilizer-quantity') !== '') payload.Quantity = $btn.data('fertilizer-quantity');
-                    if ($btn.data('fertilizer-unit') !== '') payload.Unit = $btn.data('fertilizer-unit');
+                    if ($btn.data('fertilizer-unit') !== '')     payload.Unit     = $btn.data('fertilizer-unit');
                 }
+
                 var restore = '<i class="bx bx-check"></i> ' + ($btn.data('label-done') || 'Done');
                 $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+
                 $.ajax({ url: $btn.data('url'), type: 'POST', headers: { RequestVerificationToken: token() }, data: payload })
                     .done(function (res) {
                         if (res && res.success) { removeCard($row, $btn.data('counter')); return; }
                         $btn.prop('disabled', false).html(restore);
                         toast('error', (res && res.message) || msg.failed);
                     })
-                    .fail(function () { $btn.prop('disabled', false).html(restore); toast('error', msg.failed); });
+                    .fail(function () {
+                        $btn.prop('disabled', false).html(restore);
+                        toast('error', msg.failed);
+                    });
             }
 
+            // ─────────────────────────────────────────────
+            // openSkipModal($btn)
+            // Ανοίγει το modal για επιλογή skip mode.
+            // Αποθηκεύει στο modal object ($.data) τα στοιχεία
+            // της ενέργειας ώστε να τα διαβάσει το runSkip().
+            // ─────────────────────────────────────────────
             function openSkipModal($btn) {
                 var $row = $btn.closest('[data-dashboard-action-item]');
                 $modal.find('.skip-plant-name').text($btn.data('plant-name'));
                 $modal.data({
-                    pid: $btn.data('plant-instance-id'),
-                    type: $btn.data('action-type'),
-                    freq: $btn.data('frequency-days') || 0,
-                    $row: $row,
+                    pid:     $btn.data('plant-instance-id'),
+                    type:    $btn.data('action-type'),
+                    freq:    $btn.data('frequency-days') || 0,
+                    $row:    $row,
                     counter: $row.find('.btn-action-done').first().data('counter') || ''
                 });
                 new bootstrap.Modal($modal[0]).show();
             }
 
+            // ─────────────────────────────────────────────
+            // runSkip(mode)
+            // Εκτελεί POST για skip της ενέργειας.
+            // mode: 'today' = skip μόνο για σήμερα
+            //       'next'  = skip επόμενης προγραμματισμένης ημερομηνίας
+            // Διαβάζει τα στοιχεία από το $.data του modal
+            // που αποθηκεύτηκαν από το openSkipModal().
+            // Κλείνει το modal πριν ενημερώσει το UI
+            // ώστε να αποφευχθεί double-click.
+            // ─────────────────────────────────────────────
             function runSkip(mode) {
-                var d = $modal.data(), $btns = $modal.find('#btnSkipToday, #btnSkipNext');
+                var d    = $modal.data(),
+                    $btns = $modal.find('#btnSkipToday, #btnSkipNext');
+
                 $btns.prop('disabled', true);
+
                 $.ajax({
-                    url: urls.skip, type: 'POST', headers: { RequestVerificationToken: token() },
-                    data: { PlantInstanceId: d.pid, ActionType: d.type, SkipMode: mode, FrequencyDays: d.freq, __RequestVerificationToken: token() }
-                }).done(function (res) {
-                    var inst = bootstrap.Modal.getInstance($modal[0]); if (inst) inst.hide();
+                    url: urls.skip, type: 'POST',
+                    headers: { RequestVerificationToken: token() },
+                    data: {
+                        PlantInstanceId:          d.pid,
+                        ActionType:               d.type,
+                        SkipMode:                 mode,
+                        FrequencyDays:            d.freq,
+                        __RequestVerificationToken: token()
+                    }
+                })
+                .done(function (res) {
+                    var inst = bootstrap.Modal.getInstance($modal[0]);
+                    if (inst) inst.hide();
                     $btns.prop('disabled', false);
                     if (res && res.success) { removeCard(d.$row, d.counter); return; }
                     toast('error', (res && res.message) || msg.failed);
-                }).fail(function () {
-                    var inst = bootstrap.Modal.getInstance($modal[0]); if (inst) inst.hide();
+                })
+                .fail(function () {
+                    var inst = bootstrap.Modal.getInstance($modal[0]);
+                    if (inst) inst.hide();
                     $btns.prop('disabled', false);
                     toast('error', msg.failed);
                 });
             }
 
+            // ─────────────────────────────────────────────
+            // runBulk(type, url, $btn)
+            // Εκτελεί bulk POST για όλα τα eligible actions του τρέχοντος tab.
+            // - Συλλέγει τα PlantInstanceIds από τα bulkBtns()
+            // - Στέλνει array-style form data: PlantInstanceIds[0], [1], ...
+            // - Αφαιρεί μόνο τα cards που περιλαμβάνονταν στο request
+            //   (idSet lookup για O(1) έλεγχο)
+            // - Εμφανίζει success toast με τον αριθμό των items
+            //   που ολοκληρώθηκαν (από res.count ή fallback στο ids.length)
+            // ─────────────────────────────────────────────
             function runBulk(type, url, $btn) {
                 if ($btn.prop('disabled')) return;
-                var $items = bulkBtns(type), ids = $items.map(function () { return $(this).data('plant-instance-id'); }).get().filter(Boolean);
+
+                var $items = bulkBtns(type),
+                    ids    = $items.map(function () { return $(this).data('plant-instance-id'); }).get().filter(Boolean);
+
                 if (!ids.length) return;
-                var orig = $btn.html(), data = { __RequestVerificationToken: token() }, idSet = {};
-                $.each(ids, function (i, id) { data['PlantInstanceIds[' + i + ']'] = id; idSet[String(id)] = true; });
+
+                var orig  = $btn.html(),
+                    data  = { __RequestVerificationToken: token() },
+                    idSet = {};
+
+                // Χτίζει array-style payload και lookup set παράλληλα
+                $.each(ids, function (i, id) {
+                    data['PlantInstanceIds[' + i + ']'] = id;
+                    idSet[String(id)] = true;
+                });
+
                 $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+
                 $.ajax({ url: url, type: 'POST', headers: { RequestVerificationToken: token() }, data: data })
                     .done(function (res) {
                         $btn.prop('disabled', false).html(orig);
                         if (!(res && res.success)) { toast('error', (res && res.message) || msg.failed); return; }
+
+                        // Αφαίρεση μόνο των cards που ήταν στο request
                         bulkBtns(type).each(function () {
                             var $d = $(this);
-                            if (idSet[String($d.data('plant-instance-id') || '')]) removeCard($d.closest('[data-dashboard-action-item]'), $d.data('counter'));
+                            if (idSet[String($d.data('plant-instance-id') || '')])
+                                removeCard($d.closest('[data-dashboard-action-item]'), $d.data('counter'));
                         });
+
                         var n = typeof res.count === 'number' ? res.count : ids.length;
                         if (n > 0) toast('success', ($btn.data('success-template') || 'Completed for {0} items.').replace('{0}', n));
                     })
-                    .fail(function () { $btn.prop('disabled', false).html(orig); toast('error', msg.failed); });
+                    .fail(function () {
+                        $btn.prop('disabled', false).html(orig);
+                        toast('error', msg.failed);
+                    });
             }
 
+            // ─────────────────────────────────────────────
+            // EVENT BINDINGS
+            // Χρήση event delegation (on $doc) αντί direct binding
+            // ώστε να λειτουργούν σωστά τα events σε elements
+            // που εγχέονται δυναμικά μέσω Ajax (panel content).
+            // ─────────────────────────────────────────────
+
+            // Κλικ στις counter κάρτες → αλλαγή ενεργού section
             $doc.on('click', '.dashboard-section-btn', function () {
                 var s = $(this).data('section');
                 if (s && s !== state.section) loadSection(s);
             });
+
+            // Αλλαγή spot filter → reload του τρέχοντος section με νέο filter
             $doc.on('click', '#dashboardSpotFilterMenu .dropdown-item', function () {
                 state.spotId = String($(this).data('spot-value') || '');
                 $('#dashboardSpotFilterLabel').text($(this).text());
@@ -407,21 +636,37 @@
                 $(this).addClass('active');
                 loadSection(state.section);
             });
+
+            // Toggle "Show upcoming" → δείχνει/κρύβει την upcoming section
+            // χωρίς νέο Ajax request (το HTML είναι ήδη στο DOM, απλά d-none)
             $doc.on('change', '.dashboard-show-upcoming', function () {
                 var section = $(this).data('section');
-                $panel.find('.upcoming-section[data-section="' + section + '"]').toggleClass('d-none', !this.checked);
+                $panel.find('.upcoming-section[data-section="' + section + '"]')
+                      .toggleClass('d-none', !this.checked);
             });
-            $doc.on('click', '.btn-action-done', function () { runDone($(this)); });
-            $doc.on('click', '.btn-action-skip', function () { openSkipModal($(this)); });
-            $doc.on('click', '#btnSkipToday', function () { runSkip('today'); });
-            $doc.on('click', '#btnSkipNext', function () { runSkip('next'); });
-            $doc.on('click', '#btn-water-all', function () { runBulk('watering', urls.bulkWatering, $(this)); });
+
+            // Action buttons
+            $doc.on('click', '.btn-action-done',  function () { runDone($(this)); });
+            $doc.on('click', '.btn-action-skip',  function () { openSkipModal($(this)); });
+            $doc.on('click', '#btnSkipToday',     function () { runSkip('today'); });
+            $doc.on('click', '#btnSkipNext',      function () { runSkip('next'); });
+
+            // Bulk action buttons
+            $doc.on('click', '#btn-water-all',     function () { runBulk('watering',    urls.bulkWatering,    $(this)); });
             $doc.on('click', '#btn-fertilize-all', function () { runBulk('fertilizing', urls.bulkFertilizing, $(this)); });
 
+            // ─────────────────────────────────────────────
+            // INIT
+            // Αρχικοποίηση UI κατά το page load.
+            // Το watering tab είναι ήδη rendered server-side,
+            // οπότε δεν χρειάζεται loadSection() — μόνο
+            // ενημέρωση του visual state και των tooltips.
+            // ─────────────────────────────────────────────
             setActive(state.section);
             syncTop();
             syncBulk();
             initTooltips($panel);
+
         })();
     </script>
 }
