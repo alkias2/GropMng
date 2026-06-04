@@ -40,8 +40,8 @@ namespace GropMng.Web.Controllers
             CancellationToken cancellationToken = default)
         {
             var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
-            return PartialView("_DashboardWateringPanel", model.WateringTab);
+            var model = await _dashboardModelFactory.PrepareWateringTabAsync(query, cancellationToken);
+            return PartialView("_DashboardWateringPanel", model);
         }
 
         [Authorize]
@@ -50,15 +50,15 @@ namespace GropMng.Web.Controllers
             CancellationToken cancellationToken = default)
         {
             var query = new Models.Dashboard.DashboardQueryModel { SpotId = spotId };
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(query, cancellationToken);
-            return PartialView("_DashboardFertilizingPanel", model.FertilizingTab);
+            var model = await _dashboardModelFactory.PrepareFertilizingTabAsync(query, cancellationToken);
+            return PartialView("_DashboardFertilizingPanel", model);
         }
 
         [Authorize]
         public async Task<IActionResult> DashboardDiseasesPanel(CancellationToken cancellationToken)
         {
-            var model = await _dashboardModelFactory.PrepareDashboardModelAsync(null, cancellationToken);
-            return PartialView("_DashboardDiseasesPanel", model.DiseaseTab);
+            var model = await _dashboardModelFactory.PrepareDiseaseTabAsync(cancellationToken);
+            return PartialView("_DashboardDiseasesPanel", model);
         }
 
         #endregion

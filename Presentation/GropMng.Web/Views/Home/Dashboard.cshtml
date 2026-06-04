@@ -176,7 +176,7 @@
                             </svg>
                         </span>
                         <div class="content-left">
-                            <h3 class="mb-0">@Model.DiseaseTab.ActiveCases.Count</h3>
+                            <h3 class="mb-0">@Model.DiseaseTab.TodayCount</h3>
                             <small>@T("dashboard.owner.tab.diseases")</small>
                         </div>
                     </button>
@@ -259,7 +259,7 @@
                 $('.counters-wrapper .content-left h4, .counters-wrapper small, .icon3').removeClass('active');
                 var $btn = $('.dashboard-section-btn[data-section="' + section + '"]').first();
                 $btn.closest('.card').addClass('card-border-shadow-primary active');
-                $btn.find('h4, small, .icon3').addClass('active');
+                $btn.find('h3, small, .icon3').addClass('active');
             }
 
             function syncTop() {
