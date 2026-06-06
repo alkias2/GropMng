@@ -20,4 +20,12 @@ public static class WateringCacheDefaults
         new("Grop.dashboard.owner.watering-logs.v1.{0}",
             GropCacheDefaults.DashboardPrefix,
             LogPrefix);
+
+    // -- Service-level keys
+
+    public static GropCacheKey SchedulesByInstanceKey =>
+        new("Grop.watering-schedule.by-instance.v1.{0}.{1}", SchedulePrefix);
+
+    public static GropCacheKey LogsByInstanceKey =>
+        new("Grop.watering-log.by-instance.v1.{0}.{1}", LogPrefix);
 }

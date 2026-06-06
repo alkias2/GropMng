@@ -38,8 +38,9 @@ public class PlantInstanceControllerFilterTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedList<PlantInstance>(Array.Empty<PlantInstance>(), 0, int.MaxValue));
 
-        plantInstanceService
-            .Setup(service => service.GetMainPlantPhotoAsync(It.IsAny<int>(), ownerId, It.IsAny<CancellationToken>()))
+        var plantPhotoService = new Mock<IPlantPhotoService>();
+        plantPhotoService
+            .Setup(service => service.GetMainPhotoAsync(It.IsAny<int>(), ownerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PlantPhoto?)null);
 
         var plantService = new Mock<IPlantService>();
@@ -65,7 +66,15 @@ public class PlantInstanceControllerFilterTests
             Mock.Of<IDiseaseService>(),
             Mock.Of<IEnumLocalizationHelper>(),
             currentOwnerProvider.Object,
-            Mock.Of<IPictureService>());
+            Mock.Of<IPictureService>(),
+            Mock.Of<IContainerService>(),
+            Mock.Of<ISoilMixService>(),
+            Mock.Of<IWateringService>(),
+            Mock.Of<IFertilizingService>(),
+            plantPhotoService.Object,
+            Mock.Of<IPlantNoteService>(),
+            Mock.Of<IPlantDiseaseService>(),
+            Mock.Of<IRepottingLogService>());
 
         var result = await controller.List(null, null, null, false, default);
 

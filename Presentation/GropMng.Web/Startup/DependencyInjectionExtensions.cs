@@ -300,10 +300,16 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IContainerService, ContainerService>();
         services.AddScoped<IPlantService, PlantService>();
         services.AddScoped<IPlantInstanceService, PlantInstanceService>();
+        services.AddScoped<IWateringService, WateringService>();
+        services.AddScoped<IFertilizingService, FertilizingService>();
+        services.AddScoped<IRepottingLogService, RepottingLogService>();
         services.AddScoped<IDiseaseService, DiseaseService>();
         services.AddScoped<IFertilizerService, FertilizerService>();
         services.AddScoped<IPesticideService, PesticideService>();
         services.AddScoped<ISoilMixService, SoilMixService>();
+        services.AddScoped<IPlantPhotoService, PlantPhotoService>();
+        services.AddScoped<IPlantNoteService, PlantNoteService>();
+        services.AddScoped<IPlantDiseaseService, PlantDiseaseService>();
 
         services.AddScoped<IAIQueryTemplateService, AIQueryTemplateService>();
 

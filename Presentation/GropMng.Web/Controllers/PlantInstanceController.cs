@@ -35,6 +35,14 @@ public class PlantInstanceController : Controller
     private readonly IEnumLocalizationHelper _enumLocalizationHelper;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
     private readonly IPictureService _pictureService;
+    private readonly IContainerService _containerService;
+    private readonly ISoilMixService _soilMixService;
+    private readonly IWateringService _wateringService;
+    private readonly IFertilizingService _fertilizingService;
+    private readonly IPlantPhotoService _plantPhotoService;
+    private readonly IPlantNoteService _plantNoteService;
+    private readonly IPlantDiseaseService _plantDiseaseService;
+    private readonly IRepottingLogService _repottingLogService;
 
     #endregion
 
@@ -48,7 +56,15 @@ public class PlantInstanceController : Controller
         IDiseaseService diseaseService,
         IEnumLocalizationHelper enumLocalizationHelper,
         ICurrentOwnerProvider currentOwnerProvider,
-        IPictureService pictureService)
+        IPictureService pictureService,
+        IContainerService containerService,
+        ISoilMixService soilMixService,
+        IWateringService wateringService,
+        IFertilizingService fertilizingService,
+        IPlantPhotoService plantPhotoService,
+        IPlantNoteService plantNoteService,
+        IPlantDiseaseService plantDiseaseService,
+        IRepottingLogService repottingLogService)
     {
         _plantInstanceService = plantInstanceService ?? throw new ArgumentNullException(nameof(plantInstanceService));
         _plantService = plantService ?? throw new ArgumentNullException(nameof(plantService));
@@ -58,6 +74,14 @@ public class PlantInstanceController : Controller
         _enumLocalizationHelper = enumLocalizationHelper ?? throw new ArgumentNullException(nameof(enumLocalizationHelper));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
         _pictureService = pictureService ?? throw new ArgumentNullException(nameof(pictureService));
+        _containerService = containerService ?? throw new ArgumentNullException(nameof(containerService));
+        _soilMixService = soilMixService ?? throw new ArgumentNullException(nameof(soilMixService));
+        _wateringService = wateringService ?? throw new ArgumentNullException(nameof(wateringService));
+        _fertilizingService = fertilizingService ?? throw new ArgumentNullException(nameof(fertilizingService));
+        _plantPhotoService = plantPhotoService ?? throw new ArgumentNullException(nameof(plantPhotoService));
+        _plantNoteService = plantNoteService ?? throw new ArgumentNullException(nameof(plantNoteService));
+        _plantDiseaseService = plantDiseaseService ?? throw new ArgumentNullException(nameof(plantDiseaseService));
+        _repottingLogService = repottingLogService ?? throw new ArgumentNullException(nameof(repottingLogService));
     }
 
     #endregion
@@ -111,7 +135,7 @@ public class PlantInstanceController : Controller
         // Load main photo thumbnail URL (500px) for each plant instance row
         foreach (var row in rows)
         {
-            var mainPhoto = await _plantInstanceService.GetMainPlantPhotoAsync(row.Id, ownerId, cancellationToken);
+            var mainPhoto = await _plantPhotoService.GetMainPhotoAsync(row.Id, ownerId, cancellationToken);
             if (mainPhoto != null)
                 row.MainImageUrl = await _pictureService.GetPictureUrlAsync(mainPhoto.PictureId, targetSize: 500);
         }
@@ -339,7 +363,7 @@ public class PlantInstanceController : Controller
             })
             .ToList();
 
-        var containers = await _plantInstanceService.GetContainersAsync(ownerId, cancellationToken);
+        var containers = await _containerService.GetContainersAsync(ownerId, pageSize: int.MaxValue, cancellationToken: cancellationToken);
         var availableContainers = new List<SelectListItem> { new() { Value = "", Text = "— None —" } };
         foreach (var container in containers)
         {
@@ -353,7 +377,7 @@ public class PlantInstanceController : Controller
 
         model.AvailableContainers = availableContainers;
 
-        var soilMixes = await _plantInstanceService.GetSoilMixesAsync(cancellationToken);
+        var soilMixes = await _soilMixService.GetSoilMixesAsync(pageSize: int.MaxValue, cancellationToken: cancellationToken);
         model.AvailableSoilMixes = new List<SelectListItem> { new() { Value = "", Text = "— None —" } }
             .Concat(soilMixes.Select(s => new SelectListItem
             {
@@ -395,7 +419,7 @@ public class PlantInstanceController : Controller
         if (instance is null)
             return Json(new { data = Array.Empty<object>() });
 
-        var photos = await _plantInstanceService.GetPlantPhotosAsync(id, ownerId, cancellationToken);
+        var photos = await _plantPhotoService.GetPhotosAsync(id, ownerId, cancellationToken);
 
         var rows = new List<PlantInstancePhotoRowModel>();
         foreach (var photo in photos)
@@ -435,7 +459,7 @@ public class PlantInstanceController : Controller
                 DisplayOrder = model.DisplayOrder
             };
 
-            var created = await _plantInstanceService.AddPlantPhotoAsync(id, photo, cancellationToken);
+            var created = await _plantPhotoService.CreatePhotoAsync(id, photo, cancellationToken);
             var thumbUrl = await _pictureService.GetPictureUrlAsync(created.PictureId, targetSize: 100);
 
             return Json(new
@@ -477,7 +501,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            var existing = await _plantInstanceService.GetPlantPhotoByIdAsync(id, effectivePhotoId, ownerId, cancellationToken);
+            var existing = await _plantPhotoService.GetPhotoByIdAsync(id, effectivePhotoId, ownerId, cancellationToken);
             if (existing is null)
                 return Json(new { success = false, message = "Photo not found." });
 
@@ -485,7 +509,7 @@ public class PlantInstanceController : Controller
             existing.TakenDate = model.TakenDate;
             existing.DisplayOrder = model.DisplayOrder;
 
-            await _plantInstanceService.UpdatePlantPhotoAsync(id, existing, cancellationToken);
+            await _plantPhotoService.UpdatePhotoAsync(id, existing, cancellationToken);
 
             return Json(new { success = true });
         }
@@ -513,7 +537,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeletePlantPhotoAsync(id, photoId, ownerId, cancellationToken);
+            await _plantPhotoService.DeletePhotoAsync(id, photoId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -534,8 +558,8 @@ public class PlantInstanceController : Controller
         if (instance is null)
             return NotFound();
 
-        var schedules = await _plantInstanceService.GetWateringSchedulesAsync(id, ownerId, cancellationToken);
-        var recentLogs = await _plantInstanceService.GetWateringLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
+        var schedules = await _wateringService.GetSchedulesAsync(id, ownerId, cancellationToken);
+        var recentLogs = await _wateringService.GetLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
 
         var rows = schedules.Select(s => new WateringScheduleRowModel
         {
@@ -584,7 +608,7 @@ public class PlantInstanceController : Controller
                 Notes = model.Notes
             };
 
-            await _plantInstanceService.AddWateringScheduleAsync(id, schedule, cancellationToken);
+            await _wateringService.CreateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
         catch (GropMng.Core.Common.Exceptions.DomainException ex)
@@ -615,7 +639,7 @@ public class PlantInstanceController : Controller
                 Notes = model.Notes
             };
 
-            await _plantInstanceService.UpdateWateringScheduleAsync(id, schedule, cancellationToken);
+            await _wateringService.UpdateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
         catch (GropMng.Core.Common.Exceptions.DomainException ex)
@@ -632,7 +656,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteWateringScheduleAsync(id, scheduleId, ownerId, cancellationToken);
+            await _wateringService.DeleteScheduleAsync(id, scheduleId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (GropMng.Core.Common.Exceptions.DomainException ex)
@@ -649,7 +673,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteWateringLogAsync(id, logId, ownerId, cancellationToken);
+            await _wateringService.DeleteLogAsync(id, logId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (GropMng.Core.Common.Exceptions.DomainException ex)
@@ -674,8 +698,8 @@ public class PlantInstanceController : Controller
         var fertilizers = fertilizersPaged.ToList();
         var fertilizerMap = fertilizers.ToDictionary(f => f.Id, f => f.Name);
 
-        var schedules = await _plantInstanceService.GetFertilizingSchedulesAsync(id, ownerId, cancellationToken);
-        var recentLogs = await _plantInstanceService.GetFertilizingLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
+        var schedules = await _fertilizingService.GetSchedulesAsync(id, ownerId, cancellationToken);
+        var recentLogs = await _fertilizingService.GetLogsAsync(id, ownerId, pageIndex: 0, pageSize: 5, cancellationToken);
 
         var rows = schedules.Select(s => new FertilizingScheduleRowModel
         {
@@ -742,7 +766,7 @@ public class PlantInstanceController : Controller
                 DilutionInstructions = model.DilutionInstructions
             };
 
-            await _plantInstanceService.AddFertilizingScheduleAsync(id, schedule, cancellationToken);
+            await _fertilizingService.CreateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -775,7 +799,7 @@ public class PlantInstanceController : Controller
                 DilutionInstructions = model.DilutionInstructions
             };
 
-            await _plantInstanceService.UpdateFertilizingScheduleAsync(id, schedule, cancellationToken);
+            await _fertilizingService.UpdateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -792,7 +816,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteFertilizingScheduleAsync(id, scheduleId, ownerId, cancellationToken);
+            await _fertilizingService.DeleteScheduleAsync(id, scheduleId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -809,7 +833,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteFertilizingLogAsync(id, logId, ownerId, cancellationToken);
+            await _fertilizingService.DeleteLogAsync(id, logId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -884,7 +908,7 @@ public class PlantInstanceController : Controller
                 Notes = model.Notes
             };
 
-            await _plantInstanceService.UpdateRepottingLogAsync(id, repottingLog, cancellationToken);
+            await _repottingLogService.UpdateLogAsync(id, repottingLog, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -901,7 +925,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteRepottingLogAsync(id, logId, ownerId, cancellationToken);
+            await _repottingLogService.DeleteLogAsync(id, logId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -924,7 +948,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            var created = await _plantInstanceService.CreateContainerAsync(new Container
+            var created = await _containerService.CreateContainerAsync(new Container
             {
                 OwnerId = ownerId,
                 ContainerType = model.ContainerType,
@@ -961,19 +985,21 @@ public class PlantInstanceController : Controller
         var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(plantInstanceId, ownerId, includeDetails: false, cancellationToken)
             ?? throw new DomainException("Plant instance not found.");
 
-        var containers = await _plantInstanceService.GetContainersAsync(ownerId, cancellationToken);
+        var containersPaged = await _containerService.GetContainersAsync(ownerId, pageSize: int.MaxValue, cancellationToken: cancellationToken);
+        var containers = containersPaged.ToList();
         var containerMap = containers.ToDictionary(c => c.Id);
         var containerDisplayMap = new Dictionary<int, string>(containers.Count);
         foreach (var containerItem in containers)
             containerDisplayMap[containerItem.Id] = await BuildContainerDisplayNameAsync(containerItem);
 
-        var soilMixes = await _plantInstanceService.GetSoilMixesAsync(cancellationToken);
+        var soilMixesPaged = await _soilMixService.GetSoilMixesAsync(pageSize: int.MaxValue, cancellationToken: cancellationToken);
+        var soilMixes = soilMixesPaged.ToList();
         var soilMixMap = soilMixes.ToDictionary(s => s.Id);
         var currentSoilMixName = instance.SoilMixId.HasValue && soilMixMap.TryGetValue(instance.SoilMixId.Value, out var soilMix)
             ? soilMix.Name
             : "-";
 
-        var logs = await _plantInstanceService.GetRepottingLogsAsync(plantInstanceId, ownerId, pageIndex: 0, pageSize: 20, cancellationToken);
+        var logs = await _repottingLogService.GetLogsAsync(plantInstanceId, ownerId, pageIndex: 0, pageSize: 20, cancellationToken);
 
         var currentContainerEntity = instance.Container
             ?? containers.FirstOrDefault(containerItem => containerItem.PlantInstanceId == plantInstanceId);
@@ -1154,7 +1180,7 @@ public class PlantInstanceController : Controller
         var diseases = diseasesPaged.OrderBy(d => d.Name).ToList();
         var diseaseMap = diseases.ToDictionary(d => d.Id, d => d.Name);
 
-        var records = await _plantInstanceService.GetDiseaseRecordsAsync(id, ownerId, includePhotos: true, cancellationToken);
+        var records = await _plantDiseaseService.GetRecordsAsync(id, ownerId, includePhotos: true, cancellationToken);
         var photoDictionary = new Dictionary<int, IReadOnlyList<DiseasePhotoRowModel>>();
 
         foreach (var record in records)
@@ -1226,7 +1252,7 @@ public class PlantInstanceController : Controller
                 Notes = model.Notes
             };
 
-            await _plantInstanceService.AddDiseaseRecordAsync(id, record, cancellationToken);
+            await _plantDiseaseService.CreateRecordAsync(id, record, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -1259,7 +1285,7 @@ public class PlantInstanceController : Controller
                 Notes = model.Notes
             };
 
-            await _plantInstanceService.UpdateDiseaseRecordAsync(id, record, cancellationToken);
+            await _plantDiseaseService.UpdateRecordAsync(id, record, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -1276,7 +1302,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteDiseaseRecordAsync(id, recordId, ownerId, cancellationToken);
+            await _plantDiseaseService.DeleteRecordAsync(id, recordId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -1293,7 +1319,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            var records = await _plantInstanceService.GetDiseaseRecordsAsync(id, ownerId, includePhotos: false, cancellationToken);
+            var records = await _plantDiseaseService.GetRecordsAsync(id, ownerId, includePhotos: false, cancellationToken);
             var record = records.FirstOrDefault(r => r.Id == recordId);
             if (record is null)
                 return Json(new { success = false, message = "Disease record not found." });
@@ -1301,7 +1327,7 @@ public class PlantInstanceController : Controller
             record.Outcome = PlantDiseaseOutcome.Resolved;
             record.ResolvedDate = DateOnly.FromDateTime(DateTime.Today);
 
-            await _plantInstanceService.UpdateDiseaseRecordAsync(id, record, cancellationToken);
+            await _plantDiseaseService.UpdateRecordAsync(id, record, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -1330,7 +1356,7 @@ public class PlantInstanceController : Controller
                 DisplayOrder = model.DisplayOrder
             };
 
-            await _plantInstanceService.AddDiseasePhotoAsync(id, recordId, photo, cancellationToken);
+            await _plantDiseaseService.CreatePhotoAsync(id, recordId, photo, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)
@@ -1347,7 +1373,7 @@ public class PlantInstanceController : Controller
 
         try
         {
-            await _plantInstanceService.DeleteDiseasePhotoAsync(id, recordId, photoId, ownerId, cancellationToken);
+            await _plantDiseaseService.DeletePhotoAsync(id, recordId, photoId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
         catch (DomainException ex)

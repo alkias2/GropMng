@@ -1,9 +1,12 @@
 using GropMng.Core;
+using GropMng.Core.Caching;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
+using GropMng.Services.Caching.Garden;
+using GropMng.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GropMng.Services.Services.Garden.Plants;
@@ -17,43 +20,53 @@ public class SoilMixService : ISoilMixService
     private readonly IRepository<SoilIngredient> _soilIngredientRepository;
     private readonly IRepository<SoilMixIngredient> _soilMixIngredientRepository;
     private readonly IRepository<PlantInstance> _plantInstanceRepository;
+    private readonly IGropStaticCacheManager _staticCacheManager;
 
     public SoilMixService(
         IRepository<SoilMix> soilMixRepository,
         IRepository<SoilIngredient> soilIngredientRepository,
         IRepository<SoilMixIngredient> soilMixIngredientRepository,
-        IRepository<PlantInstance> plantInstanceRepository)
+        IRepository<PlantInstance> plantInstanceRepository,
+        IGropStaticCacheManager staticCacheManager)
     {
         _soilMixRepository = soilMixRepository ?? throw new ArgumentNullException(nameof(soilMixRepository));
         _soilIngredientRepository = soilIngredientRepository ?? throw new ArgumentNullException(nameof(soilIngredientRepository));
         _soilMixIngredientRepository = soilMixIngredientRepository ?? throw new ArgumentNullException(nameof(soilMixIngredientRepository));
         _plantInstanceRepository = plantInstanceRepository ?? throw new ArgumentNullException(nameof(plantInstanceRepository));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
     }
 
-    public Task<IPagedList<SoilMix>> GetSoilMixesAsync(string? searchTerm = null, int pageIndex = 0, int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<IPagedList<SoilMix>> GetSoilMixesAsync(string? searchTerm = null, int pageIndex = 0, int pageSize = 10, CancellationToken cancellationToken = default)
     {
-        return _soilMixRepository.GetPagedAsync(
-            query =>
-            {
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    var term = searchTerm.Trim();
-                    query = query.Where(m => m.Name.Contains(term) ||
-                                             (m.Composition != null && m.Composition.Contains(term)) ||
-                                             (m.Notes != null && m.Notes.Contains(term)));
-                }
+        var cacheKey = _staticCacheManager.PrepareKey(SoilMixCacheDefaults.AllSoilMixesKey);
 
-                return query.OrderBy(m => m.Name).ThenBy(m => m.Id);
-            },
-            pageIndex,
-            pageSize,
-            cancellationToken: cancellationToken);
+        return await _staticCacheManager.GetAsync(cacheKey, () =>
+            _soilMixRepository.GetPagedAsync(
+                query =>
+                {
+                    if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        var term = searchTerm.Trim();
+                        query = query.Where(m => m.Name.Contains(term) ||
+                                                 (m.Composition != null && m.Composition.Contains(term)) ||
+                                                 (m.Notes != null && m.Notes.Contains(term)));
+                    }
+
+                    return query.OrderBy(m => m.Name).ThenBy(m => m.Id);
+                },
+                pageIndex,
+                pageSize,
+                cancellationToken: cancellationToken));
     }
 
-    public Task<SoilMix?> GetSoilMixByIdAsync(int soilMixId, CancellationToken cancellationToken = default)
+    public async Task<SoilMix?> GetSoilMixByIdAsync(int soilMixId, CancellationToken cancellationToken = default)
     {
         ValidateId(soilMixId, nameof(soilMixId));
-        return _soilMixRepository.GetByIdAsync(soilMixId, cancellationToken: cancellationToken);
+
+        var cacheKey = _staticCacheManager.PrepareKey(SoilMixCacheDefaults.SoilMixByIdKey, soilMixId);
+
+        return await _staticCacheManager.GetAsync(cacheKey, () =>
+            _soilMixRepository.GetByIdAsync(soilMixId, cancellationToken: cancellationToken));
     }
 
     public async Task<SoilMix> CreateSoilMixAsync(SoilMix soilMix, CancellationToken cancellationToken = default)
@@ -63,8 +76,9 @@ public class SoilMixService : ISoilMixService
 
         await EnsureSoilMixNameIsUniqueAsync(soilMix.Name, cancellationToken);
 
-        StampForCreate(soilMix);
+        AuditableEntityHelper.StampForCreate(soilMix);
         await _soilMixRepository.CreateAsync(soilMix, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
 
         return soilMix;
     }
@@ -86,8 +100,9 @@ public class SoilMixService : ISoilMixService
         existing.Drainage = soilMix.Drainage;
         existing.Notes = soilMix.Notes?.Trim();
 
-        StampForUpdate(existing);
+        AuditableEntityHelper.StampForUpdate(existing);
         await _soilMixRepository.UpdateAsync(existing, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
 
         return existing;
     }
@@ -104,6 +119,7 @@ public class SoilMixService : ISoilMixService
             throw new DomainException($"Cannot delete soil mix '{soilMix.Name}' because it is referenced by {references} plant instance(s).");
 
         await _soilMixRepository.DeleteAsync(soilMix, true, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
     }
 
     public Task<IReadOnlyList<SoilIngredient>> GetSoilIngredientsAsync(CancellationToken cancellationToken = default)
@@ -157,6 +173,7 @@ public class SoilMixService : ISoilMixService
         StampForCreate(ingredient);
 
         await _soilMixIngredientRepository.CreateAsync(ingredient, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
 
         ingredient.SoilIngredient = soilIngredient;
         return ingredient;
@@ -190,6 +207,8 @@ public class SoilMixService : ISoilMixService
         StampForUpdate(row);
 
         await _soilMixIngredientRepository.UpdateAsync(row, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
+
         return row;
     }
 
@@ -208,6 +227,7 @@ public class SoilMixService : ISoilMixService
             throw new DomainException($"Soil mix ingredient row '{soilMixIngredientId}' was not found for soil mix '{soilMixId}'.");
 
         await _soilMixIngredientRepository.DeleteAsync(row, true, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
     }
 
     public async Task<SoilIngredient> CreateSoilIngredientAsync(SoilIngredient ingredient, CancellationToken cancellationToken = default)
@@ -229,6 +249,8 @@ public class SoilMixService : ISoilMixService
         StampForCreate(ingredient);
 
         await _soilIngredientRepository.CreateAsync(ingredient, true, cancellationToken);
+        await _staticCacheManager.RemoveByPrefixAsync(SoilMixCacheDefaults.SoilMixPrefix);
+
         return ingredient;
     }
 
@@ -282,21 +304,9 @@ public class SoilMixService : ISoilMixService
             throw new DomainException("PhMin cannot be greater than PhMax.");
     }
 
-    private static void StampForCreate(BaseEntity entity)
-    {
-        if (entity is not AuditableEntity auditable)
-            return;
+    private static void StampForCreate(AuditableEntity entity)
+        => AuditableEntityHelper.StampForCreate(entity);
 
-        var now = DateTime.UtcNow;
-        auditable.CreatedAtUtc = now;
-        auditable.UpdatedAtUtc = now;
-        auditable.IsDeleted = false;
-        auditable.DeletedAtUtc = null;
-    }
-
-    private static void StampForUpdate(BaseEntity entity)
-    {
-        if (entity is AuditableEntity auditable)
-            auditable.UpdatedAtUtc = DateTime.UtcNow;
-    }
+    private static void StampForUpdate(AuditableEntity entity)
+        => AuditableEntityHelper.StampForUpdate(entity);
 }

@@ -20,4 +20,12 @@ public static class FertilizingCacheDefaults
         new("Grop.dashboard.owner.fertilizing-logs.v1.{0}",
             GropCacheDefaults.DashboardPrefix,
             LogPrefix);
+
+    // -- Service-level keys
+
+    public static GropCacheKey SchedulesByInstanceKey =>
+        new("Grop.fertilizing-schedule.by-instance.v1.{0}.{1}", SchedulePrefix);
+
+    public static GropCacheKey LogsByInstanceKey =>
+        new("Grop.fertilizing-log.by-instance.v1.{0}.{1}", LogPrefix);
 }

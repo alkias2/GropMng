@@ -3,13 +3,16 @@ using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
+using GropMng.Core.Interfaces.Services.Garden.Care;
+using GropMng.Core.Interfaces.Services.Garden.Health;
+using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Services.Services.Garden.Plants;
 using Moq;
 
 namespace GropMng.Tests.Services;
 
 /// <summary>
-/// Contains focused unit tests for <see cref="PlantInstanceService" />.
+/// Contains focused unit tests for <see cref="PlantInstanceService" /> aggregate-root operations.
 /// </summary>
 public class PlantInstanceServiceTests
 {
@@ -72,17 +75,14 @@ public class PlantInstanceServiceTests
             gardenSpotRepository.Object,
             containerRepository.Object,
             Mock.Of<IRepository<SoilMix>>(),
-            Mock.Of<IRepository<WateringSchedule>>(),
-            Mock.Of<IRepository<WateringLog>>(),
-            Mock.Of<IRepository<FertilizingSchedule>>(),
-            Mock.Of<IRepository<FertilizingLog>>(),
             Mock.Of<IRepository<RepottingLog>>(),
-            Mock.Of<IRepository<PlantPhoto>>(),
-            Mock.Of<IRepository<PlantNote>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
-            Mock.Of<IRepository<Fertilizer>>());
+            Mock.Of<IContainerService>(),
+            Mock.Of<ISoilMixService>(),
+            Mock.Of<IWateringService>(),
+            Mock.Of<IFertilizingService>(),
+            Mock.Of<IPlantPhotoService>(),
+            Mock.Of<IPlantNoteService>(),
+            Mock.Of<IPlantDiseaseService>());
 
         var plantInstance = new PlantInstance
         {
@@ -167,17 +167,14 @@ public class PlantInstanceServiceTests
             gardenSpotRepository.Object,
             containerRepository.Object,
             soilMixRepository.Object,
-            Mock.Of<IRepository<WateringSchedule>>(),
-            Mock.Of<IRepository<WateringLog>>(),
-            Mock.Of<IRepository<FertilizingSchedule>>(),
-            Mock.Of<IRepository<FertilizingLog>>(),
             Mock.Of<IRepository<RepottingLog>>(),
-            Mock.Of<IRepository<PlantPhoto>>(),
-            Mock.Of<IRepository<PlantNote>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
-            Mock.Of<IRepository<Fertilizer>>());
+            Mock.Of<IContainerService>(),
+            Mock.Of<ISoilMixService>(),
+            Mock.Of<IWateringService>(),
+            Mock.Of<IFertilizingService>(),
+            Mock.Of<IPlantPhotoService>(),
+            Mock.Of<IPlantNoteService>(),
+            Mock.Of<IPlantDiseaseService>());
 
         var updatedPlantInstance = new PlantInstance
         {
@@ -260,17 +257,14 @@ public class PlantInstanceServiceTests
             Mock.Of<IRepository<GardenSpot>>(),
             containerRepository.Object,
             soilMixRepository.Object,
-            Mock.Of<IRepository<WateringSchedule>>(),
-            Mock.Of<IRepository<WateringLog>>(),
-            Mock.Of<IRepository<FertilizingSchedule>>(),
-            Mock.Of<IRepository<FertilizingLog>>(),
             repottingLogRepository.Object,
-            Mock.Of<IRepository<PlantPhoto>>(),
-            Mock.Of<IRepository<PlantNote>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
-            Mock.Of<IRepository<Fertilizer>>());
+            Mock.Of<IContainerService>(),
+            Mock.Of<ISoilMixService>(),
+            Mock.Of<IWateringService>(),
+            Mock.Of<IFertilizingService>(),
+            Mock.Of<IPlantPhotoService>(),
+            Mock.Of<IPlantNoteService>(),
+            Mock.Of<IPlantDiseaseService>());
 
         var repottingLog = new RepottingLog
         {
@@ -288,128 +282,4 @@ public class PlantInstanceServiceTests
         Assert.Null(containers[0].PlantInstanceId);
         Assert.Equal(11, containers[1].PlantInstanceId);
     }
-
-    #region AddWateringScheduleAsync Tests
-
-    /// <summary>
-    /// Verifies that adding a watering schedule stamps aggregate ownership and relationship keys before persistence.
-    /// </summary>
-    [Fact]
-    public async Task AddWateringScheduleAsync_AssignsPlantInstanceAndOwner()
-    {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-        var plantInstanceRepository = new Mock<IRepository<PlantInstance>>();
-        var wateringScheduleRepository = new Mock<IRepository<WateringSchedule>>();
-
-        plantInstanceRepository
-            .Setup(repository => repository.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<PlantInstance, bool>>>(), false, true, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PlantInstance
-            {
-                Id = 9,
-                OwnerId = ownerId,
-                PlantId = 1,
-                GardenSpotId = 2
-            });
-
-        wateringScheduleRepository
-            .Setup(repository => repository.CreateAsync(It.IsAny<WateringSchedule>(), true, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((WateringSchedule entity, bool _, CancellationToken _) => entity);
-
-        var service = new PlantInstanceService(
-            plantInstanceRepository.Object,
-            Mock.Of<IRepository<Plant>>(),
-            Mock.Of<IRepository<GardenSpot>>(),
-            Mock.Of<IRepository<Container>>(),
-            Mock.Of<IRepository<SoilMix>>(),
-            wateringScheduleRepository.Object,
-            Mock.Of<IRepository<WateringLog>>(),
-            Mock.Of<IRepository<FertilizingSchedule>>(),
-            Mock.Of<IRepository<FertilizingLog>>(),
-            Mock.Of<IRepository<RepottingLog>>(),
-            Mock.Of<IRepository<PlantPhoto>>(),
-            Mock.Of<IRepository<PlantNote>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
-            Mock.Of<IRepository<Fertilizer>>());
-
-        var schedule = new WateringSchedule
-        {
-            OwnerId = ownerId,
-            FrequencyDays = 3
-        };
-
-        // Act
-        var result = await service.AddWateringScheduleAsync(9, schedule);
-
-        // Assert
-        Assert.Equal(9, result.PlantInstanceId);
-        Assert.Equal(ownerId, result.OwnerId);
-        Assert.NotEqual(default, result.CreatedAtUtc);
-    }
-
-    [Fact]
-    public async Task AddFertilizingScheduleAsync_AssignsPlantInstanceAndOwner()
-    {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-        var plantInstanceRepository = new Mock<IRepository<PlantInstance>>();
-        var fertilizerRepository = new Mock<IRepository<Fertilizer>>();
-        var fertilizingScheduleRepository = new Mock<IRepository<FertilizingSchedule>>();
-
-        plantInstanceRepository
-            .Setup(repository => repository.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<PlantInstance, bool>>>(), false, true, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PlantInstance
-            {
-                Id = 15,
-                OwnerId = ownerId,
-                PlantId = 2,
-                GardenSpotId = 3
-            });
-
-        fertilizerRepository
-            .Setup(repository => repository.GetByIdAsync(It.IsAny<int>(), false, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Fertilizer { Id = 9, Name = "Test Fertilizer" });
-
-        fertilizingScheduleRepository
-            .Setup(repository => repository.CreateAsync(It.IsAny<FertilizingSchedule>(), true, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((FertilizingSchedule entity, bool _, CancellationToken _) => entity);
-
-        var service = new PlantInstanceService(
-            plantInstanceRepository.Object,
-            Mock.Of<IRepository<Plant>>(),
-            Mock.Of<IRepository<GardenSpot>>(),
-            Mock.Of<IRepository<Container>>(),
-            Mock.Of<IRepository<SoilMix>>(),
-            Mock.Of<IRepository<WateringSchedule>>(),
-            Mock.Of<IRepository<WateringLog>>(),
-            fertilizingScheduleRepository.Object,
-            Mock.Of<IRepository<FertilizingLog>>(),
-            Mock.Of<IRepository<RepottingLog>>(),
-            Mock.Of<IRepository<PlantPhoto>>(),
-            Mock.Of<IRepository<PlantNote>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.DiseasePhoto>>(),
-            Mock.Of<IRepository<GropMng.Core.Domain.Garden.Health.Disease>>(),
-            fertilizerRepository.Object);
-
-        var schedule = new FertilizingSchedule
-        {
-            OwnerId = ownerId,
-            FertilizerId = 9,
-            Season = GardenSeason.Spring,
-            FrequencyDays = 14
-        };
-
-        // Act
-        var result = await service.AddFertilizingScheduleAsync(15, schedule);
-
-        // Assert
-        Assert.Equal(15, result.PlantInstanceId);
-        Assert.Equal(ownerId, result.OwnerId);
-        Assert.NotEqual(default, result.CreatedAtUtc);
-    }
-
-    #endregion
 }

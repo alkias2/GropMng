@@ -133,6 +133,12 @@ appsettings.Development.json
 !.env.example
 
 # ==============================
+# Agents rules
+# ==============================
+/.clinerules
+/PROJECT_CONTEXT.md
+
+# ==============================
 # Copilot agent helper scripts (root-level, generated during AI-assisted sessions)
 # ==============================
 /_write_*.py

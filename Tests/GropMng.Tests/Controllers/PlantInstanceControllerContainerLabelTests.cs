@@ -67,13 +67,15 @@ public class PlantInstanceControllerContainerLabelTests
                 IsActive = true
             });
 
-        plantInstanceService
-            .Setup(service => service.GetContainersAsync(ownerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Container> { occupiedPot, emptyBed });
+        var containerService = new Mock<IContainerService>();
+        containerService
+            .Setup(service => service.GetContainersAsync(ownerId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedList<Container>(new[] { occupiedPot, emptyBed }, 2, int.MaxValue));
 
-        plantInstanceService
-            .Setup(service => service.GetSoilMixesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<SoilMix>());
+        var soilMixService = new Mock<ISoilMixService>();
+        soilMixService
+            .Setup(service => service.GetSoilMixesAsync(null, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedList<SoilMix>(Array.Empty<SoilMix>(), 0, int.MaxValue));
 
         var plantService = new Mock<IPlantService>();
         plantService
@@ -119,7 +121,15 @@ public class PlantInstanceControllerContainerLabelTests
             Mock.Of<IDiseaseService>(),
             enumLocalizationHelper.Object,
             currentOwnerProvider.Object,
-            Mock.Of<IPictureService>());
+            Mock.Of<IPictureService>(),
+            containerService.Object,
+            soilMixService.Object,
+            Mock.Of<IWateringService>(),
+            Mock.Of<IFertilizingService>(),
+            Mock.Of<IPlantPhotoService>(),
+            Mock.Of<IPlantNoteService>(),
+            Mock.Of<IPlantDiseaseService>(),
+            Mock.Of<IRepottingLogService>());
 
         var result = await controller.Edit(7, default);
 
