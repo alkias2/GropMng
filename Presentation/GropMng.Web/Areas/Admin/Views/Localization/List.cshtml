@@ -1,0 +1,126 @@
+@model GropMng.Web.Areas.Admin.Models.Localization.LanguageSearchModel
+@using GropMng.Web.Areas.Admin.Models.Localization
+@using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using Microsoft.AspNetCore.Routing
+@{
+    ViewData["Title"] = T("admin.localization.languages.title");
+    GropHtml.SetActiveMenuItemSystemName("Localization");
+
+    var createLangUrl = Url.Action("Create", "Localization", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@T("admin.localization.languages.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.localization.languages.title") }
+    })">
+    <grop-header-button href="@createLangUrl"
+                        text="@T("admin.localization.language.create")"
+                        icon="bx bx-plus"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+@Html.AntiForgeryToken()
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("common.filters")</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> @T("common.clear")
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <grop-label asp-for="Name" />
+                <input asp-for="Name" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <grop-label asp-for="Published" />
+                <select asp-for="Published" class="form-select">
+                    <option value="">@T("common.all")</option>
+                    <option value="true">@T("common.yes")</option>
+                    <option value="false">@T("common.no")</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "languagesTable",
+    UrlRead = new GropDataUrl("LanguageList", "Localization", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(LanguageSearchModel.Name)),
+        new GropFilterParameter(nameof(LanguageSearchModel.Published))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("id")
+        {
+            Title = T("admin.localization.language.fields.id"),
+            Width = "80px",
+        },
+        new GropColumnProperty("name")
+        {
+            Title = T("admin.localization.language.fields.name"),
+            Width = "200px",
+        },
+        new GropColumnProperty("languageCulture")
+        {
+            Title = T("admin.localization.language.fields.culture"),
+            Width = "150px",
+        },
+        new GropColumnProperty("uniqueSeoCode")
+        {
+            Title = T("admin.localization.language.fields.seocode"),
+            Width = "100px",
+        },
+        new GropColumnProperty("published")
+        {
+            Title = T("admin.localization.language.fields.published"),
+            Width = "100px",
+            ClassName = GropColumnClassDefaults.CenterAll,
+            Render = new RenderBoolean(),
+        },
+        new GropColumnProperty("displayOrder")
+        {
+            Title = T("admin.localization.language.fields.displayorder"),
+            Width = "100px",
+            ClassName = GropColumnClassDefaults.CenterAll,
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.edit"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonEdit(new GropDataUrl("Edit", "Localization", new RouteValueDictionary(new { area = "Admin" }))),
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("admin.localization.language.manage"),
+            Width = "140px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonView(new GropDataUrl("Resources", "Localization", new RouteValueDictionary(new { area = "Admin" }))),
+        }
+    ]
+})
+

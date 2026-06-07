@@ -8,7 +8,12 @@
         deleteText:       @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.confirm.delete.text"))),
         deleteItemsText:  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.confirm.delete.items"))),
         deleteButtonText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.delete"))),
-        cancelButtonText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel")))
+        cancelButtonText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.cancel"))),
+        okButtonText:     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.ok"))),
+        yesButtonText:    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.yes"))),
+        noButtonText:     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.no"))),
+        loadingText:      @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.loading"))),
+        networkErrorText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(T("common.networkerror")))
     };
     window.GropSwal?.bindConfirmForms(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(selector)));
 </script>

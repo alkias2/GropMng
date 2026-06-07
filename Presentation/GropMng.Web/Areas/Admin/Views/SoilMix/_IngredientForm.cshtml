@@ -1,0 +1,98 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
+@model GropMng.Web.Areas.Admin.Models.SoilMix.SoilMixIngredientModel
+
+<form id="addIngredientForm"
+      asp-area="Admin"
+      asp-controller="SoilMix"
+      asp-action="AddIngredient"
+      method="post">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="SoilMixId" />
+    <input type="hidden" asp-for="IsNew" id="IsNew" value="false" />
+
+    <div id="addIngredientError" class="alert alert-danger d-none mb-3"></div>
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-existing-btn" data-bs-toggle="tab"
+                    data-bs-target="#tab-existing" type="button" role="tab">
+                @T("admin.soilmix.ingredient.add.existing")
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-new-btn" data-bs-toggle="tab"
+                    data-bs-target="#tab-new" type="button" role="tab">
+                @T("admin.soilmix.ingredient.add.new")
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="tab-existing" role="tabpanel">
+            @if (Model.AvailableSoilIngredients.Count == 0)
+            {
+                <div class="alert alert-info">@T("admin.soilmix.ingredient.noavailable")</div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    <div class="col-12">
+                        <grop-label asp-for="SoilIngredientId" />
+                        <grop-select asp-for="SoilIngredientId" asp-items="Model.AvailableSoilIngredients" />
+                        <span class="text-danger" asp-validation-for="SoilIngredientId"></span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="tab-new" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-12">
+                    <grop-label asp-for="NewIngredientName" />
+                    <grop-editor asp-for="NewIngredientName" asp-required="true" />
+                    <span class="text-danger" asp-validation-for="NewIngredientName"></span>
+                </div>
+                <div class="col-12">
+                    <grop-label asp-for="NewIngredientDescription" />
+                    <grop-textarea asp-for="NewIngredientDescription" asp-rows="2" />
+                    <span class="text-danger" asp-validation-for="NewIngredientDescription"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-4">
+            <grop-label asp-for="PercentageByVolume" />
+            <div class="input-group">
+                <grop-editor asp-for="PercentageByVolume" asp-required="true" />
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-danger" asp-validation-for="PercentageByVolume"></span>
+        </div>
+        <div class="col-md-8">
+            <grop-label asp-for="Notes" />
+            <grop-editor asp-for="Notes" />
+        </div>
+    </div>
+
+    <div class="modal-footer mt-3 px-0 pb-0">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">@T("common.cancel")</button>
+        <button type="submit" class="btn btn-primary">@T("common.save")</button>
+    </div>
+</form>
+
+<script>
+    (function () {
+        // Sync IsNew hidden field when tab changes
+        document.getElementById('tab-new-btn').addEventListener('shown.bs.tab', function () {
+            document.getElementById('IsNew').value = 'true';
+        });
+        document.getElementById('tab-existing-btn').addEventListener('shown.bs.tab', function () {
+            document.getElementById('IsNew').value = 'false';
+        });
+    })();
+</script>

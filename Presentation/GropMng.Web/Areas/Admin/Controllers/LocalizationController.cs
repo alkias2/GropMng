@@ -1,57 +1,95 @@
-using GropMng.Core.Domain.Localization;
-using GropMng.Core.Interfaces.Repositories;
-using GropMng.Core.Interfaces.Services.Localization;
+using System.Text;
+using FluentValidation;
 using GropMng.Web.Areas.Admin.Models.Localization;
+using GropMng.Web.Areas.Admin.Factories.Localization;
+using GropMng.Core.Interfaces.Services.Localization;
+using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
 
 /// <summary>
 /// Administers languages and locale resources.
+/// Follows the thin-controller / factory pattern: delegates all model preparation
+/// to <see cref="ILocalizationModelFactory"/> and only orchestrates HTTP concerns.
 /// </summary>
 [Area("Admin")]
+[AuthorizeAdmin]
+[CheckPermission(GropMngPermissions.Localization.ManageLocalization)]
 public class LocalizationController : Controller
 {
-    private readonly IRepository<Language> _languageRepository;
-    private readonly IRepository<LocaleStringResource> _resourceRepository;
+    private readonly ILocalizationModelFactory _factory;
+    private readonly IValidator<LanguageSearchModel> _languageSearchValidator;
+    private readonly IValidator<LocaleResourceSearchModel> _localeResourceSearchValidator;
+    private readonly ILanguageService _languageService;
     private readonly ILocalizationService _localizationService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalizationController"/> class.
     /// </summary>
     public LocalizationController(
-        IRepository<Language> languageRepository,
-        IRepository<LocaleStringResource> resourceRepository,
+        ILocalizationModelFactory factory,
+        IValidator<LanguageSearchModel> languageSearchValidator,
+        IValidator<LocaleResourceSearchModel> localeResourceSearchValidator,
+        ILanguageService languageService,
         ILocalizationService localizationService)
     {
-        _languageRepository = languageRepository;
-        _resourceRepository = resourceRepository;
+        _factory = factory;
+        _languageSearchValidator = languageSearchValidator;
+        _localeResourceSearchValidator = localeResourceSearchValidator;
+        _languageService = languageService;
         _localizationService = localizationService;
     }
 
     /// <summary>
-    /// Shows the language list.
+    /// Redirects the legacy index route to the canonical list page.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Languages(CancellationToken cancellationToken)
+    public IActionResult Index()
+        => RedirectToAction(nameof(List));
+
+    /// <summary>
+    /// Renders the Languages list page with an initialised search model.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
+        var searchModel = await _factory.PrepareLanguageSearchModelAsync(cancellationToken: cancellationToken);
+        return View(searchModel);
+    }
 
-        var languages = await _languageRepository.GetAllAsync(
-            query => query.OrderBy(entity => entity.DisplayOrder).ThenBy(entity => entity.Id),
-            cancellationToken: cancellationToken);
+    /// <summary>
+    /// Returns paged, filtered language rows in the DataTables server-side JSON format.
+    /// DataTables posts draw/start/length plus any custom filter fields defined in
+    /// <see cref="LanguageSearchModel"/>.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> LanguageList([FromForm] LanguageSearchModel searchModel, CancellationToken cancellationToken)
+    {
+        var validationResult = await _languageSearchValidator.ValidateAsync(searchModel, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ErrorMessage).ToArray());
 
-        return View(languages);
+            return BadRequest(new { errors });
+        }
+
+        var listModel = await _factory.PrepareLanguageListModelAsync(searchModel, cancellationToken);
+        return Json(listModel);
     }
 
     /// <summary>
     /// Renders the language create page.
     /// </summary>
     [HttpGet]
-    public IActionResult CreateLanguage()
+    public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-        return View(new LanguageModel());
+        var model = await _factory.PrepareLanguageCreateModelAsync(cancellationToken);
+        return View(model);
     }
 
     /// <summary>
@@ -59,54 +97,41 @@ public class LocalizationController : Controller
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateLanguage(LanguageModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(LanguageModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
-            return View(model);
-
-        var now = DateTime.UtcNow;
-        await _languageRepository.CreateAsync(new Language
         {
-            Name = model.Name.Trim(),
-            LanguageCulture = model.LanguageCulture.Trim(),
-            UniqueSeoCode = model.UniqueSeoCode.Trim().ToLowerInvariant(),
-            FlagImageFileName = string.IsNullOrWhiteSpace(model.FlagImageFileName) ? null : model.FlagImageFileName.Trim(),
-            Rtl = model.Rtl,
-            Published = model.Published,
-            DisplayOrder = model.DisplayOrder,
-            CreatedOnUtc = now,
-            UpdatedOnUtc = now
-        }, cancellationToken: cancellationToken);
+            var preparedModel = await _factory.PrepareLanguageCreateModelAsync(cancellationToken);
+            MergePostedValues(preparedModel, model);
+            return View(preparedModel);
+        }
 
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.language.create.success");
-        return RedirectToAction(nameof(Languages));
+        try
+        {
+            await _factory.SaveLanguageCreateAsync(model, cancellationToken);
+            TempData["SuccessMessage"] = await _factory.GetLocalizationResourceAsync("admin.localization.language.create.success");
+            return RedirectToAction(nameof(List));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var preparedModel = await _factory.PrepareLanguageCreateModelAsync(cancellationToken);
+            MergePostedValues(preparedModel, model);
+            return View(preparedModel);
+        }
     }
 
     /// <summary>
     /// Renders the language edit page.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> EditLanguage(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
+        var model = await _factory.PrepareLanguageEditModelAsync(id, cancellationToken);
+        if (model is null)
+            return RedirectToAction(nameof(List));
 
-        var language = await _languageRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
-        if (language is null)
-            return RedirectToAction(nameof(Languages));
-
-        return View(new LanguageModel
-        {
-            Id = language.Id,
-            Name = language.Name,
-            LanguageCulture = language.LanguageCulture,
-            UniqueSeoCode = language.UniqueSeoCode,
-            FlagImageFileName = language.FlagImageFileName,
-            Rtl = language.Rtl,
-            Published = language.Published,
-            DisplayOrder = language.DisplayOrder
-        });
+        return View(model);
     }
 
     /// <summary>
@@ -114,30 +139,30 @@ public class LocalizationController : Controller
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditLanguage(LanguageModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Edit(LanguageModel model, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
         if (!ModelState.IsValid)
-            return View(model);
+        {
+            var hydratedModel = await _factory.PrepareLanguageEditModelAsync(model.Id, cancellationToken) ?? 
+                                await _factory.PrepareLanguageCreateModelAsync(cancellationToken);
+            MergePostedValues(hydratedModel, model);
+            return View(hydratedModel);
+        }
 
-        var language = await _languageRepository.GetByIdAsync(model.Id, cancellationToken: cancellationToken);
-        if (language is null)
-            return RedirectToAction(nameof(Languages));
-
-        language.Name = model.Name.Trim();
-        language.LanguageCulture = model.LanguageCulture.Trim();
-        language.UniqueSeoCode = model.UniqueSeoCode.Trim().ToLowerInvariant();
-        language.FlagImageFileName = string.IsNullOrWhiteSpace(model.FlagImageFileName) ? null : model.FlagImageFileName.Trim();
-        language.Rtl = model.Rtl;
-        language.Published = model.Published;
-        language.DisplayOrder = model.DisplayOrder;
-        language.UpdatedOnUtc = DateTime.UtcNow;
-
-        await _languageRepository.UpdateAsync(language, cancellationToken: cancellationToken);
-
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.language.edit.success");
-        return RedirectToAction(nameof(EditLanguage), new { id = model.Id });
+        try
+        {
+            await _factory.SaveLanguageEditAsync(model, cancellationToken);
+            TempData["SuccessMessage"] = await _factory.GetLocalizationResourceAsync("admin.localization.language.edit.success");
+            return RedirectToAction(nameof(Edit), new { id = model.Id });
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var hydratedModel = await _factory.PrepareLanguageEditModelAsync(model.Id, cancellationToken) ?? 
+                                await _factory.PrepareLanguageCreateModelAsync(cancellationToken);
+            MergePostedValues(hydratedModel, model);
+            return View(hydratedModel);
+        }
     }
 
     /// <summary>
@@ -145,188 +170,201 @@ public class LocalizationController : Controller
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteLanguage(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        var language = await _languageRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
-        if (language is null)
-            return RedirectToAction(nameof(Languages));
-
-        var hasResources = await _resourceRepository.AnyAsync(entity => entity.LanguageId == id, cancellationToken: cancellationToken);
-        if (hasResources)
+        try
         {
-            TempData["ErrorMessage"] = await _localizationService.GetResourceAsync("admin.localization.language.delete.hasresources");
-            return RedirectToAction(nameof(Languages));
+            await _factory.DeleteLanguageAsync(id, cancellationToken);
+            TempData["SuccessMessage"] = await _factory.GetLocalizationResourceAsync("admin.localization.language.delete.success");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
         }
 
-        await _languageRepository.DeleteAsync(language, softDelete: false, cancellationToken: cancellationToken);
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.language.delete.success");
-
-        return RedirectToAction(nameof(Languages));
+        return RedirectToAction(nameof(List));
     }
 
     /// <summary>
     /// Shows locale resources for a language.
+    /// The route segment maps to <c>id</c> via the default <c>{controller}/{action}/{id?}</c> template.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Resources(int languageId, string? searchTerm, CancellationToken cancellationToken)
+    public async Task<IActionResult> Resources(int id, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
+        if (id <= 0)
+            return RedirectToAction(nameof(List));
 
-        var language = await _languageRepository.GetByIdAsync(languageId, cancellationToken: cancellationToken);
-        if (language is null)
-            return RedirectToAction(nameof(Languages));
+        var searchModel = await _factory.PrepareLocaleResourceSearchModelAsync(id, cancellationToken: cancellationToken);
 
-        var normalizedSearch = searchTerm?.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(searchModel.LanguageName))
+            return RedirectToAction(nameof(List));
 
-        var resources = await _resourceRepository.GetAllAsync(
-            query =>
-            {
-                query = query.Where(entity => entity.LanguageId == languageId);
-
-                if (!string.IsNullOrWhiteSpace(normalizedSearch))
-                    query = query.Where(entity => entity.ResourceName.ToLower().Contains(normalizedSearch));
-
-                return query.OrderBy(entity => entity.ResourceName).ThenBy(entity => entity.Id);
-            },
-            cancellationToken: cancellationToken);
-
-        ViewData["Language"] = language;
-        ViewData["SearchTerm"] = searchTerm ?? string.Empty;
-
-        return View(resources);
+        return View(searchModel);
     }
 
     /// <summary>
-    /// Renders locale resource create page.
-    /// </summary>
-    [HttpGet]
-    public IActionResult CreateResource(int languageId)
-    {
-        ViewData["ActiveMenu"] = "Localization";
-        return View(new LocaleResourceModel { LanguageId = languageId });
-    }
-
-    /// <summary>
-    /// Creates a locale resource.
+    /// Returns paged, filtered locale resource rows in the DataTables server-side JSON format.
     /// </summary>
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateResource(LocaleResourceModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> LocaleResourceList([FromForm] LocaleResourceSearchModel searchModel, CancellationToken cancellationToken)
     {
-        ViewData["ActiveMenu"] = "Localization";
-
-        if (!ModelState.IsValid)
-            return View(model);
-
-        await _localizationService.InsertLocaleStringResourceAsync(new LocaleStringResource
+        var validationResult = await _localeResourceSearchValidator.ValidateAsync(searchModel, cancellationToken);
+        if (!validationResult.IsValid)
         {
-            LanguageId = model.LanguageId,
-            ResourceName = model.ResourceName,
-            ResourceValue = model.ResourceValue
-        }, cancellationToken);
+            var errors = validationResult.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ErrorMessage).ToArray());
 
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.create.success");
-        return RedirectToAction(nameof(Resources), new { languageId = model.LanguageId });
-    }
-
-    /// <summary>
-    /// Renders locale resource edit page.
-    /// </summary>
-    [HttpGet]
-    public async Task<IActionResult> EditResource(int id, CancellationToken cancellationToken)
-    {
-        ViewData["ActiveMenu"] = "Localization";
-
-        var resource = await _resourceRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
-        if (resource is null)
-            return RedirectToAction(nameof(Languages));
-
-        return View(new LocaleResourceModel
-        {
-            Id = resource.Id,
-            LanguageId = resource.LanguageId,
-            ResourceName = resource.ResourceName,
-            ResourceValue = resource.ResourceValue
-        });
-    }
-
-    /// <summary>
-    /// Updates a locale resource.
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditResource(LocaleResourceModel model, CancellationToken cancellationToken)
-    {
-        ViewData["ActiveMenu"] = "Localization";
-
-        if (!ModelState.IsValid)
-            return View(model);
-
-        await _localizationService.UpdateLocaleStringResourceAsync(new LocaleStringResource
-        {
-            Id = model.Id,
-            LanguageId = model.LanguageId,
-            ResourceName = model.ResourceName,
-            ResourceValue = model.ResourceValue
-        }, cancellationToken);
-
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.edit.success");
-        return RedirectToAction(nameof(Resources), new { languageId = model.LanguageId });
-    }
-
-    /// <summary>
-    /// Deletes a locale resource.
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteResource(int id, int languageId, CancellationToken cancellationToken)
-    {
-        var resource = await _resourceRepository.GetByIdAsync(id, cancellationToken: cancellationToken);
-        if (resource is not null)
-            await _localizationService.DeleteLocaleStringResourceAsync(resource, cancellationToken);
-
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.delete.success");
-        return RedirectToAction(nameof(Resources), new { languageId });
-    }
-
-    /// <summary>
-    /// Exports resources as XML.
-    /// </summary>
-    [HttpGet]
-    public async Task<IActionResult> ExportResources(int languageId, CancellationToken cancellationToken)
-    {
-        var language = await _languageRepository.GetByIdAsync(languageId, cancellationToken: cancellationToken);
-        if (language is null)
-            return RedirectToAction(nameof(Languages));
-
-        var xml = await _localizationService.ExportResourcesToXmlAsync(language, cancellationToken);
-        var fileName = $"resources-{language.UniqueSeoCode}-{DateTime.UtcNow:yyyyMMddHHmmss}.xml";
-        return File(System.Text.Encoding.UTF8.GetBytes(xml), "application/xml", fileName);
-    }
-
-    /// <summary>
-    /// Imports resources from XML.
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ImportResources(int languageId, IFormFile? xmlFile, bool updateExistingResources = true, CancellationToken cancellationToken = default)
-    {
-        if (xmlFile is null || xmlFile.Length == 0)
-        {
-            TempData["ErrorMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.empty");
-            return RedirectToAction(nameof(Resources), new { languageId });
+            return BadRequest(new { errors });
         }
 
-        var language = await _languageRepository.GetByIdAsync(languageId, cancellationToken: cancellationToken);
+        var listModel = await _factory.PrepareLocaleResourceListModelAsync(searchModel, cancellationToken);
+        return Json(listModel);
+    }
+
+    /// <summary>
+    /// Creates a new locale string resource inline from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddLocaleResource([FromForm] LocaleResourceModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
+        try
+        {
+            var row = await _factory.SaveLocaleResourceAddAsync(model, cancellationToken);
+            return Json(new { success = true, data = row });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing locale string resource inline from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateLocaleResource([FromForm] LocaleResourceModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+            return BadRequest(new { errors });
+        }
+
+        try
+        {
+            await _factory.SaveLocaleResourceUpdateAsync(model, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    /// <summary>
+    /// Deletes a locale string resource from the Resources grid.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteLocaleResource([FromForm] int id, CancellationToken cancellationToken)
+    {
+        if (id <= 0)
+            return BadRequest(new { errors = new Dictionary<string, string[]> { ["id"] = ["Invalid resource ID."] } });
+
+        try
+        {
+            await _factory.DeleteLocaleResourceAsync(id, cancellationToken);
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = new Dictionary<string, string[]> { [""] = [ex.Message] } });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportXml(int id, CancellationToken cancellationToken)
+    {
+        var language = await _languageService.GetLanguageByIdAsync(id, cancellationToken);
         if (language is null)
-            return RedirectToAction(nameof(Languages));
+            return RedirectToAction(nameof(List));
 
-        await using var stream = xmlFile.OpenReadStream();
-        using var reader = new StreamReader(stream);
-        await _localizationService.ImportResourcesFromXmlAsync(language, reader, updateExistingResources, cancellationToken);
+        try
+        {
+            var xml = await _localizationService.ExportResourcesToXmlAsync(language, cancellationToken);
+            var seoCode = string.IsNullOrWhiteSpace(language.UniqueSeoCode)
+                ? "language"
+                : language.UniqueSeoCode.Trim().ToLowerInvariant();
 
-        TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.success");
-        return RedirectToAction(nameof(Resources), new { languageId });
+            return File(Encoding.UTF8.GetBytes(xml), "application/xml", $"language_pack.{seoCode}.xml");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportXml(int id, IFormFile? importxmlfile, CancellationToken cancellationToken)
+    {
+        var language = await _languageService.GetLanguageByIdAsync(id, cancellationToken);
+        if (language is null)
+            return RedirectToAction(nameof(List));
+
+        try
+        {
+            if (importxmlfile is null || importxmlfile.Length <= 0)
+            {
+                TempData["ErrorMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.empty");
+                return RedirectToAction(nameof(Edit), new { id = language.Id });
+            }
+
+            using var streamReader = new StreamReader(importxmlfile.OpenReadStream(), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            await _localizationService.ImportResourcesFromXmlAsync(language, streamReader, updateExistingResources: true, cancellationToken: cancellationToken);
+
+            TempData["SuccessMessage"] = await _localizationService.GetResourceAsync("admin.localization.resource.import.success");
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Edit), new { id = language.Id });
+        }
+    }
+
+    private static void MergePostedValues(LanguageModel destination, LanguageModel source)
+    {
+        destination.Name = source.Name;
+        destination.LanguageCulture = source.LanguageCulture;
+        destination.UniqueSeoCode = source.UniqueSeoCode;
+        destination.FlagImageFileName = source.FlagImageFileName;
+        destination.Rtl = source.Rtl;
+        destination.Published = source.Published;
+        destination.DisplayOrder = source.DisplayOrder;
     }
 }
 

@@ -1,19 +1,12 @@
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 
 @{
-    var generalText = T("common.general");
-    var growthEnvironmentText = T("admin.plant.growth.environment");
-    var relatedText = T("common.related");
-    var saveText = T("common.save");
-    var cancelText = T("common.cancel");
-    var noneText = T("common.none");
-
     var localizedCategories = Model.AvailableCategories
         .Select(item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.category.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -24,7 +17,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.growthtype.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -35,7 +28,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.sunrequirement.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -46,7 +39,7 @@
         {
             Value = item.Value,
             Text = string.IsNullOrWhiteSpace(item.Value)
-                ? noneText
+                ? T("common.none")
                 : T($"admin.plant.waterrequirement.{item.Value.ToLowerInvariant()}"),
             Selected = item.Selected
         })
@@ -57,17 +50,23 @@
 
 <ul class="nav nav-pills flex-column flex-md-row mb-3">
     <li class="nav-item">
-        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> @generalText</a>
+        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-leaf me-1"></i> @T("common.general")</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> @growthEnvironmentText</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-sun me-1"></i> @T("admin.plant.growth.environment")</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> @relatedText</a>
+        <a class="nav-link disabled" href="javascript:void(0);"><i class="bx bx-link me-1"></i> @T("common.related")</a>
     </li>
 </ul>
 
 <div class="row g-3">
+    <div class="col-md-4">
+        @{ ViewData["PictureEntityType"] = "plant"; }
+        <grop-label asp-for="PictureId" />
+        <grop-editor asp-for="PictureId" />
+    </div>
+
     <div class="col-md-6">
         <grop-label asp-for="CommonName" />
         <grop-editor asp-for="CommonName" asp-required="true" />
@@ -148,14 +147,5 @@
         <grop-editor asp-for="GeneralNotes" asp-template="RichEditor" />
         <span class="text-danger" asp-validation-for="GeneralNotes"></span>
     </div>
-</div>
-
-<div class="mt-4 d-flex gap-2">
-    <button type="submit" class="btn btn-primary">
-        <i class="bx bx-save me-1"></i> @saveText
-    </button>
-    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Plant" asp-action="Index">
-        @cancelText
-    </a>
 </div>
 

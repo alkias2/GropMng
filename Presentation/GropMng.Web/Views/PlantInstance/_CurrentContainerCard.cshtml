@@ -1,0 +1,156 @@
+@model GropMng.Web.Models.Garden.ContainerInfoModel
+@using System.Globalization
+
+@{
+    var hasLength = Model.LengthCm.HasValue && Model.LengthCm.Value > 0;
+    var hasWidth = Model.WidthCm.HasValue && Model.WidthCm.Value > 0;
+    var hasHeight = Model.HeightCm.HasValue && Model.HeightCm.Value > 0;
+    var hasBaseCircumference = Model.BaseCircumferenceCm.HasValue && Model.BaseCircumferenceCm.Value > 0;
+    var hasRimCircumference = Model.RimCircumferenceCm.HasValue && Model.RimCircumferenceCm.Value > 0;
+
+    var showPotDiagram = !hasLength && !hasWidth && hasHeight && hasBaseCircumference && hasRimCircumference;
+
+    var heightCm = showPotDiagram ? (double)Model.HeightCm!.Value : 0d;
+    var baseDiameterCm = showPotDiagram ? (double)(Model.BaseCircumferenceCm!.Value / (decimal)Math.PI) : 0d;
+    var rimDiameterCm = showPotDiagram ? (double)(Model.RimCircumferenceCm!.Value / (decimal)Math.PI) : 0d;
+
+    var heightCmText = heightCm.ToString("0.###", CultureInfo.InvariantCulture);
+    var baseDiameterCmText = baseDiameterCm.ToString("0.###", CultureInfo.InvariantCulture);
+    var rimDiameterCmText = rimDiameterCm.ToString("0.###", CultureInfo.InvariantCulture);
+}
+
+<div class="card border">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">@T("mygarden.repotting.current.title")</h6>
+            <span class="badge bg-label-secondary">@T("mygarden.plantinstance.tab.container")</span>
+        </div>
+
+        <div class="row g-4">
+            <div class="@(showPotDiagram ? "col-lg-7" : "col-12")">
+                <div class="row g-3 small">
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.container")</div>
+                <div class="fw-semibold">@Model.ContainerName</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.soilmix")</div>
+                <div class="fw-semibold">@Model.SoilMixName</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.volume")</div>
+                <div class="fw-semibold">@(Model.VolumeL.HasValue ? $"{Model.VolumeL:0.##} L" : "-")</div>
+            </div>
+
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.base")</div>
+                <div class="fw-semibold">@(Model.BaseCircumferenceCm.HasValue ? $"{Model.BaseCircumferenceCm:0.##} cm" : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.rim")</div>
+                <div class="fw-semibold">@(Model.RimCircumferenceCm.HasValue ? $"{Model.RimCircumferenceCm:0.##} cm" : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.height")</div>
+                <div class="fw-semibold">@(Model.HeightCm.HasValue ? $"{Model.HeightCm:0.##} cm" : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.length")</div>
+                <div class="fw-semibold">@(Model.LengthCm.HasValue ? $"{Model.LengthCm:0.##} cm" : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.width")</div>
+                <div class="fw-semibold">@(Model.WidthCm.HasValue ? $"{Model.WidthCm:0.##} cm" : "-")</div>
+            </div>
+
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.material")</div>
+                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Material) ? "-" : Model.Material)</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.color")</div>
+                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Color) ? "-" : Model.Color)</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.container.field.drainage")</div>
+                <div class="fw-semibold">
+                    @if (Model.HasDrainageHole.HasValue)
+                    {
+                        @(Model.HasDrainageHole.Value ? T("common.yes") : T("common.no"))
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </div>
+            </div>
+                    <div class="col-md-12">
+                <div class="text-muted">@T("mygarden.repotting.current.notes")</div>
+                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Notes) ? "-" : Model.Notes)</div>
+            </div>
+
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.changed")</div>
+                <div class="fw-semibold">@(Model.CurrentContainerSinceUtc.HasValue ? Model.CurrentContainerSinceUtc.Value.ToString("yyyy-MM-dd HH:mm") : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.created")</div>
+                <div class="fw-semibold">@(Model.ContainerCreatedOnUtc.HasValue ? Model.ContainerCreatedOnUtc.Value.ToString("yyyy-MM-dd HH:mm") : "-")</div>
+            </div>
+                    <div class="col-md-4">
+                <div class="text-muted">@T("mygarden.repotting.current.updated")</div>
+                <div class="fw-semibold">@(Model.ContainerUpdatedOnUtc.HasValue ? Model.ContainerUpdatedOnUtc.Value.ToString("yyyy-MM-dd HH:mm") : "-")</div>
+            </div>
+                </div>
+            </div>
+
+            @if (showPotDiagram)
+            {
+                <div class="col-lg-5">
+                    <div class="grop-pot-diagram border rounded p-2 bg-body-tertiary">
+                        <canvas class="grop-pot-diagram__canvas"
+                                width="420"
+                                height="360"
+                                data-height-cm="@heightCmText"
+                                data-base-diameter-cm="@baseDiameterCmText"
+                                data-rim-diameter-cm="@rimDiameterCmText"
+                                aria-label="Pot diagram"></canvas>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <div class="text-muted small mb-2">@T("mygarden.repotting.current.soilmixingredients")</div>
+
+            @if (Model.SoilMixIngredients.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-0">@T("mygarden.repotting.current.soilmixingredient.name")</th>
+                                <th>@T("mygarden.repotting.current.soilmixingredient.percentage")</th>
+                                <th>@T("mygarden.repotting.current.soilmixingredient.notes")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ingredient in Model.SoilMixIngredients)
+                            {
+                                <tr>
+                                    <td class="ps-0 fw-semibold">@ingredient.IngredientName</td>
+                                    <td>@ingredient.PercentageByVolume.ToString("0.##")%</td>
+                                    <td>@(string.IsNullOrWhiteSpace(ingredient.Notes) ? "-" : ingredient.Notes)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="fw-semibold">@T("mygarden.repotting.current.soilmixingredients.empty")</div>
+            }
+        </div>
+    </div>
+</div>

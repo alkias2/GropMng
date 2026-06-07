@@ -97,7 +97,30 @@ Presentation/GropMng.Web/_ReferenceFiles/
 **/_ReferenceFiles/
 docs/
 Presentation/GropMng.Web/docs/
+Presentation/GropMng.Web/App_Data/
+Presentation/GropMng.Web/Properties/
 .github/copilot-instructions.md
+
+# Generated build diagnostics (local investigation outputs)
+/msbuild-content-items.txt
+/msbuild-none-items.txt
+/msbuild-staticwebasset-items.txt
+/GropMng.Web.preprocessed.xml
+/_bootstrap_diff_check.txt
+/build-diagnostics/
+
+# ==============================
+# Project-specific images
+# ==============================
+Presentation/GropMng.Web/wwwroot/images/catalog/*
+Presentation/GropMng.Web/wwwroot/images/gardenspots/*
+!Presentation/GropMng.Web/wwwroot/images/gardenspots/placeholder.txt
+Presentation/GropMng.Web/wwwroot/images/plants/*
+!Presentation/GropMng.Web/wwwroot/images/plants/placeholder.txt
+Presentation/GropMng.Web/wwwroot/images/thumbs/*
+!Presentation/GropMng.Web/wwwroot/images/thumbs/placeholder.txt
+Presentation/GropMng.Web/wwwroot/images/uploads/*
+!Presentation/GropMng.Web/wwwroot/images/uploads/placeholder.txt
 
 # ==============================
 # App settings with local secrets
@@ -108,3 +131,16 @@ appsettings.Development.json
 
 # Keep an example env file if you create one later
 !.env.example
+
+# ==============================
+# Agents rules
+# ==============================
+/.clinerules
+/PROJECT_CONTEXT.md
+
+# ==============================
+# Copilot agent helper scripts (root-level, generated during AI-assisted sessions)
+# ==============================
+/_write_*.py
+/_write_*.js
+/_write_*.sh

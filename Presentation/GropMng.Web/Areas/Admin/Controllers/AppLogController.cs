@@ -1,7 +1,8 @@
 using FluentValidation;
 using GropMng.Core.Interfaces.Services.Logging;
 using GropMng.Web.Areas.Admin.Models.Logging;
-using GropMng.Web.Factories.Logging;
+using GropMng.Web.Areas.Admin.Factories.Logging;
+using GropMng.Web.Infrastructure.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GropMng.Web.Areas.Admin.Controllers;
@@ -13,6 +14,8 @@ namespace GropMng.Web.Areas.Admin.Controllers;
 /// HTTP concerns (routing, serialisation and redirects).
 /// </summary>
 [Area("Admin")]
+[AuthorizeAdmin]
+[CheckPermission(GropMngPermissions.Logging.ManageAppLogs)]
 public class AppLogController : Controller
 {
     private readonly IAppLogModelFactory _factory;

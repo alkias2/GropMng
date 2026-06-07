@@ -1,27 +1,21 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
 @model GropMng.Web.Areas.Admin.Models.Localization.LocaleResourceModel
 @{
     ViewData["Title"] = T("admin.localization.resource.edit");
-    ViewData["ActiveMenu"] = "Localization";
-
-    var titleText = (string)ViewData["Title"]!;
-    var dashboardText = T("common.dashboard");
-    var languagesText = T("admin.localization.languages.title");
-    var resourcesText = T("admin.localization.resources.title");
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = titleText,
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = languagesText, Url = Url.Action("Languages", "Localization", new { area = "Admin" }) },
-            new() { Text = resourcesText, Url = Url.Action("Resources", "Localization", new { area = "Admin", languageId = Model.LanguageId }) },
-            new() { Text = titleText }
-        }
-    };
+    GropHtml.SetActiveMenuItemSystemName("Localization");
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@T("admin.localization.resource.edit")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.localization.languages.title"), Url = Url.Action("List", "Localization", new { area = "Admin" }) },
+        new() { Text = T("admin.localization.resources.title"), Url = Url.Action("Resources", "Localization", new { area = "Admin", id = Model.LanguageId }) },
+        new() { Text = T("admin.localization.resource.edit") }
+    })">
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 <div class="card">

@@ -1,0 +1,63 @@
+@model int
+@{
+    var plantInstanceId = Model;
+    var modalId = $"watering-schedule-modal-{plantInstanceId}";
+}
+@* ── Watering Schedule Create / Edit Modal ─────────────────────── *@
+<div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="@(modalId)-title">@T("mygarden.watering.schedule.add")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="@(modalId)-schedule-id" value="0" />
+
+                <div class="mb-3">
+                    <label class="form-label">@T("mygarden.watering.schedule.field.season") <span class="text-danger">*</span></label>
+                    <select id="@(modalId)-season" class="form-select">
+                        <option value="Spring">@T("common.season.spring")</option>
+                        <option value="Summer">@T("common.season.summer")</option>
+                        <option value="Autumn">@T("common.season.autumn")</option>
+                        <option value="Winter">@T("common.season.winter")</option>
+                        <option value="AllYear">@T("common.season.allyear")</option>
+                    </select>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.watering.schedule.field.frequencydays") <span class="text-danger">*</span></label>
+                        <input type="number" id="@(modalId)-frequency" class="form-control" min="1" max="365" value="3" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.watering.schedule.field.amount")</label>
+                        <div class="input-group">
+                            <input type="text" id="@(modalId)-amount" class="form-control" inputmode="decimal" autocomplete="off" placeholder="—" />
+                            <span class="input-group-text">L</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">@T("mygarden.watering.schedule.field.timeofday")</label>
+                        <select id="@(modalId)-timeofday" class="form-select">
+                            <option value="">—</option>
+                            <option value="Morning">@T("common.timeofday.morning")</option>
+                            <option value="Midday">@T("common.timeofday.midday")</option>
+                            <option value="Evening">@T("common.timeofday.evening")</option>
+                            <option value="Any">@T("common.timeofday.any")</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label">@T("mygarden.watering.schedule.field.notes")</label>
+                    <textarea id="@(modalId)-notes" class="form-control" rows="2" maxlength="500"></textarea>
+                </div>
+                <div id="@(modalId)-error" class="text-danger small mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(modalId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>

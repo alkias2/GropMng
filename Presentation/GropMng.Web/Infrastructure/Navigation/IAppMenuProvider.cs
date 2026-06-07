@@ -11,5 +11,5 @@ public interface IAppMenuProvider
     /// Builds the menu tree.
     /// </summary>
     /// <returns>A list of root menu items.</returns>
-    IList<AppMenuItemModel> Build();
+    Task<IList<AppMenuItemModel>> BuildAsync(CancellationToken cancellationToken = default);
 }

@@ -1,7 +1,10 @@
 ﻿using GropMng.Core.Domain.Configuration;
+using GropMng.Core.Domain.Garden.Enums;
 using GropMng.Core.Domain.Localization;
 using GropMng.Core.Domain.Logging;
+using GropMng.Core.Domain.Media;
 using GropMng.Core.Domain.Garden.Owners;
+using GropMng.Core.Domain.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace GropMng.Data.DbContext;
@@ -19,8 +22,12 @@ public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<AppLog> AppLogs => Set<AppLog>();
     public DbSet<Setting> Settings => Set<Setting>();
     public DbSet<Owner> Owners => Set<Owner>();
+    public DbSet<OwnerRole> OwnerRoles => Set<OwnerRole>();
+    public DbSet<OwnerPassword> OwnerPasswords => Set<OwnerPassword>();
+    public DbSet<PermissionRecord> PermissionRecords => Set<PermissionRecord>();
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<LocaleStringResource> LocaleStringResources => Set<LocaleStringResource>();
+    public DbSet<Picture> Pictures => Set<Picture>();
 
     partial void ConfigureGardenDomain(ModelBuilder modelBuilder);
 
@@ -99,15 +106,22 @@ public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
 
         modelBuilder.Entity<Owner>(entity =>
         {
-            entity.ToTable("Owner");
+            entity.ToTable("Owner", tableBuilder =>
+            {
+                tableBuilder.HasCheckConstraint("CK_Owner_Status", BuildEnumConstraintSql<OwnerAccountStatus>("Status"));
+            });
+
             entity.HasKey(e => e.Id).HasName("PK_Owner");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.OwnerId).IsRequired();
             entity.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.LastName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.DisplayName).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(256).IsRequired();
             entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
+            entity.Property(e => e.Status).HasMaxLength(30).HasStorageEnumConversion().HasDefaultValue(OwnerAccountStatus.Active).HasSentinel(OwnerAccountStatus.Active);
+            entity.Property(e => e.IsEmailConfirmed).HasDefaultValue(false);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.CreatedAtUtc).HasColumnType("datetime2(7)").HasDefaultValueSql("SYSUTCDATETIME()");
             entity.Property(e => e.UpdatedAtUtc).HasColumnType("datetime2(7)").HasDefaultValueSql("SYSUTCDATETIME()");
@@ -116,8 +130,124 @@ public partial class GropContext : Microsoft.EntityFrameworkCore.DbContext
 
             entity.HasIndex(e => e.OwnerId).IsUnique().HasDatabaseName("UQ_Owner_OwnerId");
             entity.HasIndex(e => e.Email).IsUnique().HasDatabaseName("UQ_Owner_Email");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Owner_Status");
         });
 
+        modelBuilder.Entity<OwnerRole>(entity =>
+        {
+            entity.ToTable("OwnerRole");
+            entity.HasKey(e => e.Id).HasName("PK_OwnerRole");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.SystemName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsSystemRole).HasDefaultValue(true);
+
+            entity.HasIndex(e => e.SystemName).IsUnique().HasDatabaseName("UQ_OwnerRole_SystemName");
+            entity.HasIndex(e => e.Name).IsUnique().HasDatabaseName("UQ_OwnerRole_Name");
+
+            entity.HasMany(e => e.PermissionRecords)
+                .WithMany(e => e.OwnerRoles)
+                .UsingEntity<Dictionary<string, object>>(
+                    "OwnerRole_PermissionRecord_Mapping",
+                    right => right
+                        .HasOne<PermissionRecord>()
+                        .WithMany()
+                        .HasForeignKey("PermissionRecordId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    left => left
+                        .HasOne<OwnerRole>()
+                        .WithMany()
+                        .HasForeignKey("OwnerRoleId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.ToTable("OwnerRole_PermissionRecord_Mapping");
+                        join.HasKey("OwnerRoleId", "PermissionRecordId");
+                    });
+        });
+
+        modelBuilder.Entity<OwnerPassword>(entity =>
+        {
+            entity.ToTable("OwnerPassword");
+            entity.HasKey(e => e.Id).HasName("PK_OwnerPassword");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.OwnerId).IsRequired();
+            entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
+            entity.Property(e => e.PasswordSalt).HasMaxLength(256);
+            entity.Property(e => e.CreatedAtUtc).HasColumnType("datetime2(7)").HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(e => e.IsCurrent).HasDefaultValue(true);
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(256);
+            entity.Property(e => e.PasswordResetTokenExpiresAtUtc).HasColumnType("datetime2(7)");
+
+            entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_OwnerPassword_OwnerId");
+            entity.HasIndex(e => new { e.OwnerId, e.IsCurrent })
+                .HasDatabaseName("UQ_OwnerPassword_CurrentPerOwner")
+                .IsUnique()
+                .HasFilter("[IsCurrent] = 1");
+
+            entity.HasOne(e => e.Owner)
+                .WithMany(e => e.Passwords)
+                .HasForeignKey(e => e.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_OwnerPassword_Owner");
+        });
+
+        modelBuilder.Entity<PermissionRecord>(entity =>
+        {
+            entity.ToTable("PermissionRecord");
+            entity.HasKey(e => e.Id).HasName("PK_PermissionRecord");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.SystemName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Category).HasMaxLength(200).IsRequired();
+
+            entity.HasIndex(e => e.SystemName).IsUnique().HasDatabaseName("UQ_PermissionRecord_SystemName");
+            entity.HasIndex(e => e.Category).HasDatabaseName("IX_PermissionRecord_Category");
+        });
+
+        modelBuilder.Entity<Owner>()
+            .HasMany(e => e.OwnerRoles)
+            .WithMany(e => e.Owners)
+            .UsingEntity<Dictionary<string, object>>(
+                "Owner_OwnerRole_Mapping",
+                right => right
+                    .HasOne<OwnerRole>()
+                    .WithMany()
+                    .HasForeignKey("OwnerRoleId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                left => left
+                    .HasOne<Owner>()
+                    .WithMany()
+                    .HasForeignKey("OwnerId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                join =>
+                {
+                    join.ToTable("Owner_OwnerRole_Mapping");
+                    join.HasKey("OwnerId", "OwnerRoleId");
+                });
+
         ConfigureGardenDomain(modelBuilder);
+
+        modelBuilder.Entity<Picture>(entity =>
+        {
+            entity.ToTable("Picture");
+            entity.HasKey(e => e.Id).HasName("PK_Picture");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.MimeType).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.SeoFilename).HasMaxLength(300);
+            entity.Property(e => e.AltAttribute).HasMaxLength(300);
+            entity.Property(e => e.TitleAttribute).HasMaxLength(300);
+            entity.Property(e => e.IsNew).HasDefaultValue(true);
+            entity.Property(e => e.VirtualPath).HasMaxLength(2000);
+            entity.Property(e => e.CreatedAtUtc)
+                .HasColumnType("datetime2(7)")
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+        });
     }
 }

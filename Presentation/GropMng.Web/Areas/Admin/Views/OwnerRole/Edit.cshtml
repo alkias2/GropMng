@@ -1,0 +1,39 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
+@model GropMng.Web.Areas.Admin.Models.Roles.OwnerRoleEditModel
+@{
+    ViewData["Title"] = "Edit Role";
+    GropHtml.SetActiveMenuItemSystemName("Roles");
+
+    var listUrl = Url.Action("List", "OwnerRole", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@Model.Name"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = "Roles & Permissions", Url = listUrl },
+        new() { Text = "Edit Role" }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="ownerRoleEditForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-body">
+        <form id="ownerRoleEditForm" asp-area="Admin" asp-controller="OwnerRole" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            @await Html.PartialAsync("_CreateOrUpdate", Model)
+        </form>
+    </div>
+</div>

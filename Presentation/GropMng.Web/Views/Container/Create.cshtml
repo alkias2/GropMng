@@ -1,0 +1,115 @@
+@model GropMng.Web.Models.Garden.ContainerModel
+
+@{
+    GropHtml.SetActiveMenuItemSystemName("Containers");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@T("mygarden.container.create.title")</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">@T("common.dashboard")</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("List", "Container")">@T("mygarden.container.list.title")</a></li>
+                <li class="breadcrumb-item active">@T("mygarden.container.create.title")</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" asp-controller="Container" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="ContainerType" class="form-label">@T("mygarden.container.field.type")</label>
+                    <select asp-for="ContainerType" asp-items="Model.AvailableContainerTypes" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Material" class="form-label">@T("mygarden.container.field.material")</label>
+                    <input asp-for="Material" class="form-control" />
+                    <span asp-validation-for="Material" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Color" class="form-label">@T("mygarden.container.field.color")</label>
+                    <input asp-for="Color" class="form-control" />
+                    <span asp-validation-for="Color" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="BaseCircumferenceCm" class="form-label">@T("mygarden.container.field.base")</label>
+                    <div class="input-group">
+                        <input asp-for="BaseCircumferenceCm" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="BaseCircumferenceCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="RimCircumferenceCm" class="form-label">@T("mygarden.container.field.rim")</label>
+                    <div class="input-group">
+                        <input asp-for="RimCircumferenceCm" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="RimCircumferenceCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="HeightCm" class="form-label">@T("mygarden.container.field.height")</label>
+                    <div class="input-group">
+                        <input asp-for="HeightCm" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="HeightCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="LengthCm" class="form-label">@T("mygarden.container.field.length")</label>
+                    <div class="input-group">
+                        <input asp-for="LengthCm" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="LengthCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="WidthCm" class="form-label">@T("mygarden.container.field.width")</label>
+                    <div class="input-group">
+                        <input asp-for="WidthCm" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="WidthCm" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="VolumeL" class="form-label">@T("mygarden.container.field.volume")</label>
+                    <div class="input-group">
+                        <input asp-for="VolumeL" class="form-control" type="text" inputmode="decimal" />
+                        <span class="input-group-text">L</span>
+                    </div>
+                    <span asp-validation-for="VolumeL" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <input asp-for="HasDrainageHole" class="form-check-input" type="checkbox" />
+                        <label asp-for="HasDrainageHole" class="form-check-label">@T("mygarden.container.field.drainage")</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label">@T("common.notes")</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@T("common.save")</button>
+                <a href="@Url.Action("List", "Container")" class="btn btn-outline-secondary">@T("common.cancel")</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

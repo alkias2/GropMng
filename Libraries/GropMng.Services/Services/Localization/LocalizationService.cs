@@ -1,10 +1,12 @@
 using GropMng.Core.Common.Exceptions;
+using GropMng.Core.Caching;
 using GropMng.Core.Domain.Localization;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Localization;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Xml.Linq;
+using System.Xml;
 using GropMng.Core;
 
 namespace GropMng.Services.Services.Localization;
@@ -14,12 +16,16 @@ namespace GropMng.Services.Services.Localization;
 /// </summary>
 public class LocalizationService : ILocalizationService
 {
-    private const string ResourceCachePrefix = "grop.localization.";
+    private const string ResourceCachePrefix = "Grop.localization.resources.";
+    private static readonly GropCacheKey ResourcesByLanguageCacheKey = new("Grop.localization.resources.v1.{0}", ResourceCachePrefix)
+    {
+        CacheTime = 30
+    };
 
     private readonly IRepository<LocaleStringResource> _resourceRepository;
     private readonly ILanguageService _languageService;
     private readonly ICurrentLanguageContext _currentLanguageContext;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IGropStaticCacheManager _staticCacheManager;
     private readonly ILogger<LocalizationService> _logger;
 
     /// <summary>
@@ -29,19 +35,23 @@ public class LocalizationService : ILocalizationService
         IRepository<LocaleStringResource> resourceRepository,
         ILanguageService languageService,
         ICurrentLanguageContext currentLanguageContext,
-        IMemoryCache memoryCache,
+        IGropStaticCacheManager staticCacheManager,
         ILogger<LocalizationService> logger)
     {
         _resourceRepository = resourceRepository ?? throw new ArgumentNullException(nameof(resourceRepository));
         _languageService = languageService ?? throw new ArgumentNullException(nameof(languageService));
         _currentLanguageContext = currentLanguageContext ?? throw new ArgumentNullException(nameof(currentLanguageContext));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        _staticCacheManager = staticCacheManager ?? throw new ArgumentNullException(nameof(staticCacheManager));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc />
     public async Task<string> GetResourceAsync(string resourceKey)
     {
+        var currentLanguage = await _currentLanguageContext.GetCurrentLanguageAsync();
+        if (currentLanguage is not null)
+            return await GetResourceAsync(resourceKey, currentLanguage.Id);
+
         var defaultLanguage = await _languageService.GetDefaultLanguageAsync();
         return await GetResourceAsync(resourceKey, defaultLanguage.Id);
     }
@@ -81,22 +91,22 @@ public class LocalizationService : ILocalizationService
         if (languageId <= 0)
             return new Dictionary<string, string>();
 
-        var cacheKey = BuildCacheKey(languageId);
-        if (_memoryCache.TryGetValue(cacheKey, out IDictionary<string, string>? cached) && cached is not null)
-            return cached;
+        var cacheKey = _staticCacheManager.PrepareKey(ResourcesByLanguageCacheKey, languageId);
 
-        var resources = await _resourceRepository.GetAllAsync(
-            query => query
-                .Where(resource => resource.LanguageId == languageId)
-                .OrderBy(resource => resource.ResourceName),
-            cancellationToken: cancellationToken);
+        return await _staticCacheManager.GetAsync(
+            cacheKey,
+            async () =>
+            {
+                var resources = await _resourceRepository.GetAllAsync(
+                    query => query
+                        .Where(resource => resource.LanguageId == languageId)
+                        .OrderBy(resource => resource.ResourceName),
+                    cancellationToken: cancellationToken);
 
-        var dictionary = resources
-            .GroupBy(resource => NormalizeKey(resource.ResourceName))
-            .ToDictionary(group => group.Key, group => group.Last().ResourceValue ?? string.Empty);
-
-        _memoryCache.Set(cacheKey, dictionary, TimeSpan.FromMinutes(30));
-        return dictionary;
+                return (IDictionary<string, string>)resources
+                    .GroupBy(resource => NormalizeKey(resource.ResourceName))
+                    .ToDictionary(group => group.Key, group => group.Last().ResourceValue ?? string.Empty);
+            });
     }
 
     /// <inheritdoc />
@@ -107,7 +117,7 @@ public class LocalizationService : ILocalizationService
         StampForCreate(resource);
 
         await _resourceRepository.CreateAsync(resource, cancellationToken: cancellationToken);
-        InvalidateLanguageCache(resource.LanguageId);
+        await InvalidateLanguageCacheAsync(resource.LanguageId);
     }
 
     /// <inheritdoc />
@@ -124,7 +134,7 @@ public class LocalizationService : ILocalizationService
         existing.UpdatedOnUtc = DateTime.UtcNow;
 
         await _resourceRepository.UpdateAsync(existing, cancellationToken: cancellationToken);
-        InvalidateLanguageCache(existing.LanguageId);
+        await InvalidateLanguageCacheAsync(existing.LanguageId);
     }
 
     /// <inheritdoc />
@@ -136,7 +146,7 @@ public class LocalizationService : ILocalizationService
             ?? throw new DomainException($"Locale string resource with id '{resource.Id}' was not found.");
 
         await _resourceRepository.DeleteAsync(existing, softDelete: false, cancellationToken: cancellationToken);
-        InvalidateLanguageCache(existing.LanguageId);
+        await InvalidateLanguageCacheAsync(existing.LanguageId);
     }
 
     /// <inheritdoc />
@@ -150,17 +160,33 @@ public class LocalizationService : ILocalizationService
                 .OrderBy(resource => resource.ResourceName),
             cancellationToken: cancellationToken);
 
-        var document = new XDocument(
-            new XElement("Language",
-                new XAttribute("Name", language.Name),
-                new XAttribute("LanguageCulture", language.LanguageCulture),
-                new XAttribute("UniqueSeoCode", language.UniqueSeoCode),
-                resources.Select(resource =>
-                    new XElement("LocaleResource",
-                        new XElement("Name", resource.ResourceName),
-                        new XElement("Value", resource.ResourceValue ?? string.Empty)))));
+        var stringBuilder = new StringBuilder();
+        await using var writer = XmlWriter.Create(new StringWriter(stringBuilder), new XmlWriterSettings
+        {
+            Async = true,
+            Indent = true,
+            OmitXmlDeclaration = false
+        });
 
-        return document.ToString(SaveOptions.DisableFormatting);
+        await writer.WriteStartDocumentAsync();
+        await writer.WriteStartElementAsync(null, "Language", null);
+        await writer.WriteAttributeStringAsync(null, "Name", null, language.Name);
+        await writer.WriteAttributeStringAsync(null, "LanguageCulture", null, language.LanguageCulture);
+        await writer.WriteAttributeStringAsync(null, "UniqueSeoCode", null, language.UniqueSeoCode);
+
+        foreach (var resource in resources)
+        {
+            await writer.WriteStartElementAsync(null, "LocaleResource", null);
+            await writer.WriteElementStringAsync(null, "Name", null, resource.ResourceName);
+            await writer.WriteElementStringAsync(null, "Value", null, resource.ResourceValue ?? string.Empty);
+            await writer.WriteEndElementAsync();
+        }
+
+        await writer.WriteEndElementAsync();
+        await writer.WriteEndDocumentAsync();
+        await writer.FlushAsync();
+
+        return stringBuilder.ToString();
     }
 
     /// <inheritdoc />
@@ -190,6 +216,18 @@ public class LocalizationService : ILocalizationService
 
         if (normalizedResources.Count == 0)
             return;
+
+        var duplicateKeys = normalizedResources
+            .GroupBy(resource => resource.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (duplicateKeys.Length > 0)
+        {
+            throw new DomainException($"Duplicate locale resource keys were found in the import XML: {string.Join(", ", duplicateKeys)}.");
+        }
 
         var existingResources = await _resourceRepository.GetAllAsync(
             query => query.Where(resource => resource.LanguageId == language.Id),
@@ -224,7 +262,7 @@ public class LocalizationService : ILocalizationService
             await _resourceRepository.UpdateAsync(existing, cancellationToken: cancellationToken);
         }
 
-        InvalidateLanguageCache(language.Id);
+        await InvalidateLanguageCacheAsync(language.Id);
     }
 
     /// <summary>
@@ -260,11 +298,6 @@ public class LocalizationService : ILocalizationService
         return resourceKey.Trim().ToLowerInvariant();
     }
 
-    private static string BuildCacheKey(int languageId)
-    {
-        return $"{ResourceCachePrefix}{languageId}";
-    }
-
     private static void ValidateResource(LocaleStringResource resource)
     {
         if (resource.LanguageId <= 0)
@@ -286,9 +319,9 @@ public class LocalizationService : ILocalizationService
         resource.UpdatedOnUtc = now;
     }
 
-    private void InvalidateLanguageCache(int languageId)
+    private Task InvalidateLanguageCacheAsync(int languageId)
     {
-        _memoryCache.Remove(BuildCacheKey(languageId));
+        return _staticCacheManager.RemoveAsync(ResourcesByLanguageCacheKey, languageId);
     }
 
 

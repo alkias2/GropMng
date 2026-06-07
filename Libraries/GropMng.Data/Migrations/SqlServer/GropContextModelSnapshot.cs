@@ -118,6 +118,69 @@ namespace GropMng.Data.Migrations.SqlServer
                         });
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.ActionSkip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte>("ActionType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateOnly>("ActiveUntilDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
+
+                    b.Property<DateTime>("SkippedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_ActionSkip");
+
+                    b.HasIndex("ActiveUntilDate")
+                        .HasDatabaseName("IX_ActionSkip_ActiveUntilDate");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_ActionSkip_OwnerId");
+
+                    b.HasIndex("PlantInstanceId")
+                        .HasDatabaseName("IX_ActionSkip_InstanceId");
+
+                    b.HasIndex("OwnerId", "PlantInstanceId", "ActionType", "ActiveUntilDate")
+                        .HasDatabaseName("IX_ActionSkip_Owner_Instance_Type_Until");
+
+                    b.ToTable("ActionSkip", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ActionSkip_ActionType", "[ActionType] IN (0, 1)");
+                        });
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.Fertilizer", b =>
                 {
                     b.Property<int>("Id")
@@ -187,6 +250,79 @@ namespace GropMng.Data.Migrations.SqlServer
                         });
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.FertilizingLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AppliedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<int>("FertilizerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
+
+                    b.Property<decimal?>("Quantity")
+                        .HasPrecision(8, 3)
+                        .HasColumnType("decimal(8,3)");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_FertilizingLog");
+
+                    b.HasIndex("AppliedAtUtc")
+                        .HasDatabaseName("IX_FertilizingLog_AppliedAtUtc");
+
+                    b.HasIndex("FertilizerId");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_FertilizingLog_OwnerId");
+
+                    b.HasIndex("PlantInstanceId")
+                        .HasDatabaseName("IX_FertilizingLog_InstanceId");
+
+                    b.ToTable("FertilizingLog", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_FertilizingLog_Quantity", "[Quantity] IS NULL OR [Quantity] >= 0");
+
+                            t.HasCheckConstraint("CK_FertilizingLog_Unit", "[Unit] IS NULL OR [Unit] IN (N'g', N'kg', N'ml', N'l', N'tbsp', N'tsp')");
+                        });
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.FertilizingSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -202,6 +338,10 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("DilutionInstructions")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("FertilizerId")
                         .HasColumnType("int");
@@ -268,6 +408,142 @@ namespace GropMng.Data.Migrations.SqlServer
 
                             t.HasCheckConstraint("CK_FertilizingSchedule_Unit", "[Unit] IS NULL OR [Unit] IN (N'g', N'kg', N'ml', N'l', N'tbsp', N'tsp')");
                         });
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.RepottingLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("ContainerChanged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("NewContainerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NewSoilMixId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
+
+                    b.Property<int?>("PreviousContainerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PreviousSoilMixId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RepottedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("SoilMixChanged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_RepottingLog");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_RepottingLog_OwnerId");
+
+                    b.HasIndex("PlantInstanceId")
+                        .HasDatabaseName("IX_RepottingLog_InstanceId");
+
+                    b.HasIndex("RepottedAtUtc")
+                        .HasDatabaseName("IX_RepottingLog_RepottedAtUtc");
+
+                    b.ToTable("RepottingLog", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.WateringLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<decimal?>("WaterAmountL")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<DateTime>("WateredAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_WateringLog");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_WateringLog_OwnerId");
+
+                    b.HasIndex("PlantInstanceId")
+                        .HasDatabaseName("IX_WateringLog_InstanceId");
+
+                    b.HasIndex("WateredAtUtc")
+                        .HasDatabaseName("IX_WateringLog_WateredAtUtc");
+
+                    b.ToTable("WateringLog", (string)null);
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.WateringSchedule", b =>
@@ -432,10 +708,10 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -449,6 +725,11 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("PlantDiseaseRecordId")
                         .HasColumnType("int")
                         .HasColumnName("RecordId");
@@ -457,10 +738,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-
-                    b.Property<string>("ThumbnailPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -472,6 +749,9 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_DiseasePhoto_OwnerId");
+
+                    b.HasIndex("PictureId")
+                        .HasDatabaseName("IX_DiseasePhoto_PictureId");
 
                     b.HasIndex("PlantDiseaseRecordId")
                         .HasDatabaseName("IX_DiseasePhoto_RecordId");
@@ -751,6 +1031,11 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<byte?>("SunHoursPerDay")
                         .HasColumnType("tinyint");
 
@@ -873,6 +1158,11 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -893,6 +1183,11 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("IsEmailConfirmed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -905,6 +1200,13 @@ namespace GropMng.Data.Migrations.SqlServer
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("Active");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -922,7 +1224,112 @@ namespace GropMng.Data.Migrations.SqlServer
                         .IsUnique()
                         .HasDatabaseName("UQ_Owner_OwnerId");
 
-                    b.ToTable("Owner", (string)null);
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Owner_Status");
+
+                    b.ToTable("Owner", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Owner_Status", "[Status] IN (N'PendingActivation', N'Active', N'Inactive')");
+                        });
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Owners.OwnerPassword", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<bool>("IsCurrent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiresAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("PasswordSalt")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_OwnerPassword");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_OwnerPassword_OwnerId");
+
+                    b.HasIndex("OwnerId", "IsCurrent")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_OwnerPassword_CurrentPerOwner")
+                        .HasFilter("[IsCurrent] = 1");
+
+                    b.ToTable("OwnerPassword", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Owners.OwnerRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsSystemRole")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SystemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_OwnerRole");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_OwnerRole_Name");
+
+                    b.HasIndex("SystemName")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_OwnerRole_SystemName");
+
+                    b.ToTable("OwnerRole", (string)null);
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Container", b =>
@@ -932,6 +1339,10 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("BaseCircumferenceCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
 
                     b.Property<string>("Color")
                         .HasMaxLength(50)
@@ -952,18 +1363,14 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<decimal?>("DepthCm")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("decimal(8,2)");
-
-                    b.Property<decimal?>("DiameterCm")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("decimal(8,2)");
-
                     b.Property<bool>("HasDrainageHole")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<decimal?>("HeightCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -985,6 +1392,13 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("PlantInstanceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("RimCircumferenceCm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2(7)")
@@ -1004,11 +1418,16 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_Container_OwnerId");
 
+                    b.HasIndex("PlantInstanceId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Container_PlantInstanceId")
+                        .HasFilter("[PlantInstanceId] IS NOT NULL");
+
                     b.ToTable("Container", null, t =>
                         {
                             t.HasCheckConstraint("CK_Container_ContainerType", "[ContainerType] IN (N'Pot', N'Bed', N'HangingBasket', N'WindowBox', N'RaisedBed', N'Other')");
 
-                            t.HasCheckConstraint("CK_Container_Dimensions", "[DiameterCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [DepthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
+                            t.HasCheckConstraint("CK_Container_Dimensions", "[BaseCircumferenceCm] IS NOT NULL OR [RimCircumferenceCm] IS NOT NULL OR [HeightCm] IS NOT NULL OR [LengthCm] IS NOT NULL OR [WidthCm] IS NOT NULL OR [VolumeL] IS NOT NULL");
                         });
                 });
 
@@ -1079,6 +1498,11 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasPrecision(5, 1)
                         .HasColumnType("decimal(5,1)");
 
+                    b.Property<int>("PictureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("ScientificName")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -1127,9 +1551,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ContainerId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -1198,8 +1619,6 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.HasKey("Id")
                         .HasName("PK_PlantInstance");
-
-                    b.HasIndex("ContainerId");
 
                     b.HasIndex("GardenSpotId")
                         .HasDatabaseName("IX_PlantInstance_SpotId");
@@ -1300,10 +1719,10 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1313,23 +1732,19 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("PlantInstanceId")
-                        .HasColumnType("int")
-                        .HasColumnName("InstanceId");
-
-                    b.Property<int>("SortOrder")
+                    b.Property<int>("PictureId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
 
                     b.Property<DateOnly>("TakenDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-
-                    b.Property<string>("ThumbnailPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -1342,10 +1757,59 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_PlantPhoto_OwnerId");
 
+                    b.HasIndex("PictureId")
+                        .HasDatabaseName("IX_PlantPhoto_PictureId");
+
                     b.HasIndex("PlantInstanceId")
                         .HasDatabaseName("IX_PlantPhoto_InstanceId");
 
                     b.ToTable("PlantPhoto", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilIngredient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_SoilIngredient");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_SoilIngredient_Name")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("SoilIngredient", (string)null);
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilMix", b =>
@@ -1415,6 +1879,65 @@ namespace GropMng.Data.Migrations.SqlServer
                             t.HasCheckConstraint("CK_SoilMix_PhRange", "[PhMin] IS NULL OR [PhMax] IS NULL OR [PhMin] <= [PhMax]");
 
                             t.HasCheckConstraint("CK_SoilMix_Texture", "[Texture] IS NULL OR [Texture] IN (N'Sandy', N'Loamy', N'Clay', N'Silty', N'Peaty', N'Chalky')");
+                        });
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilMixIngredient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("PercentageByVolume")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("SoilIngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoilMixId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_SoilMixIngredient");
+
+                    b.HasIndex("SoilIngredientId");
+
+                    b.HasIndex("SoilMixId")
+                        .HasDatabaseName("IX_SoilMixIngredient_SoilMixId");
+
+                    b.HasIndex("SoilMixId", "SoilIngredientId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_SoilMixIngredient_Mix_Ingredient")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("SoilMixIngredient", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SoilMixIngredient_Percentage", "[PercentageByVolume] BETWEEN 0 AND 100");
                         });
                 });
 
@@ -1648,6 +2171,167 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.ToTable("AppLog", (string)null);
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Media.Picture", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AltAttribute")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<bool>("IsNew")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("SeoFilename")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("TitleAttribute")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("VirtualPath")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_Picture");
+
+                    b.ToTable("Picture", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Security.PermissionRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SystemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_PermissionRecord");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("IX_PermissionRecord_Category");
+
+                    b.HasIndex("SystemName")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_PermissionRecord_SystemName");
+
+                    b.ToTable("PermissionRecord", (string)null);
+                });
+
+            modelBuilder.Entity("OwnerRole_PermissionRecord_Mapping", b =>
+                {
+                    b.Property<int>("OwnerRoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionRecordId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OwnerRoleId", "PermissionRecordId");
+
+                    b.HasIndex("PermissionRecordId");
+
+                    b.ToTable("OwnerRole_PermissionRecord_Mapping", (string)null);
+                });
+
+            modelBuilder.Entity("Owner_OwnerRole_Mapping", b =>
+                {
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OwnerRoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OwnerId", "OwnerRoleId");
+
+                    b.HasIndex("OwnerRoleId");
+
+                    b.ToTable("Owner_OwnerRole_Mapping", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.ActionSkip", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_ActionSkip_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithMany()
+                        .HasForeignKey("PlantInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ActionSkip_PlantInstance");
+
+                    b.Navigation("PlantInstance");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.FertilizingLog", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Care.Fertilizer", "Fertilizer")
+                        .WithMany()
+                        .HasForeignKey("FertilizerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_FertilizingLog_Fertilizer");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_FertilizingLog_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithMany("FertilizingLogs")
+                        .HasForeignKey("PlantInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_FertilizingLog_PlantInstance");
+
+                    b.Navigation("Fertilizer");
+
+                    b.Navigation("PlantInstance");
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.FertilizingSchedule", b =>
                 {
                     b.HasOne("GropMng.Core.Domain.Garden.Care.Fertilizer", "Fertilizer")
@@ -1673,6 +2357,46 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasConstraintName("FK_FertilizingSchedule_PlantInstance");
 
                     b.Navigation("Fertilizer");
+
+                    b.Navigation("PlantInstance");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.RepottingLog", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_RepottingLog_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithMany("RepottingLogs")
+                        .HasForeignKey("PlantInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_RepottingLog_PlantInstance");
+
+                    b.Navigation("PlantInstance");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.WateringLog", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_WateringLog_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithMany("WateringLogs")
+                        .HasForeignKey("PlantInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_WateringLog_PlantInstance");
 
                     b.Navigation("PlantInstance");
                 });
@@ -1798,6 +2522,18 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasConstraintName("FK_Location_Owner");
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Owners.OwnerPassword", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", "Owner")
+                        .WithMany("Passwords")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_OwnerPassword_Owner");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Container", b =>
                 {
                     b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
@@ -1807,16 +2543,18 @@ namespace GropMng.Data.Migrations.SqlServer
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Container_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithOne("Container")
+                        .HasForeignKey("GropMng.Core.Domain.Garden.Plants.Container", "PlantInstanceId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Container_PlantInstance");
+
+                    b.Navigation("PlantInstance");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.PlantInstance", b =>
                 {
-                    b.HasOne("GropMng.Core.Domain.Garden.Plants.Container", "Container")
-                        .WithMany("PlantInstances")
-                        .HasForeignKey("ContainerId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("FK_PlantInstance_Container");
-
                     b.HasOne("GropMng.Core.Domain.Garden.Locations.GardenSpot", "GardenSpot")
                         .WithMany("PlantInstances")
                         .HasForeignKey("GardenSpotId")
@@ -1844,8 +2582,6 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasForeignKey("SoilMixId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_PlantInstance_SoilMix");
-
-                    b.Navigation("Container");
 
                     b.Navigation("GardenSpot");
 
@@ -1894,6 +2630,27 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("PlantInstance");
                 });
 
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilMixIngredient", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.SoilIngredient", "SoilIngredient")
+                        .WithMany("SoilMixIngredients")
+                        .HasForeignKey("SoilIngredientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_SoilMixIngredient_SoilIngredient");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.SoilMix", "SoilMix")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("SoilMixId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SoilMixIngredient_SoilMix");
+
+                    b.Navigation("SoilIngredient");
+
+                    b.Navigation("SoilMix");
+                });
+
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Preferences.UserPreference", b =>
                 {
                     b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
@@ -1915,6 +2672,36 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasConstraintName("FK_LocaleStringResource_Language");
 
                     b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("OwnerRole_PermissionRecord_Mapping", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.OwnerRole", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GropMng.Core.Domain.Security.PermissionRecord", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Owner_OwnerRole_Mapping", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.OwnerRole", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Care.Fertilizer", b =>
@@ -1949,9 +2736,9 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("GardenSpots");
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Container", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Owners.Owner", b =>
                 {
-                    b.Navigation("PlantInstances");
+                    b.Navigation("Passwords");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.Plant", b =>
@@ -1961,7 +2748,11 @@ namespace GropMng.Data.Migrations.SqlServer
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.PlantInstance", b =>
                 {
+                    b.Navigation("Container");
+
                     b.Navigation("DiseaseRecords");
+
+                    b.Navigation("FertilizingLogs");
 
                     b.Navigation("FertilizingSchedules");
 
@@ -1969,11 +2760,22 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.Navigation("Photos");
 
+                    b.Navigation("RepottingLogs");
+
+                    b.Navigation("WateringLogs");
+
                     b.Navigation("WateringSchedules");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilIngredient", b =>
+                {
+                    b.Navigation("SoilMixIngredients");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Plants.SoilMix", b =>
                 {
+                    b.Navigation("Ingredients");
+
                     b.Navigation("PlantInstances");
                 });
 

@@ -1,0 +1,67 @@
+@model GropMng.Web.Models.Dashboard.DashboardDiseaseTabModel
+@using GropMng.Web.Models.Dashboard
+
+<script id="dashboard-spot-options" type="application/json">[]</script>
+
+@if (!Model.ActiveCases.Any())
+{
+    <div class="p-4">
+        <p class="text-muted mb-0">@T("dashboard.owner.tab.diseases.empty")</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive pt-3">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>@T("dashboard.owner.disease.plant")</th>
+                    <th>@T("dashboard.owner.disease.name")</th>
+                    <th>@T("dashboard.owner.disease.location")</th>
+                    <th>@T("dashboard.owner.disease.diagnosed")</th>
+                    <th>@T("dashboard.owner.disease.severity")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var disease in Model.ActiveCases)
+                {
+                    var severityBadge = disease.Severity switch
+                    {
+                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Mild => "success",
+                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Moderate => "warning",
+                        GropMng.Core.Domain.Garden.Enums.PlantDiseaseSeverity.Severe => "danger",
+                        _ => "secondary"
+                    };
+                    <tr>
+                        <td>
+                            <span class="fw-medium">@disease.PlantName</span>
+                            @if (!string.IsNullOrWhiteSpace(disease.Nickname))
+                            {
+                                <small class="text-muted d-block">@disease.Nickname</small>
+                            }
+                        </td>
+                        <td>@disease.DiseaseName</td>
+                        <td>
+                            <span>@disease.LocationName</span>
+                            <small class="text-muted d-block">@disease.GardenSpotName</small>
+                        </td>
+                        <td>@disease.DiagnosedOn.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (disease.Severity.HasValue)
+                            {
+                                <span class="badge bg-label-@severityBadge">@disease.Severity</span>
+                            }
+                        </td>
+                        <td>
+                                     <a href="@Url.Action("Edit", "PlantInstance", new { id = disease.PlantInstanceId })"
+                               class="btn btn-sm btn-outline-secondary">
+                                @T("common.details")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

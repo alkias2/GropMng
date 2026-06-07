@@ -1,24 +1,29 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
 @model GropMng.Web.Areas.Admin.Models.Settings.GropAdminAreaSettingsModel
 @{
     ViewData["Title"] = "Admin Settings";
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = "Admin Settings",
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = "Dashboard", Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = "Admin Settings" }
-        }
-    };
+    GropHtml.SetActiveMenuItemSystemName("AdminSettings");
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="Admin Settings"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = "Admin Settings" }
+    })">
+    <grop-header-button form="settingsForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Setting" asp-action="AdminArea" method="post">
+        <form id="settingsForm" asp-area="Admin" asp-controller="Setting" asp-action="AdminArea" method="post">
             @Html.AntiForgeryToken()
             @await Html.PartialAsync("_CreateOrUpdate", Model)
         </form>

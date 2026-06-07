@@ -1,9 +1,12 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using GropMng.Core;
 using GropMng.Core.Domain.Garden;
+using GropMng.Core.Events;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace GropMng.Data.Repositories;
 
@@ -13,20 +16,27 @@ namespace GropMng.Data.Repositories;
 /// <typeparam name="TEntity">The entity type managed by the repository.</typeparam>
 public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
 {
+    private static readonly MethodInfo PublishAsyncMethod = typeof(IEventPublisher)
+        .GetMethod(nameof(IEventPublisher.PublishAsync))
+        ?? throw new InvalidOperationException($"Unable to resolve {nameof(IEventPublisher)}.{nameof(IEventPublisher.PublishAsync)}.");
+
     private readonly GropContext _context;
     private readonly DbSet<TEntity> _dbSet;
+    private readonly IEventPublisher _eventPublisher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EfRepository{TEntity}" /> class.
     /// </summary>
     /// <param name="context">The EF Core database context used by the repository.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="context" /> is <see langword="null" />.</exception>
-    public EfRepository(GropContext context)
+    public EfRepository(GropContext context, IEventPublisher eventPublisher)
     {
         ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(eventPublisher);
 
         _context = context;
         _dbSet = _context.Set<TEntity>();
+        _eventPublisher = eventPublisher;
     }
 
     /// <inheritdoc />
@@ -283,9 +293,76 @@ public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : BaseEn
     }
 
     /// <inheritdoc />
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return _context.SaveChangesAsync(cancellationToken);
+        var pendingEvents = GetPendingEntityEvents();
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        foreach (var pendingEvent in pendingEvents)
+            await pendingEvent(cancellationToken);
+    }
+
+    private List<Func<CancellationToken, Task>> GetPendingEntityEvents()
+    {
+        var pendingEvents = new List<Func<CancellationToken, Task>>();
+
+        foreach (var entry in _context.ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                pendingEvents.Add(CreatePublishCallback(typeof(EntityInsertedEvent<>), entry.Entity));
+                continue;
+            }
+
+            if (entry.State == EntityState.Deleted)
+            {
+                pendingEvents.Add(CreatePublishCallback(typeof(EntityDeletedEvent<>), entry.Entity));
+                continue;
+            }
+
+            if (entry.State != EntityState.Modified)
+                continue;
+
+            if (entry.Entity is AuditableEntity && IsSoftDeleted(entry))
+            {
+                pendingEvents.Add(CreatePublishCallback(typeof(EntityDeletedEvent<>), entry.Entity));
+                continue;
+            }
+
+            pendingEvents.Add(CreatePublishCallback(typeof(EntityUpdatedEvent<>), entry.Entity));
+        }
+
+        return pendingEvents;
+    }
+
+    private Func<CancellationToken, Task> CreatePublishCallback(Type eventTypeDefinition, BaseEntity entity)
+    {
+        var entityType = entity.GetType();
+        var eventType = eventTypeDefinition.MakeGenericType(entityType);
+        var eventMessage = Activator.CreateInstance(eventType, entity)
+            ?? throw new InvalidOperationException($"Unable to create event instance for {eventType.Name}.");
+
+        return cancellationToken => PublishEventAsync(eventType, eventMessage, cancellationToken);
+    }
+
+    private Task PublishEventAsync(Type eventType, object eventMessage, CancellationToken cancellationToken)
+    {
+        var publishMethod = PublishAsyncMethod.MakeGenericMethod(eventType);
+
+        return (Task)(publishMethod.Invoke(_eventPublisher, new object?[] { eventMessage, cancellationToken })
+            ?? throw new InvalidOperationException($"Event publication returned null for {eventType.Name}."));
+    }
+
+    private static bool IsSoftDeleted(EntityEntry<BaseEntity> entry)
+    {
+        if (entry.Entity is not AuditableEntity)
+            return false;
+
+        var originalValue = entry.OriginalValues.GetValue<bool>(nameof(AuditableEntity.IsDeleted));
+        var currentValue = entry.CurrentValues.GetValue<bool>(nameof(AuditableEntity.IsDeleted));
+
+        return !originalValue && currentValue;
     }
 
     /// <summary>

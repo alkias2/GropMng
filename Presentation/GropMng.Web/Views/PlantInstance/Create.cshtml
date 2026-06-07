@@ -1,0 +1,107 @@
+@model GropMng.Web.Models.Garden.PlantInstanceModel
+
+@{
+    GropHtml.SetActiveMenuItemSystemName("MyPlants");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@T("mygarden.plantinstance.create.title")</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">@T("common.dashboard")</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("List", "PlantInstance")">@T("mygarden.plantinstance.list.title")</a></li>
+                <li class="breadcrumb-item active">@T("mygarden.plantinstance.create.title")</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" asp-controller="PlantInstance" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="PlantId" class="form-label">@T("mygarden.plantinstance.field.plant") <span class="text-danger">*</span></label>
+                    <select asp-for="PlantId" asp-items="Model.AvailablePlants" class="form-select"></select>
+                    <span asp-validation-for="PlantId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="GardenSpotId" class="form-label">@T("mygarden.plantinstance.field.gardenspot") <span class="text-danger">*</span></label>
+                    <select asp-for="GardenSpotId" asp-items="Model.AvailableGardenSpots" class="form-select"></select>
+                    <span asp-validation-for="GardenSpotId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ContainerId" class="form-label">@T("mygarden.plantinstance.field.container")</label>
+                    <select asp-for="ContainerId" asp-items="Model.AvailableContainers" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="SoilMixId" class="form-label">@T("mygarden.plantinstance.field.soilmix")</label>
+                    <select asp-for="SoilMixId" asp-items="Model.AvailableSoilMixes" class="form-select"></select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Nickname" class="form-label">@T("mygarden.plantinstance.field.nickname")</label>
+                    <input asp-for="Nickname" class="form-control" />
+                    <span asp-validation-for="Nickname" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="PlantedDate" class="form-label">@T("mygarden.plantinstance.field.planteddate")</label>
+                    <input asp-for="PlantedDate" class="form-control flatpickr-date" type="text" autocomplete="off" />
+                    <span asp-validation-for="PlantedDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SizeCategory" class="form-label">@T("mygarden.plantinstance.field.size")</label>
+                    <select asp-for="SizeCategory" asp-items="Model.AvailableSizeCategories" class="form-select"></select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="HeightCm" class="form-label">@T("mygarden.plantinstance.field.height")</label>
+                    <div class="input-group">
+                        <input asp-for="HeightCm" class="form-control" type="number" step="0.5" min="0" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="HeightCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SpreadCm" class="form-label">@T("mygarden.plantinstance.field.spread")</label>
+                    <div class="input-group">
+                        <input asp-for="SpreadCm" class="form-control" type="number" step="0.5" min="0" />
+                        <span class="input-group-text">cm</span>
+                    </div>
+                    <span asp-validation-for="SpreadCm" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="HealthStatus" class="form-label">@T("mygarden.plantinstance.field.health")</label>
+                    <select asp-for="HealthStatus" asp-items="Model.AvailableHealthStatuses" class="form-select"></select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsActive" class="form-check-label">@T("mygarden.plantinstance.field.active")</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label">@T("common.notes")</label>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                    <div class="grop-quill-editor" data-quill-mode="full" data-input-selector="#Notes"></div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@T("common.save")</button>
+                <a href="@Url.Action("List", "PlantInstance")" class="btn btn-outline-secondary">@T("common.cancel")</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

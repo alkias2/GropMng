@@ -1,31 +1,36 @@
+@using GropMng.Web.Framework.TagHelpers.Admin
 @model GropMng.Web.Areas.Admin.Models.Plant.PlantModel
 @{
-    var titleText = T("admin.plant.create");
-    var plantsText = T("admin.plant.title");
-    var dashboardText = T("common.dashboard");
-    var createText = T("common.create");
+    ViewData["Title"] = T("admin.plant.create");
+    GropHtml.SetActiveMenuItemSystemName("Plants");
 
-    ViewData["Title"] = titleText;
-    ViewData["ActiveMenu"] = "Plants";
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = titleText,
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = dashboardText, Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = plantsText, Url = Url.Action("Index", "Plant", new { area = "Admin" }) },
-            new() { Text = createText }
-        }
-    };
+    var listUrl = Url.Action("List", "Plant", new { area = "Admin" })!;
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@T("admin.plant.create")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.plant.title"), Url = listUrl },
+        new() { Text = T("common.create") }
+    })">
+    <grop-header-button href="@listUrl"
+                        text="@T("common.cancel")"
+                        icon="bx bx-arrow-back"
+                        css-class="btn btn-label-secondary" />
+    <grop-header-button form="plantCreateForm"
+                        type="submit"
+                        text="@T("common.save")"
+                        icon="bx bx-save"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
 @await Html.PartialAsync("Notifications")
 
 <div class="card">
     <div class="card-body">
-        <form asp-area="Admin" asp-controller="Plant" asp-action="Create" method="post">
+        <form id="plantCreateForm" asp-area="Admin" asp-controller="Plant" asp-action="Create" method="post">
             @Html.AntiForgeryToken()
             @await Html.PartialAsync("_CreateOrUpdate", Model)
         </form>

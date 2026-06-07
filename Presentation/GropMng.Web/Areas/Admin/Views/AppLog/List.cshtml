@@ -1,37 +1,35 @@
 ﻿@model GropMng.Web.Areas.Admin.Models.Logging.AppLogSearchModel
 @using GropMng.Web.Areas.Admin.Models.Logging
 @using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
 @using Microsoft.AspNetCore.Routing
 @{
     ViewData["Title"] = T("admin.applog.title");
-    ViewData["ActiveMenu"] = "AppLogs";
-
-    var headerModel = new AdminPageHeaderModel
-    {
-        Title = T("admin.applog.title"),
-        Breadcrumbs = new List<AdminBreadcrumbItemModel>
-        {
-            new() { Text = T("common.dashboard"), Url = Url.Action("Index", "Home", new { area = "" }) },
-            new() { Text = T("admin.applog.breadcrumb") }
-        }
-    };
+    GropHtml.SetActiveMenuItemSystemName("AppLogs");
 }
 
-@await Html.PartialAsync("_AdminPageHeader", headerModel)
+<grop-admin-page-header
+    title="@T("admin.applog.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel> {
+                     new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+                     new() { Text = T("admin.applog.breadcrumb") }
+                 })">
+
+    <grop-header-button id="delete-selected"
+                        text="@T("admin.applog.delete.selected")"
+                        icon="bx bx-trash"
+                        css-class="btn btn-label-danger"/>
+
+    <grop-header-button id="clearall"
+                        text="@T("admin.applog.delete.all")"
+                        icon="bx bx-trash"
+                        css-class="btn btn-danger"/>
+</grop-admin-page-header>
 
 @Html.AntiForgeryToken()
 
-<div class="d-flex justify-content-end gap-2 mb-4">
-    <button id="delete-selected" name="delete-selected" type="button" class="btn btn-danger">
-        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.selected")
-    </button>
-    <grop-action-confirmation asp-button-id="delete-selected" />
-
-    <button id="clearall" name="clearall" type="button" class="btn btn-danger">
-        <i class="bx bx-trash me-1"></i> @T("admin.applog.delete.all")
-    </button>
-    <grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
-</div>
+<grop-action-confirmation asp-button-id="delete-selected" />
+<grop-action-confirmation asp-button-id="clearall" asp-action="DeleteAll" />
 
 <div class="card mb-4">
     <div class="card-header d-flex align-items-center">
@@ -135,13 +133,10 @@
 <grop-alert asp-alert-id="nothingSelectedAlert" />
 
 @section Vendors {
-    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
     <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.css" />
 }
 
 @section Scripts {
-    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
     <script src="~/vendor/libs/flatpickr/flatpickr.js"></script>
     <script>
         $(function () {

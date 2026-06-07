@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using GropMng.Web.Models.Navigation;
+using Microsoft.AspNetCore.Http;
 
 namespace GropMng.Web.Infrastructure.Navigation;
 
@@ -7,79 +9,80 @@ namespace GropMng.Web.Infrastructure.Navigation;
 /// </summary>
 public class DefaultAppMenuProvider : IAppMenuProvider
 {
-    /// <inheritdoc />
-    public IList<AppMenuItemModel> Build()
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAppMenuSiteMap _appMenuSiteMap;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefaultAppMenuProvider"/> class.
+    /// </summary>
+    public DefaultAppMenuProvider(IHttpContextAccessor httpContextAccessor, IAppMenuSiteMap appMenuSiteMap)
     {
-        return new List<AppMenuItemModel>
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        _appMenuSiteMap = appMenuSiteMap ?? throw new ArgumentNullException(nameof(appMenuSiteMap));
+    }
+
+    /// <inheritdoc />
+    public async Task<IList<AppMenuItemModel>> BuildAsync(CancellationToken cancellationToken = default)
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        var isAdministrator = user?.Identity?.IsAuthenticated == true
+            && (user.IsInRole("Administrator")
+                || string.Equals(user.FindFirstValue(ClaimTypes.Role), "Administrator", StringComparison.OrdinalIgnoreCase));
+
+        var rootNode = await _appMenuSiteMap.LoadAsync(cancellationToken);
+        return rootNode.Children
+            .Select(node => MapNode(node, isAdministrator))
+            .Where(item => item is not null)
+            .Cast<AppMenuItemModel>()
+            .ToList();
+    }
+
+    private static AppMenuItemModel? MapNode(AppMenuSiteMapNode node, bool isAdministrator)
+    {
+        if (!node.Visible || (node.RequiresAdministrator && !isAdministrator))
+            return null;
+
+        var children = node.Children
+            .Select(child => MapNode(child, isAdministrator))
+            .Where(item => item is not null)
+            .Cast<AppMenuItemModel>()
+            .ToList();
+
+        if (node.ItemType != AppMenuItemType.Header && string.IsNullOrWhiteSpace(node.Title) && children.Count == 0)
+            return null;
+
+        if (node.ItemType != AppMenuItemType.Header &&
+            string.IsNullOrWhiteSpace(node.Controller) &&
+            string.IsNullOrWhiteSpace(node.Action) &&
+            children.Count == 0)
         {
-            new()
-            {
-                Key = "section-main",
-                Title = "Main",
-                ItemType = AppMenuItemType.Header
-            },
-            new()
-            {
-                Key = "dashboard",
-                Title = "Dashboard",
-                IconClass = "bx bx-home-circle",
-                Area = string.Empty,
-                Controller = "Home",
-                Action = "Index",
-                ItemType = AppMenuItemType.Link
-            },
-            new()
-            {
-                Key = "section-admin",
-                Title = "Administration",
-                ItemType = AppMenuItemType.Header
-            },
-            new()
-            {
-                Key = "admin",
-                Title = "Admin",
-                IconClass = "bx bx-cog",
-                ItemType = AppMenuItemType.Link,
-                Children = new List<AppMenuItemModel>
-                {
-                    new()
-                    {
-                        Key = "admin-plants",
-                        Title = "Plants",
-                        Area = "Admin",
-                        Controller = "Plant",
-                        Action = "Index",
-                        ItemType = AppMenuItemType.Link
-                    },
-                    new()
-                    {
-                        Key = "admin-applogs",
-                        Title = "App Logs",
-                        Area = "Admin",
-                        Controller = "AppLog",
-                        Action = "Index",
-                        ItemType = AppMenuItemType.Link
-                    },
-                    new()
-                    {
-                        Key = "admin-settings",
-                        Title = "Admin Settings",
-                        Area = "Admin",
-                        Controller = "Setting",
-                        Action = "AdminArea",
-                        ItemType = AppMenuItemType.Link
-                    },
-                    new()
-                    {
-                        Key = "admin-localization",
-                        Title = "Localization",
-                        Area = "Admin",
-                        Controller = "Localization",
-                        Action = "Languages",
-                        ItemType = AppMenuItemType.Link
-                    }
-                }
-            }
+            return null;
+        }
+
+        return new AppMenuItemModel
+        {
+            Key = BuildKey(node.SystemName, node.Title),
+            SystemName = node.SystemName,
+            Title = node.Title,
+            ItemType = node.ItemType,
+            IconClass = node.IconClass,
+            Area = node.Area,
+            Controller = node.Controller,
+            Action = node.Action,
+            Children = children
         };
+    }
+
+    private static string BuildKey(string systemName, string title)
+    {
+        var source = !string.IsNullOrWhiteSpace(systemName) ? systemName : title;
+        if (string.IsNullOrWhiteSpace(source))
+            return Guid.NewGuid().ToString("N");
+
+        return source
+            .Trim()
+            .ToLowerInvariant()
+            .Replace(" ", "-")
+            .Replace("&", "and");
     }
 }

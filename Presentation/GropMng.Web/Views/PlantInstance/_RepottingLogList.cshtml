@@ -1,0 +1,77 @@
+@model GropMng.Web.Models.Garden.RepottingTabModel
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">@T("mygarden.repotting.log.title")</h6>
+    <span class="text-muted small">@T("mygarden.repotting.log.recent")</span>
+</div>
+
+@if (!Model.Logs.Any())
+{
+    <p class="text-muted small" id="repotting-empty-@Model.PlantInstanceId">@T("mygarden.repotting.log.empty")</p>
+}
+
+<div class="table-responsive" id="repotting-log-list-@Model.PlantInstanceId">
+    @if (Model.Logs.Any())
+    {
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>@T("mygarden.repotting.log.field.date")</th>
+                    <th>@T("mygarden.repotting.log.field.container")</th>
+                    <th>@T("mygarden.repotting.log.field.soilmix")</th>
+                    <th>@T("mygarden.repotting.log.field.notes")</th>
+                    <th style="width:100px; text-align:right">@T("common.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.Logs)
+                {
+                    <tr data-log-id="@log.Id">
+                        <td class="small">@log.RepottedOn.ToString("dd MMM yyyy")</td>
+                        <td class="small">
+                            @if (log.ContainerChanged)
+                            {
+                                <span>@log.PreviousContainerName</span>
+                                <i class="bx bx-right-arrow-alt mx-1 text-muted"></i>
+                                <span class="fw-semibold">@log.NewContainerName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">@T("mygarden.repotting.log.nochange")</span>
+                            }
+                        </td>
+                        <td class="small">
+                            @if (log.SoilMixChanged)
+                            {
+                                <span>@log.PreviousSoilMixName</span>
+                                <i class="bx bx-right-arrow-alt mx-1 text-muted"></i>
+                                <span class="fw-semibold">@log.NewSoilMixName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">@T("mygarden.repotting.log.nochange")</span>
+                            }
+                        </td>
+                        <td class="small text-muted">@(string.IsNullOrWhiteSpace(log.Notes) ? "-" : log.Notes)</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-secondary repotting-edit-btn"
+                                    data-log-id="@log.Id"
+                                    data-containerid="@(log.NewContainerId?.ToString() ?? "")"
+                                    data-soilmixid="@(log.NewSoilMixId?.ToString() ?? "")"
+                                    data-repottedon="@log.RepottedOn.ToString("yyyy-MM-dd")"
+                                    data-notes="@(log.Notes ?? "")"
+                                    title="@T("common.edit")">
+                                <i class="bx bx-edit-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger repotting-delete-btn"
+                                    data-log-id="@log.Id"
+                                    title="@T("common.delete")">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

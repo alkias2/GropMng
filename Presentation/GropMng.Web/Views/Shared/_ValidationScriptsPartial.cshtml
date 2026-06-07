@@ -1,2 +1,60 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+	(function ($) {
+		if (!$ || !$.validator) {
+			return;
+		}
+
+		function normalizeDecimal(value) {
+			if (typeof value !== 'string') {
+				return value;
+			}
+
+			var normalized = value.trim().replace(/\s+/g, '');
+			var lastComma = normalized.lastIndexOf(',');
+			var lastDot = normalized.lastIndexOf('.');
+
+			if (lastComma >= 0 && lastDot >= 0) {
+				if (lastComma > lastDot) {
+					normalized = normalized.replace(/\./g, '').replace(',', '.');
+				} else {
+					normalized = normalized.replace(/,/g, '');
+				}
+			} else {
+				normalized = normalized.replace(',', '.');
+			}
+
+			if (normalized.indexOf('-.') === 0) {
+				normalized = normalized.replace('-.', '-0.');
+			} else if (normalized.indexOf('.') === 0) {
+				normalized = '0' + normalized;
+			}
+
+			return normalized;
+		}
+
+		$.validator.methods.number = function (value, element) {
+			if (this.optional(element)) {
+				return true;
+			}
+
+			var normalized = normalizeDecimal(value);
+			return normalized !== '' && !isNaN(Number(normalized));
+		};
+
+		$.validator.methods.range = function (value, element, param) {
+			if (this.optional(element)) {
+				return true;
+			}
+
+			var normalized = normalizeDecimal(value);
+			var parsed = Number(normalized);
+			if (isNaN(parsed)) {
+				return false;
+			}
+
+			return parsed >= Number(param[0]) && parsed <= Number(param[1]);
+		};
+	})(jQuery);
+</script>

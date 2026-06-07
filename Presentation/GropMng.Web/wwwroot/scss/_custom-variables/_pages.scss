@@ -6,7 +6,7 @@
 @import 'support';
 
 // ============================================================
-// GropMng — Views/shared/_Layout.cshtml
+// GropMng — Views/shared/_Layout.cshtml (admin sidebar)
 // ============================================================
 .app-brand {
   .app-brand-logo {
@@ -16,6 +16,99 @@
   .app-brand-text {
     font-size: 1.3rem;
     margin-top: 16px;
+  }
+}
+
+// ============================================================
+// Dashboard section selector buttons
+// ============================================================
+.dashboard-section-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}
+
+.counters-wrapper {
+
+    .badge.bg-label-primary {
+        background: rgba(94, 115, 160, 0.28) !important;
+        color: #8fa0c2 !important;
+    }
+
+    .icon3 {
+        color: #8fa0c2;
+        width: 48px;
+        height: 48px;
+    }
+
+    .icon3.active {
+        color: #44ce72;
+    }
+
+    .content-left h3 {
+        color: #e8eeff;
+        line-height: 1;
+    }
+
+    .content-left small {
+        color: #afbdd8;
+    }
+
+    .content-left .active {
+        color: #ffffff;
+    }
+
+    .content-left h3:not(:hover):not(.active),
+    .content-left small:not(:hover):not(.active),
+    .icon3:not(:hover):not(:hover):not(.active) {
+        color: #69809a;
+    }
+
+    .dashboard-show-upcoming {
+        & + .switch-toggle-slider {
+            border-color: rgba(163, 182, 216, 0.25);
+            background: rgba(82, 101, 138, 0.35);
+        }
+
+        &:checked + .switch-toggle-slider {
+            background: rgba(132, 200, 74, 0.9);
+            border-color: rgba(132, 200, 74, 0.9);
+        }
+    }
+
+    .switch {
+        transform: scale(0.95);
+        transform-origin: right center;
+    }
+
+    .ms-auto small {
+        color: #afbdd8;
+    }
+}
+
+// ============================================================
+// GropMng — Views/shared/_LandingLayout.cshtml (public navbar)
+// Scoped to .landing-navbar — does NOT affect admin sidebar
+// ============================================================
+.landing-navbar {
+  .app-brand-logo {
+    width: auto;
+    height: auto;
+
+    img {
+      height: 26px;
+      width: auto;
+    }
+  }
+
+  .app-brand-text {
+    margin-top: 0;
   }
 }
 
@@ -42,6 +135,23 @@
     @include media-breakpoint-down(md) {
       height: 300px;
     }
+  }
+}
+
+// ============================================================
+// PlantInstance — Container tab pot diagram
+// ============================================================
+.grop-pot-diagram {
+  max-width: 420px;
+  margin-inline: auto;
+
+  &__canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 0.5px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    background: var(--bs-body-bg);
   }
 }
 
@@ -89,8 +199,6 @@
     align-items: flex-start;
     width: 100%;
     border: 0;
-    // border-radius: 0.5rem;
-    //border-bottom: 1px solid var(--bs-border-color);
     background: transparent;
     color: inherit;
     padding: 0.75rem;
@@ -172,10 +280,6 @@
   }
 
   .category-sub-list {
-    // .list-group-item {
-    //   border-bottom-color: var(--bs-border-color-translucent);
-    // }
-
     &__inactive {
       opacity: 0.6;
     }
@@ -187,4 +291,129 @@
 // ============================================================
 #appLogsTable_processing.dataTables_processing {
   display: none;
+}
+
+// ============================================================
+// Dashboard — Views/Home/Dashboard.cshtml
+// ============================================================
+.dashboard-action-card {
+    overflow: hidden;
+    background: #2c3852;
+
+    .card-header {
+        display: block;
+        position: absolute;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.45);
+        width: 100%;
+        min-height: 20%;
+
+        .card-action-title {
+            color: #36445d;
+            width: 100%;
+            font-size: 1.4rem;
+            padding: 0.5rem 0rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .fs-4 {
+            color: #36445d;
+            line-height: 1;
+            font-size: 1.1rem !important;
+            font-weight: 400;
+        }
+    }
+
+    .card-img-top {
+        height: 400px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .card-body {
+        .fw-normal {
+            font-size: 1.2rem;
+        }
+
+        .qty-label {
+            font-size: 12px;
+            color: #e8a832;
+        }
+
+        .qty-label--fert {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .qty-label-text {
+            display: block;
+            max-width: 12rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .qty-label-tip {
+            font-size: 0.9rem;
+            line-height: 1;
+            color: #e8a832;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .icon {
+            width: 36px;
+            height: 36px;
+            color: #5a8dee;
+        }
+
+        .icon2 {
+            width: 60px;
+            height: 60px;
+            color: #a1b0cb;
+        }
+
+        .btn-label-primary {
+            background: rgba(76,85,105,0.5) !important;
+
+            &:hover {
+                border-color: transparent !important;
+                background: rgba(94,141,238,0.5) !important;
+            }
+        }
+    }
+
+    &__icon {
+        width: 1rem;
+        height: 1rem;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    &__fallback {
+        width: 100%;
+        max-width: 100%;
+        height: 360px;
+        border-radius: 0;
+        background: rgba(var(--bs-primary-rgb), 0.16);
+        color: var(--bs-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__fallback &__icon {
+        width: 4rem;
+        height: 4rem;
+    }
+
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-action-card .card-body .qty-label-text {
+        max-width: 8.5rem;
+    }
 }

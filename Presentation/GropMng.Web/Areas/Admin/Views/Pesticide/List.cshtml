@@ -1,0 +1,116 @@
+@model GropMng.Web.Areas.Admin.Models.Pesticide.PesticideSearchModel
+@using GropMng.Web.Areas.Admin.Models.Pesticide
+@using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using Microsoft.AspNetCore.Routing
+@{
+    ViewData["Title"] = T("admin.pesticide.title");
+    GropHtml.SetActiveMenuItemSystemName("Pesticides");
+
+    var addPesticideUrl = Url.Action("Create", "Pesticide", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@T("admin.pesticide.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.pesticide.title") }
+    })">
+    <grop-header-button href="@addPesticideUrl"
+                        text="@T("admin.pesticide.create")"
+                        icon="bx bx-plus"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+@Html.AntiForgeryToken()
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">@T("common.filters")</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> @T("common.apply")
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> @T("common.clear")
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <grop-label asp-for="SearchTerm" />
+                <grop-editor asp-for="SearchTerm" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "pesticidesTable",
+    UrlRead = new GropDataUrl("PesticideList", "Pesticide", new RouteValueDictionary(new { area = "Admin" })),
+    UrlDelete = new GropDataUrl("Delete", "Pesticide", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(PesticideSearchModel.SearchTerm))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("id")
+        {
+            Title = T("admin.pesticide.grid.id"),
+            Width = "60px"
+        },
+        new GropColumnProperty("name")
+        {
+            Title = T("admin.pesticide.fields.name")
+        },
+        new GropColumnProperty("brand")
+        {
+            Title = T("admin.pesticide.fields.brand")
+        },
+        new GropColumnProperty("activeIngredient")
+        {
+            Title = T("admin.pesticide.fields.activeingredient")
+        },
+        new GropColumnProperty("pesticideTypeLocalized")
+        {
+            Title = T("admin.pesticide.fields.pesticidetype"),
+            Width = "120px",
+            ClassName = GropColumnClassDefaults.NoWrap,
+            Render = new RenderBadge("badge bg-label-warning")
+        },
+        new GropColumnProperty("isOrganic")
+        {
+            Title = T("admin.pesticide.fields.isorganic"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.CenterAll,
+            Render = new RenderBoolean()
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.edit"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonEdit(new GropDataUrl("Edit", "Pesticide", new RouteValueDictionary(new { area = "Admin" })))
+        },
+        new GropColumnProperty("id")
+        {
+            Title = T("common.delete"),
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonRemove(new GropDataUrl("Delete", "Pesticide", new RouteValueDictionary(new { area = "Admin" })))
+        }
+    ]
+})
+

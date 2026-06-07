@@ -1,0 +1,186 @@
+@model IList<GropMng.Web.Models.Garden.PlantInstanceListRowModel>
+@{
+    var filter = ViewBag.FilterModel as GropMng.Web.Models.Garden.PlantInstanceListFilterModel;
+}
+
+@{
+    GropHtml.SetActiveMenuItemSystemName("MyPlants");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@T("mygarden.plantinstance.list.title")</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">@T("common.dashboard")</a></li>
+                <li class="breadcrumb-item active">@T("mygarden.plantinstance.list.title")</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="@Url.Action("Create", "PlantInstance")" class="btn btn-primary">
+        <i class="bx bx-plus me-1"></i>@T("mygarden.plantinstance.add")
+    </a>
+</div>
+
+<!-- Filter Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="@Url.Action("List", "PlantInstance")" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">@T("mygarden.plantinstance.filter.plant")</label>
+                <select name="plantId" class="form-select">
+                    <option value="">— All Plants —</option>
+                    @if (filter?.AvailablePlants != null)
+                    {
+                        @foreach (var p in filter.AvailablePlants)
+                        {
+                            @if (p.Selected)
+                            {
+                                <option value="@p.Value" selected>@p.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@p.Value">@p.Text</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">@T("mygarden.plantinstance.filter.location")</label>
+                <select name="locationId" class="form-select">
+                    <option value="">— All Locations —</option>
+                    @if (filter?.AvailableLocations != null)
+                    {
+                        @foreach (var l in filter.AvailableLocations)
+                        {
+                            @if (l.Selected)
+                            {
+                                <option value="@l.Value" selected>@l.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@l.Value">@l.Text</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">@T("mygarden.plantinstance.filter.gardenspot")</label>
+                <select name="gardenSpotId" class="form-select">
+                    <option value="">— All Spots —</option>
+                    @if (filter?.AvailableGardenSpots != null)
+                    {
+                        @foreach (var s in filter.AvailableGardenSpots)
+                        {
+                            @if (s.Selected)
+                            {
+                                <option value="@s.Value" selected>@s.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@s.Value">@s.Text</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-check mb-2 w-100">
+                    <input type="checkbox" class="form-check-input" id="activeOnly" name="activeOnly" value="true" @(filter?.ActiveOnly == true ? "checked" : "") />
+                    <input type="hidden" name="activeOnly" value="false" />
+                    <label class="form-check-label" for="activeOnly">@T("mygarden.plantinstance.filter.activeonly")</label>
+                </div>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary w-100">@T("common.filters")</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Plants List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("mygarden.plantinstance.list.title")</h5>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <p class="text-muted mb-0">@T("mygarden.plantinstance.list.empty")</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">@T("admin.plant.fields.picture")</th>
+                            <th>@T("mygarden.plantinstance.field.plant")</th>
+                            <th>@T("mygarden.plantinstance.field.nickname")</th>
+                            <th>@T("mygarden.plantinstance.field.location")</th>
+                            <th>@T("mygarden.plantinstance.field.gardenspot")</th>
+                            <th>@T("mygarden.plantinstance.field.container")</th>
+                            <th>@T("mygarden.plantinstance.field.age")</th>
+                            <th>@T("mygarden.plantinstance.field.health")</th>
+                            <th>@T("mygarden.plantinstance.field.active")</th>
+                            <th class="text-end">@T("common.actions")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(row.MainImageUrl))
+                                    {
+                                        <img src="@row.MainImageUrl"
+                                             alt="@row.PlantName"
+                                             class="rounded"
+                                             style="width:48px;height:48px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                             style="width:48px;height:48px;">
+                                            <i class="bx bx-leaf text-muted fs-4"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@row.PlantName</td>
+                                <td>@(row.Nickname ?? "—")</td>
+                                <td>@row.LocationName</td>
+                                <td>@row.GardenSpotName</td>
+                                <td>@(row.ContainerInfo ?? "—")</td>
+                                <td>@(row.AgeYears.HasValue ? $"{row.AgeYears} y" : "—")</td>
+                                <td><span class="badge bg-label-@(row.HealthStatus switch { GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Excellent => "success", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Good => "info", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Fair => "warning", GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Poor or GropMng.Core.Domain.Garden.Enums.PlantHealthStatus.Critical => "danger", _ => "secondary" })">@row.HealthStatus</span></td>
+                                <td>
+                                    @if (row.IsActive)
+                                    {
+                                        <i class="bx bx-check text-success" aria-label="active"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-x text-muted" aria-label="inactive"></i>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a href="@Url.Action("Edit", "PlantInstance", new { id = row.Id })" class="btn btn-sm btn-icon btn-outline-primary" title="@T("common.edit")">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    <form method="post" action="@Url.Action("Delete", "PlantInstance", new { id = row.Id })" class="d-inline" data-grop-confirm="@T("common.delete.confirm")">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="@T("common.delete")">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -21,6 +21,8 @@ public partial class FertilizingSchedule : AuditableEntity
 
     public string? Notes { get; set; }
 
+    public string? DilutionInstructions { get; set; }
+
     public PlantInstance PlantInstance { get; set; } = null!;
 
     public Fertilizer Fertilizer { get; set; } = null!;

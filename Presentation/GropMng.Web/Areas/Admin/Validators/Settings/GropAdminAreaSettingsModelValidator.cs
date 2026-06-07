@@ -27,5 +27,9 @@ public class GropAdminAreaSettingsModelValidator : BaseGropValidator<GropAdminAr
         RuleFor(x => x.AdminDashboardWelcomeHtml)
             .MaximumLength(8000)
             .WithMessage("Welcome HTML cannot exceed 8000 characters.");
+
+        RuleFor(x => x.PasswordResetTokenExpirationHours)
+            .InclusiveBetween(1, 168)
+            .WithMessage("Password reset token expiration must be between 1 and 168 hours.");
     }
 }

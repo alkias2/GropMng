@@ -1,0 +1,88 @@
+@model GropMng.Web.Areas.Admin.Models.Roles.OwnerRoleSearchModel
+@using GropMng.Web.Areas.Admin.Models.Roles
+@using GropMng.Web.Framework.Models.DataTables
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using Microsoft.AspNetCore.Routing
+@{
+    ViewData["Title"] = "Roles & Permissions";
+    GropHtml.SetActiveMenuItemSystemName("Roles");
+}
+
+<grop-admin-page-header
+    title="Roles & Permissions"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = "Dashboard", Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = "Roles & Permissions" }
+    })">
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+@Html.AntiForgeryToken()
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0 me-auto">Role filters</h5>
+        <button id="btnApplyFilters" class="btn btn-primary btn-sm">
+            <i class="bx bx-filter-alt me-1"></i> Apply
+        </button>
+        <button id="btnClearFilters" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="bx bx-x me-1"></i> Clear
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="SearchTerm" class="form-label"></label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Search by role name or system name" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Table", new GropDataTablesModel
+{
+    Name = "rolesTable",
+    UrlRead = new GropDataUrl("RoleList", "OwnerRole", new RouteValueDictionary(new { area = "Admin" })),
+    SearchButtonId = "btnApplyFilters",
+    ClearButtonId = "btnClearFilters",
+    Length = Model.PageSize,
+    LengthMenu = [10, 25, 50, 100],
+    Filters =
+    [
+        new GropFilterParameter(nameof(OwnerRoleSearchModel.SearchTerm))
+    ],
+    ColumnCollection =
+    [
+        new GropColumnProperty("name")
+        {
+            Title = "Role"
+        },
+        new GropColumnProperty("systemName")
+        {
+            Title = "System name"
+        },
+        new GropColumnProperty("permissionCount")
+        {
+            Title = "Permissions",
+            Width = "100px"
+        },
+        new GropColumnProperty("isActive")
+        {
+            Title = "Active",
+            Width = "90px",
+            Render = new RenderBoolean { TrueClass = "badge bg-label-success", FalseClass = "badge bg-label-secondary" }
+        },
+        new GropColumnProperty("id")
+        {
+            Title = "Edit",
+            Width = "80px",
+            ClassName = GropColumnClassDefaults.Button,
+            Orderable = false,
+            Searchable = false,
+            Render = new RenderButtonEdit(new GropDataUrl("Edit", "OwnerRole", new RouteValueDictionary(new { area = "Admin" })))
+        }
+    ]
+})
+

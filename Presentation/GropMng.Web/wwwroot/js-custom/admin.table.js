@@ -92,9 +92,10 @@
      */
     function buildLanguage(localizedTexts) {
         const texts = localizedTexts || {};
+        const commonTexts = window.gropCommonTexts || {};
 
         return {
-            processing: `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">${escapeHtml(texts.processing || 'Loading...')}</span></div>`,
+            processing: `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">${escapeHtml(texts.processing || commonTexts.loadingText || 'Loading...')}</span></div>`,
             lengthMenu: texts.lengthMenu || '_MENU_',
             zeroRecords: texts.zeroRecords || '',
             emptyTable: texts.emptyTable || '',
@@ -248,10 +249,11 @@
                 }
             },
             error: function (xhr, error, thrown) {
+                const commonTexts = window.gropCommonTexts || {};
                 console.error('GropAdminTable: AJAX error — HTTP ' + xhr.status + ' ' + xhr.statusText
                     + ' | textStatus=' + error
                     + ' | responseText=' + (xhr.responseText ? xhr.responseText.substring(0, 300) : '(empty)'));
-                window.GropSwal?.showError?.('Failed to load data. Please try again.');
+                window.GropSwal?.showError?.(commonTexts.networkErrorText || 'Failed to load data. Please try again.');
             }
         };
 
@@ -562,11 +564,11 @@
         const texts = window.gropCommonTexts || {};
         const token = function () { return $('input[name="__RequestVerificationToken"]').first().val(); };
 
-        const title      = cfg.deleteTitle       || texts.deleteTitle       || 'Delete';
+        const title      = cfg.deleteTitle       || texts.deleteTitle       || texts.deleteButtonText || 'Delete';
         const text       = cfg.deleteText        || texts.deleteText        || 'Are you sure?';
         const itemsText  = cfg.deleteItemsText   || texts.deleteItemsText   || 'Are you sure you want to delete {0} items?';
-        const btnConfirm = cfg.deleteButtonText  || texts.deleteButtonText  || 'Delete';
-        const btnCancel  = cfg.cancelButtonText  || texts.cancelButtonText  || 'Cancel';
+        const btnConfirm = cfg.deleteButtonText  || texts.deleteButtonText  || texts.yesButtonText || 'Delete';
+        const btnCancel  = cfg.cancelButtonText  || texts.cancelButtonText  || texts.noButtonText || 'Cancel';
 
         // Update selected-count badge and toggle delete-selected button
         $(tableSelector).on('grop:selectionChanged', function (e, ids) {
@@ -675,8 +677,9 @@
      * @param {*} error - Optional error object or details
      */
     function handleActionError(message, error) {
+        const texts = window.gropCommonTexts || {};
         console.error('GropAdminTable action error:', error);
-        window.GropSwal?.showError?.(message || 'An error occurred. Please try again.');
+        window.GropSwal?.showError?.(message || texts.networkErrorText || 'An error occurred. Please try again.');
     }
 
     // ============================================================================
@@ -760,7 +763,10 @@
      */
     function renderStatus(value, options) {
         const config = options || {};
-        const label = value ? (config.trueLabel || 'Yes') : (config.falseLabel || 'No');
+        const texts = window.gropCommonTexts || {};
+        const label = value
+            ? (config.trueLabel || texts.yesButtonText || 'Yes')
+            : (config.falseLabel || texts.noButtonText || 'No');
         const cssClass = value ? (config.trueClass || 'badge bg-success') : (config.falseClass || 'badge bg-danger');
         
         return `<span class="${escapeHtml(cssClass)}">${escapeHtml(label)}</span>`;
@@ -808,22 +814,26 @@
         return true;
     }
 
-    if (!initialize(window.jQuery)) {
-        var retryCount = 0;
-        var maxRetries = 100;
+    // Defer initialization until jQuery is available
+    var retryCount = 0;
+    var maxRetries = 200; // Increased from 100 to allow more time
 
-        (function waitForDependencies() {
+    function attemptInitialize() {
+        if (window.jQuery) {
             if (initialize(window.jQuery)) {
                 return;
             }
+        }
 
-            retryCount += 1;
-            if (retryCount <= maxRetries) {
-                window.setTimeout(waitForDependencies, 50);
-            }
-            else {
-                console.warn('GropAdminTable initialization skipped: jQuery is unavailable.');
-            }
-        })();
+        retryCount += 1;
+        if (retryCount <= maxRetries) {
+            window.setTimeout(attemptInitialize, 25); // Reduced delay from 50ms to 25ms for responsiveness
+        }
+        else {
+            console.warn('GropAdminTable initialization skipped: jQuery is unavailable after 5 seconds.');
+        }
     }
+
+    // Start initialization attempt immediately when script loads
+    attemptInitialize();
 })(window);

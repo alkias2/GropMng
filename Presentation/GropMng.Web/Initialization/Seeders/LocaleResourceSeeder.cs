@@ -58,7 +58,8 @@ internal sealed class LocaleResourceSeeder
     }
 
     /// <summary>
-    /// Seeds locale resources that do not already exist for the specified language.
+    /// Synchronizes locale resources for the specified language with the provided key/value set.
+    /// New resources are inserted and existing resources are updated when values differ.
     /// </summary>
     /// <param name="languageId">The language identifier.</param>
     /// <param name="resources">The resources to seed.</param>
@@ -66,27 +67,36 @@ internal sealed class LocaleResourceSeeder
     /// <returns>A task that represents the asynchronous seed operation.</returns>
     public async Task SeedResourcesAsync(int languageId, IReadOnlyDictionary<string, string> resources, CancellationToken cancellationToken = default)
     {
-        var existingResourceNames = await _dbContext.LocaleStringResources
+        var existingResources = await _dbContext.LocaleStringResources
             .Where(entity => entity.LanguageId == languageId)
-            .Select(entity => entity.ResourceName)
             .ToListAsync(cancellationToken);
 
-        var existingSet = existingResourceNames
-            .Select(name => name.Trim().ToLowerInvariant())
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingMap = existingResources
+            .GroupBy(entity => entity.ResourceName.Trim().ToLowerInvariant())
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
         var now = DateTime.UtcNow;
         foreach (var resource in resources)
         {
             var key = resource.Key.Trim().ToLowerInvariant();
-            if (existingSet.Contains(key))
+            var value = resource.Value;
+
+            if (existingMap.TryGetValue(key, out var existing))
+            {
+                if (!string.Equals(existing.ResourceValue ?? string.Empty, value, StringComparison.Ordinal))
+                {
+                    existing.ResourceValue = value;
+                    existing.UpdatedOnUtc = now;
+                }
+
                 continue;
+            }
 
             _dbContext.LocaleStringResources.Add(new LocaleStringResource
             {
                 LanguageId = languageId,
                 ResourceName = key,
-                ResourceValue = resource.Value,
+                ResourceValue = value,
                 CreatedOnUtc = now,
                 UpdatedOnUtc = now
             });

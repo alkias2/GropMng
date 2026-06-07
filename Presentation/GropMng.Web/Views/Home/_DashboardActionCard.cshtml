@@ -1,0 +1,173 @@
+@model GropMng.Web.Models.Dashboard.DashboardActionModel
+@using GropMng.Web.Models.Dashboard
+@using GropMng.Core.Domain.Garden.Enums
+@{
+    var actionTypeStr = Model.ActionType == DashboardActionType.Watering ? "watering" : "fertilizing";
+    var skipKey = $"{Model.PlantInstanceId}:{actionTypeStr}";
+    var plantDisplayName = string.IsNullOrWhiteSpace(Model.Nickname) ? Model.PlantName : $"{Model.PlantName} ({Model.Nickname})";
+    var overdueDays = Model.DueStatus == DashboardDueStatus.Overdue
+        ? DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - Model.DueDate.DayNumber
+        : 0;
+    var isCountable = Model.DueStatus != DashboardDueStatus.Upcoming;
+
+    var logUrl = Model.ActionType == DashboardActionType.Watering
+        ? Url.Action("LogWatering", "ActionLog")
+        : Url.Action("LogFertilizing", "ActionLog");
+
+    var unitStr = Model.FertilizerQuantityUnit switch
+    {
+        FertilizerQuantityUnit.Gram        => "g",
+        FertilizerQuantityUnit.Kilogram    => "kg",
+        FertilizerQuantityUnit.Millilitre  => "ml",
+        FertilizerQuantityUnit.Litre       => "l",
+        FertilizerQuantityUnit.Tablespoon  => "tbsp",
+        FertilizerQuantityUnit.Teaspoon    => "tsp",
+        _                                  => ""
+    };
+
+    var quantityDisplay = Model.ActionType == DashboardActionType.Watering
+        ? (Model.WaterAmountL.HasValue ? $"{Model.WaterAmountL:0.##}" : "—")
+        : (Model.FertilizerQuantity.HasValue ? $"{Model.FertilizerQuantity:0.##} {unitStr}".Trim() : "—");
+
+    var fertilizerLabel = !string.IsNullOrWhiteSpace(Model.FertilizerName)
+        ? Model.FertilizerName
+        : T("dashboard.owner.quantity").ToString();
+
+    var locationDisplay = string.IsNullOrWhiteSpace(Model.GardenSpotName) ? Model.LocationName : Model.GardenSpotName;
+}
+
+<div class="col mb-2"
+    data-dashboard-action-item="true"
+    data-skip-key="@skipKey"
+    data-spot-id="@Model.GardenSpotId"
+    data-due-status="@Model.DueStatus.ToString().ToLowerInvariant()"
+    data-bulk-eligible="@(isCountable ? "true" : "false")">
+    <div class="card h-100 dashboard-action-card">
+        <div class="card-header">
+            <div class="card-action-title">@(Model.Nickname ?? string.Empty)</div>
+            <div class="fs-4">@Model.PlantName</div>
+        </div>
+   
+        @if (!string.IsNullOrEmpty(Model.PlantMainImageUrl)) {
+            <img src="@Model.PlantMainImageUrl" alt="@Model.PlantName" class="card-img-top"/>
+        }
+        else {
+            <div class="dashboard-action-card__fallback">
+                <svg class="dashboard-action-card__icon" aria-hidden="true" focusable="false">
+                    <use href="#gm-icon-leaf"></use>
+                </svg>
+            </div>
+        }
+
+        <div class="card-body">
+
+           <h3 class="fw-normal mb-4">@locationDisplay</h3>
+           
+           <!-- Action Info-->
+           <div class="d-flex gap-2 border-top pb-3 pt-3">
+               <!-- Ημερομηνία -->
+               <div class="d-flex align-items-start gap-2 flex-fill">
+                   <svg aria-hidden="true" class="icon flex-shrink-0 mt-1">
+                       <use href="@(Model.ActionType == DashboardActionType.Watering ? "#gm-icon-watering" : "#gm-icon-fretilize")" />
+                   </svg>
+                   <div>
+                       <div class="fw-bold" style="font-size:13px;">@Model.DueDate.ToString("yyyy-MM-dd")</div>
+                       <div style="font-size: 12px; color: #e8a832;">
+                           @if (Model.DueStatus == DashboardDueStatus.Today) {
+                               @T("dashboard.owner.status.today")
+                           }
+                           else if (Model.DueStatus == DashboardDueStatus.Overdue) {
+                               @overdueDays
+                               @T("dashboard.owner.daysago")
+                           }
+                           else {
+                               @string.Format(T("dashboard.owner.group.inxdays").ToString(), Model.DeltaDaysFromToday)
+                           }
+                       </div>
+                   </div>
+               </div>
+                
+               <!-- Συχνότητα -->
+               <div class="d-flex align-items-start gap-2 flex-fill">
+                   <svg aria-hidden="true" class="icon flex-shrink-0 mt-1">
+                       <use href="#gm-icon-alarm-check" />
+                   </svg>
+                   <div>
+                       <div class="fw-bold" style="font-size:13px;">@Model.FrequencyDays @T("dashboard.owner.days")</div>
+                       <div style="font-size:12px; color:#e8a832;">@T("dashboard.owner.frequency")</div>
+                   </div>
+               </div>
+                
+               <!-- Ποσότητα -->
+               <div class="d-flex align-items-start gap-2 flex-fill">
+                   <svg aria-hidden="true" class="icon flex-shrink-0 mt-1">
+                       <use href="@(Model.ActionType == DashboardActionType.Watering ? "#gm-icon-water-volume" : "#gm-icon-fertillize-volume")" />
+                   </svg>
+                   <div>
+                       <div class="fw-bold" style="font-size:13px;">@quantityDisplay</div>
+                       @if (Model.ActionType == DashboardActionType.Watering)
+                       {
+                           <div class="qty-label">@T("dashboard.owner.amountL")</div>
+                       }
+                       else
+                       {
+                           <div class="qty-label qty-label--fert">
+                               <span class="qty-label-text">@fertilizerLabel.TruncateAtWord(20)</span>
+                               <i class="bx bx-info-circle qty-label-tip"
+                                  aria-hidden="true"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="top"
+                                  data-bs-title="@fertilizerLabel"></i>
+                           </div>
+                       }
+                   </div>
+               </div>
+           </div>
+           <!--/ Action Info-->
+           
+           <!-- Actions -->
+           <div class="d-flex justify-content-between border-top p-3" style="border-color:rgba(255,255,255,.1)!important;">
+               <button type="button"
+                       class="btn btn-label-primary p-0  btn-action-done"
+                       data-url="@logUrl"
+                       data-plant-instance-id="@Model.PlantInstanceId"
+                       data-action-type="@actionTypeStr"
+                       data-water-amount-l="@Model.WaterAmountL"
+                       data-fertilizer-quantity="@Model.FertilizerQuantity"
+                       data-fertilizer-unit="@((int?)Model.FertilizerQuantityUnit)"
+                       data-due-status="@Model.DueStatus.ToString().ToLowerInvariant()"
+                       data-due-date="@Model.DueDate.ToString("yyyy-MM-dd")"
+                       data-counter="@(isCountable ? actionTypeStr + "-count" : "")"
+                       data-label-done="@T("dashboard.owner.action.done")"
+                       aria-label="@T("dashboard.owner.action.done")"
+                       title="@T("dashboard.owner.action.done")">
+                   <svg class="icon2" aria-hidden="true" focusable="false">
+                       <use href="#gm-icon-check-circle"></use>
+                   </svg>
+               </button>
+               <button type="button"
+                       class="btn btn-label-primary p-0  btn-action-skip"
+                       data-plant-instance-id="@Model.PlantInstanceId"
+                       data-action-type="@actionTypeStr"
+                       data-plant-name="@plantDisplayName"
+                       data-frequency-days="@Model.FrequencyDays"
+                       aria-label="@T("dashboard.owner.action.skip")"
+                       title="@T("dashboard.owner.action.skip")">
+                   <svg class="icon2" aria-hidden="true" focusable="false">
+                       <use href="#gm-icon-snooze"></use>
+                   </svg>
+               </button>
+               <a href="@Url.Action("Edit", "PlantInstance", new { id = Model.PlantInstanceId })"
+                  class="btn btn-label-primary p-0"
+                  aria-label="@T("common.details")"
+                  title="@T("common.details")">
+                   <svg class="icon2" aria-hidden="true" focusable="false">
+                       <use href="#gm-icon-info"></use>
+                   </svg>
+               </a>
+           </div>
+           <!--/ Actions -->
+
+        </div>
+    </div>
+</div>

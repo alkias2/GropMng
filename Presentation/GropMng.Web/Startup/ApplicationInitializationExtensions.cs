@@ -21,10 +21,11 @@ public static class ApplicationInitializationExtensions
     public static async Task RunStartupInitializationAsync(this WebApplication app, CancellationToken cancellationToken = default)
     {
         var sqlServerSettings = GropContextConfiguration.ResolveSqlServerSettings(app.Configuration);
+        var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+        var runStartupSeeders = app.Configuration.GetValue("Database:RunStartupSeeders", true);
 
         if (sqlServerSettings.IsEnabled && !sqlServerSettings.CanConnect)
         {
-            var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
             startupLogger.LogWarning("SQL Server is enabled but no usable connection string was resolved. Reason: {Reason}", sqlServerSettings.FailureReason);
         }
 
@@ -37,8 +38,16 @@ public static class ApplicationInitializationExtensions
             var sqlServerContext = scope.ServiceProvider.GetRequiredService<GropContext>();
             await sqlServerContext.Database.MigrateAsync(cancellationToken);
 
-            var startupSeeder = scope.ServiceProvider.GetRequiredService<IStartupSeeder>();
-            await startupSeeder.SeedAsync(cancellationToken);
+            if (runStartupSeeders)
+            {
+                var startupSeeder = scope.ServiceProvider.GetRequiredService<IStartupSeeder>();
+                await startupSeeder.SeedAsync(cancellationToken);
+                startupLogger.LogInformation("Startup seeders executed successfully.");
+            }
+            else
+            {
+                startupLogger.LogInformation("Startup seeders are disabled via configuration key 'Database:RunStartupSeeders'.");
+            }
 
             var appLogService = scope.ServiceProvider.GetService<IAppLogService>();
             if (appLogService is not null)
@@ -54,7 +63,6 @@ public static class ApplicationInitializationExtensions
         }
         catch (Exception ex)
         {
-            var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
             startupLogger.LogWarning(ex, "SQL Server initialization failed. Application will continue with SQLite data context.");
         }
     }

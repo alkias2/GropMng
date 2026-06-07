@@ -36,14 +36,22 @@
 
     <div class="col-md-3 d-flex align-items-center">
         <div class="form-check form-switch mt-4">
+            <input class="form-check-input" asp-for="RequireEmailConfirmation" />
+            <label class="form-check-label" asp-for="RequireEmailConfirmation"></label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <grop-label asp-for="PasswordResetTokenExpirationHours" />
+        <grop-editor asp-for="PasswordResetTokenExpirationHours" html-attributes='new { type = "number", min = "1", max = "168" }' />
+        <span class="text-danger" asp-validation-for="PasswordResetTokenExpirationHours"></span>
+        <div class="form-text">Controls the lifetime of owner password reset links.</div>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="form-check form-switch mt-4">
             <input class="form-check-input" asp-for="UseIsoDateFormatInJsonResult" />
             <label class="form-check-label" asp-for="UseIsoDateFormatInJsonResult"></label>
         </div>
     </div>
-</div>
-
-<div class="mt-4">
-    <button type="submit" class="btn btn-primary">
-        <i class="bx bx-save me-1"></i> Save Settings
-    </button>
 </div>

@@ -1,5 +1,106 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = T("landing.page.title").ToString();
+    Layout = "_LandingLayout";
 }
 
-<h1>Dashboard</h1>
+<div data-bs-spy="scroll" data-bs-target="#landingNavbar" class="scrollspy-example">
+
+    <!-- Hero: Start -->
+    <section id="hero-animation">
+        <div id="landingHero" class="section-py landing-hero position-relative">
+            <div class="container">
+                <div class="hero-text-box text-center">
+                    <h1 class="text-primary hero-title display-4 fw-bold">@T("landing.hero.title")</h1>
+                    <h2 class="hero-sub-title h6 mb-4 pb-1">
+                        @T("landing.hero.subtitle")
+                    </h2>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="btn btn-primary btn-lg">
+                            <i class="bx bx-leaf me-2"></i>@T("landing.hero.cta.start")
+                        </a>
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="btn btn-outline-secondary btn-lg">
+                            @T("common.login")
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="landing-hero-blank"></div>
+    </section>
+    <!-- Hero: End -->
+
+    <!-- Features: Start -->
+    <section id="landingFeatures" class="section-py landing-features">
+        <div class="container">
+            <div class="text-center mb-3 pb-1">
+                <span class="badge bg-label-primary">@T("landing.features.badge")</span>
+            </div>
+            <h3 class="text-center mb-1">
+                <span class="section-title">@T("landing.features.title")</span>
+            </h3>
+            <p class="text-center mb-3 mb-md-5 pb-3">@T("landing.features.subtitle")</p>
+
+            <div class="features-icon-wrapper row gx-0 gy-4 g-sm-5">
+                <!-- Feature 1 -->
+                <div class="col-lg-4 col-sm-6 text-center features-icon-box">
+                    <div class="text-center mb-3">
+                        <div class="avatar avatar-lg mx-auto">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="bx bx-leaf fs-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <h5 class="mb-3">@T("landing.features.track.title")</h5>
+                    <p class="features-icon-description">@T("landing.features.track.desc")</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="col-lg-4 col-sm-6 text-center features-icon-box">
+                    <div class="text-center mb-3">
+                        <div class="avatar avatar-lg mx-auto">
+                            <span class="avatar-initial rounded bg-label-info">
+                                <i class="bx bx-droplet fs-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <h5 class="mb-3">@T("landing.features.schedule.title")</h5>
+                    <p class="features-icon-description">@T("landing.features.schedule.desc")</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="col-lg-4 col-sm-6 text-center features-icon-box">
+                    <div class="text-center mb-3">
+                        <div class="avatar avatar-lg mx-auto">
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="bx bx-heart fs-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <h5 class="mb-3">@T("landing.features.health.title")</h5>
+                    <p class="features-icon-description">@T("landing.features.health.desc")</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features: End -->
+
+    <!-- CTA: Start -->
+    <section class="section-py landing-reviews bg-body">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h3 class="mb-2">@T("landing.cta.title")</h3>
+                    <p class="mb-4">@T("landing.cta.subtitle")</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="btn btn-primary btn-lg">
+                            <i class="bx bx-user-plus me-2"></i>@T("common.register")
+                        </a>
+                        <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="btn btn-outline-primary btn-lg">
+                            @T("common.login")
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CTA: End -->
+
+</div>

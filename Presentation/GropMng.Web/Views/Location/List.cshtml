@@ -1,0 +1,70 @@
+@model IList<GropMng.Core.Domain.Garden.Locations.Location>
+
+@{
+    GropHtml.SetActiveMenuItemSystemName("Locations");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@T("mygarden.location.list.title")</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Home")">@T("common.dashboard")</a></li>
+                <li class="breadcrumb-item active">@T("mygarden.location.list.title")</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="@Url.Action("Create", "Location")" class="btn btn-primary">
+        <i class="bx bx-plus me-1"></i>@T("mygarden.location.add")
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("mygarden.location.list.title")</h5>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <p class="text-muted mb-0">@T("mygarden.location.list.empty")</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>@T("mygarden.location.field.name")</th>
+                            <th>@T("mygarden.location.field.city")</th>
+                            <th>@T("mygarden.location.field.country")</th>
+                            <th>@T("mygarden.location.field.spots")</th>
+                            <th class="text-end">@T("common.actions")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loc in Model)
+                        {
+                            <tr>
+                                <td>@loc.Name</td>
+                                <td>@loc.City</td>
+                                <td>@loc.Country</td>
+                                <td><span class="badge bg-label-primary">@loc.GardenSpots.Count</span></td>
+                                <td class="text-end">
+                                    <a href="@Url.Action("Edit", "Location", new { id = loc.Id })" class="btn btn-sm btn-icon btn-outline-primary" title="@T("common.edit")">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                    <form method="post" action="@Url.Action("Delete", "Location", new { id = loc.Id })" class="d-inline" data-grop-confirm="@T("common.delete.confirm")">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="@T("common.delete")">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

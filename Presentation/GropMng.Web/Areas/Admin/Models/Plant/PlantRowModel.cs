@@ -6,10 +6,14 @@ namespace GropMng.Web.Areas.Admin.Models.Plant;
 public class PlantRowModel
 {
     public int Id { get; set; }
+    public int PictureId { get; set; }
+    public string PictureThumbnailUrl { get; set; } = string.Empty;
     public string CommonName { get; set; } = string.Empty;
     public string ScientificName { get; set; } = string.Empty;
     public string? Family { get; set; }
     public string Category { get; set; } = string.Empty;
+    public string CategoryLocalized { get; set; } = string.Empty;
+    public string FlagsSummary { get; set; } = string.Empty;
     public bool IsEdible { get; set; }
     public bool IsMedicinal { get; set; }
     public bool IsToxic { get; set; }

@@ -1,0 +1,70 @@
+@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var displayName = User?.Identity?.Name;
+    var userRole = User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? T("common.user");
+    var ownerId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+}
+
+@if (isAuthenticated)
+{
+    <!-- Navbar Dropdown - Authenticated User -->
+    <li class="nav-item navbar-dropdown dropdown-user dropdown">
+        <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+            <div class="avatar avatar-online">
+                <img src="~/img/avatars/1.png" alt="@displayName" class="rounded-circle" />
+            </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="javascript:void(0);">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar avatar-online">
+                                <img src="~/img/avatars/1.png" alt="@displayName" class="rounded-circle" />
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <span class="fw-medium d-block lh-1">@displayName</span>
+                            <small>@userRole</small>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <div class="dropdown-divider"></div>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-area="Admin" asp-controller="Owner" asp-action="Edit" asp-route-id="@ownerId">
+                    <i class="bx bx-user me-2"></i>
+                    <span class="align-middle">@T("common.profile")</span>
+                </a>
+            </li>
+            <li>
+                <div class="dropdown-divider"></div>
+            </li>
+            <li>
+                <form asp-area="" asp-controller="OwnerAuth" asp-action="Logout" method="post" class="d-inline w-100">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item">
+                        <i class="bx bx-power-off me-2"></i>
+                        <span class="align-middle">@T("common.logout")</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <!-- Navbar Auth Links - Unauthenticated User -->
+    <li class="nav-item">
+        <div class="d-flex align-items-center gap-2 px-2">
+            <a asp-area="" asp-controller="OwnerAuth" asp-action="Login" class="btn btn-sm btn-outline-primary">
+                @T("common.login")
+            </a>
+            <a asp-area="" asp-controller="OwnerAuth" asp-action="Register" class="btn btn-sm btn-primary">
+                @T("common.register")
+            </a>
+        </div>
+    </li>
+}

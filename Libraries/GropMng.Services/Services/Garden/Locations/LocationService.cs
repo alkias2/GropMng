@@ -161,6 +161,7 @@ public class LocationService : ILocationService
         existingGardenSpot.SunHoursPerDay = gardenSpot.SunHoursPerDay;
         existingGardenSpot.Surroundings = gardenSpot.Surroundings?.Trim();
         existingGardenSpot.Notes = gardenSpot.Notes?.Trim();
+        existingGardenSpot.PictureId = gardenSpot.PictureId;
         StampForUpdate(existingGardenSpot);
 
         return await _gardenSpotRepository.UpdateAsync(existingGardenSpot, cancellationToken: cancellationToken);

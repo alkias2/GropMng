@@ -1,4 +1,5 @@
 using GropMng.Core.Domain.Garden;
+using GropMng.Core.Domain.Garden.Enums;
 
 namespace GropMng.Core.Domain.Garden.Owners;
 
@@ -23,17 +24,42 @@ public class Owner : AuditableEntity
     public required string LastName { get; set; }
 
     /// <summary>
+    /// Gets or sets the display name shown in the UI.
+    /// </summary>
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the owner email.
     /// </summary>
     public required string Email { get; set; }
 
     /// <summary>
-    /// Gets or sets the password hash used for future authentication flows.
+    /// Gets or sets the password hash used for the current baseline login flow.
     /// </summary>
     public required string PasswordHash { get; set; }
+
+    /// <summary>
+    /// Gets or sets the lifecycle status of the owner account.
+    /// </summary>
+    public OwnerAccountStatus Status { get; set; } = OwnerAccountStatus.Active;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the owner email has been confirmed.
+    /// </summary>
+    public bool IsEmailConfirmed { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether the owner is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the roles assigned to the owner.
+    /// </summary>
+    public ICollection<OwnerRole> OwnerRoles { get; set; } = new List<OwnerRole>();
+
+    /// <summary>
+    /// Gets or sets the password history records for the owner.
+    /// </summary>
+    public ICollection<OwnerPassword> Passwords { get; set; } = new List<OwnerPassword>();
 }
