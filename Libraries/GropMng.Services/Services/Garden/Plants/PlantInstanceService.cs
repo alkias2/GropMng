@@ -71,7 +71,16 @@ public class PlantInstanceService : IPlantInstanceService
     #region Public
 
     /// <inheritdoc />
-    public Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(Guid ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default)
+    public Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(
+        Guid ownerId,
+        int? plantId = null,
+        int? gardenSpotId = null,
+        int? locationId = null,
+        bool activeOnly = false,
+        int pageIndex = 0,
+        int pageSize = int.MaxValue,
+        CancellationToken cancellationToken = default
+    )
     {
         ValidateOwnerId(ownerId);
 
@@ -102,7 +111,12 @@ public class PlantInstanceService : IPlantInstanceService
     }
 
     /// <inheritdoc />
-    public async Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, Guid ownerId, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public async Task<PlantInstance?> GetPlantInstanceByIdAsync(
+        int plantInstanceId,
+        Guid ownerId,
+        bool includeDetails = false,
+        CancellationToken cancellationToken = default
+    )
     {
         ValidateOwnerId(ownerId);
 

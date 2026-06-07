@@ -11,12 +11,26 @@ public interface IPlantInstanceService
     /// <summary>
     /// Retrieves a paged list of plant instances for an owner using optional aggregate filters.
     /// </summary>
-    Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(Guid ownerId, int? plantId = null, int? gardenSpotId = null, int? locationId = null, bool activeOnly = false, int pageIndex = 0, int pageSize = int.MaxValue, CancellationToken cancellationToken = default);
+    Task<IPagedList<PlantInstance>> GetPlantInstancesAsync(
+        Guid ownerId,
+        int? plantId = null,
+        int? gardenSpotId = null,
+        int? locationId = null,
+        bool activeOnly = false,
+        int pageIndex = 0,
+        int pageSize = int.MaxValue,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Retrieves a single plant instance for an owner.
     /// </summary>
-    Task<PlantInstance?> GetPlantInstanceByIdAsync(int plantInstanceId, Guid ownerId, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<PlantInstance?> GetPlantInstanceByIdAsync(
+        int plantInstanceId,
+        Guid ownerId,
+        bool includeDetails = false,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Creates a new plant instance.
