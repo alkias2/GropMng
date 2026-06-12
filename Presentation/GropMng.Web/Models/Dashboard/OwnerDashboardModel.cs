@@ -66,16 +66,13 @@ public class DashboardQueryModel
 
 public class DashboardDiseaseTabModel
 {
-    // Backward-compatible list consumed by the current dashboard UI.
-    public IList<DashboardDiseaseModel> ActiveCases { get; set; } = new List<DashboardDiseaseModel>();
+    public int TodayOverdueCount { get; set; }
 
-    // Explicitly grouped disease cases diagnosed today or earlier.
-    public int TodayCount { get; set; }
-    public IList<DashboardDiseaseModel> TodayCases { get; set; } = new List<DashboardDiseaseModel>();
-
-    // Explicitly grouped disease cases with a future diagnosed date.
     public int UpcomingCount { get; set; }
-    public IList<DashboardDiseaseModel> UpcomingCases { get; set; } = new List<DashboardDiseaseModel>();
+
+    public IList<DashboardActionModel> TodayOverdueActions { get; set; } = new List<DashboardActionModel>();
+
+    public IList<DashboardActionGroupModel> UpcomingActionGroups { get; set; } = new List<DashboardActionGroupModel>();
 }
 
 public class DashboardActionModel
@@ -111,6 +108,10 @@ public class DashboardActionModel
     public decimal? FertilizerQuantity { get; set; }
     public FertilizerQuantityUnit? FertilizerQuantityUnit { get; set; }
     public string? FertilizerName { get; set; }
+
+    // ProblemTreatment-specific fields
+    public string? ScheduleActionName { get; set; }
+    public string? DosageNotes { get; set; }
 }
 
 public class DashboardDiseaseModel
@@ -129,7 +130,7 @@ public class DashboardDiseaseModel
 
     public string GardenSpotName { get; set; } = string.Empty;
 
-    public PlantDiseaseSeverity? Severity { get; set; }
+    public Severity? Severity { get; set; }
 }
 
 public class DashboardActivityModel
@@ -150,7 +151,8 @@ public class DashboardActivityModel
 public enum DashboardActionType
 {
     Watering,
-    Fertilizing
+    Fertilizing,
+    ProblemTreatment
 }
 
 public enum DashboardDueStatus

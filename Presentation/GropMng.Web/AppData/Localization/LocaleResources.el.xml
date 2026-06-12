@@ -81,6 +81,14 @@
     <Value>Γενικά</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>common.basicinfo</Name>
+    <Value>Βασικές Πληροφορίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.backtolist</Name>
+    <Value>Επιστροφή στη Λίστα</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>common.related</Name>
     <Value>Σχετικά</Value>
   </LocaleResource>
@@ -2425,5 +2433,209 @@
   <LocaleResource>
     <Name>mygarden.container.linked.plant</Name>
     <Value>Συνδεδεμένο Φυτό</Value>
+  </LocaleResource>
+
+  <!-- Plant Problems (User-facing) -->
+  <LocaleResource>
+    <Name>plantProblems.tab</Name>
+    <Value>Προβλήματα / Ασθένειες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.empty</Name>
+    <Value>Δεν υπάρχουν καταγεγραμμένα προβλήματα για αυτό το φυτό.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.addNew</Name>
+    <Value>Νέο Πρόβλημα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.createTitle</Name>
+    <Value>Καταγραφή Προβλήματος / Ασθένειας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.editTitle</Name>
+    <Value>Επεξεργασία Προβλήματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.problemName</Name>
+    <Value>Όνομα Προβλήματος / Ασθένειας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.detectedDate</Name>
+    <Value>Ημερομηνία Εντοπισμού</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.resolvedDate</Name>
+    <Value>Ημερομηνία Επίλυσης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.severity</Name>
+    <Value>Σοβαρότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.problemStatus</Name>
+    <Value>Κατάσταση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.infoSource</Name>
+    <Value>Πηγή Πληροφορίας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notes</Name>
+    <Value>Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notifyAdmin</Name>
+    <Value>Ενημέρωση διαχειριστή για πιθανή προσθήκη στη βάση γνώσεων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.schedules</Name>
+    <Value>Προγράμματα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.addSchedule</Name>
+    <Value>Πρόγραμμα Θεραπείας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.every</Name>
+    <Value>κάθε</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.nextDue</Name>
+    <Value>Επόμενη εκτέλεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.knowledgeInfo</Name>
+    <Value>Πληροφορίες από τη Βάση Γνώσεων</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.deleteConfirm</Name>
+    <Value>Θέλετε σίγουρα να διαγράψετε αυτό το πρόβλημα; Τα σχετικά προγράμματα θα διαγραφούν επίσης.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.created</Name>
+    <Value>Το πρόβλημα καταγράφηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.updated</Name>
+    <Value>Οι αλλαγές αποθηκεύτηκαν.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.deleted</Name>
+    <Value>Το πρόβλημα διαγράφηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notified</Name>
+    <Value>Το πρόβλημα καταγράφηκε. Ο διαχειριστής ειδοποιήθηκε για πιθανή προσθήκη στη βάση γνώσεων.</Value>
+  </LocaleResource>
+
+  <!-- Schedule (User-facing) -->
+  <LocaleResource>
+    <Name>schedule.createTitle</Name>
+    <Value>Νέο Πρόγραμμα Θεραπείας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.editTitle</Name>
+    <Value>Επεξεργασία Προγράμματος</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.actionName</Name>
+    <Value>Ενέργεια</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.frequency</Name>
+    <Value>Συχνότητα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.dosageNotes</Name>
+    <Value>Δοσολογία / Σημειώσεις</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.startDate</Name>
+    <Value>Ημερομηνία Έναρξης</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.nextDueDate</Name>
+    <Value>Επόμενη Εκτέλεση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.status</Name>
+    <Value>Κατάσταση</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.saved</Name>
+    <Value>Το πρόγραμμα θεραπείας αποθηκεύτηκε.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.deleted</Name>
+    <Value>Το πρόγραμμα διαγράφηκε.</Value>
+  </LocaleResource>
+
+  <!-- Admin DiseaseKnowledge -->
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.title</Name>
+    <Value>Βάση Γνώσεων Ασθενειών</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.create</Name>
+    <Value>Προσθήκη Γνώσης Ασθένειας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.edit</Name>
+    <Value>Επεξεργασία Γνώσης Ασθένειας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.description</Name>
+    <Value>Περιγραφή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.treatmentGuidelines</Name>
+    <Value>Οδηγίες Θεραπείας</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.plants</Name>
+    <Value>Σχετιζόμενα Φυτά</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.plantsHint</Name>
+    <Value>Επιλέξτε τα είδη φυτών που μπορεί να επηρεάσει αυτή η ασθένεια.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.photos</Name>
+    <Value>Φωτογραφίες</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.created</Name>
+    <Value>Η καταχώρηση γνώσης ασθένειας δημιουργήθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.updated</Name>
+    <Value>Η καταχώρηση γνώσης ασθένειας ενημερώθηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.deleted</Name>
+    <Value>Η καταχώρηση γνώσης ασθένειας διαγράφηκε επιτυχώς.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.commonName</Name>
+    <Value>Κοινό Όνομα</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.scientificName</Name>
+    <Value>Επιστημονικό Όνομα</Value>
+  </LocaleResource>
+
+  <!-- Admin Notifications -->
+  <LocaleResource>
+    <Name>admin.notifications.title</Name>
+    <Value>Ειδοποιήσεις Διαχειριστή</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.notifications.unresolved</Name>
+    <Value>Η ειδοποίηση επισημάνθηκε ως μη επιλυμένη.</Value>
   </LocaleResource>
 </Language>

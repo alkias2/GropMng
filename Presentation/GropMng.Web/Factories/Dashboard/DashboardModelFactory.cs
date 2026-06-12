@@ -5,6 +5,7 @@ using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Caching;
 using GropMng.Core.Interfaces.Repositories;
+using GropMng.Core.Interfaces.Services.Garden.Health;
 using GropMng.Core.Interfaces.Services.Localization;
 using GropMng.Core.Interfaces.Services.Media;
 using GropMng.Core.Interfaces.Services.User;
@@ -57,13 +58,12 @@ public class DashboardModelFactory : IDashboardModelFactory
     private readonly IRepository<Fertilizer> _fertilizerRepository;
     private readonly IRepository<WateringLog> _wateringLogRepository;
     private readonly IRepository<FertilizingLog> _fertilizingLogRepository;
-    private readonly IRepository<PlantDiseaseRecord> _plantDiseaseRecordRepository;
-    private readonly IRepository<Disease> _diseaseRepository;
     private readonly IRepository<ActionSkip> _actionSkipRepository;
     private readonly IRepository<PlantPhoto> _plantPhotoRepository;
     private readonly IGropStaticCacheManager _staticCacheManager;
     private readonly IPictureService _pictureService;
     private readonly ILocalizationService _localizationService;
+    private readonly IPlantProblemService _plantProblemService;
     private readonly DashboardOptions _dashboardOptions;
 
     #endregion
@@ -81,13 +81,12 @@ public class DashboardModelFactory : IDashboardModelFactory
         IRepository<Fertilizer> fertilizerRepository,
         IRepository<WateringLog> wateringLogRepository,
         IRepository<FertilizingLog> fertilizingLogRepository,
-        IRepository<PlantDiseaseRecord> plantDiseaseRecordRepository,
-        IRepository<Disease> diseaseRepository,
         IRepository<ActionSkip> actionSkipRepository,
         IRepository<PlantPhoto> plantPhotoRepository,
         IGropStaticCacheManager staticCacheManager,
         IPictureService pictureService,
         ILocalizationService localizationService,
+        IPlantProblemService plantProblemService,
         IOptions<DashboardOptions> dashboardOptions)
     {
         _currentOwnerProvider = currentOwnerProvider;
@@ -100,13 +99,12 @@ public class DashboardModelFactory : IDashboardModelFactory
         _fertilizerRepository = fertilizerRepository;
         _wateringLogRepository = wateringLogRepository;
         _fertilizingLogRepository = fertilizingLogRepository;
-        _plantDiseaseRecordRepository = plantDiseaseRecordRepository;
-        _diseaseRepository = diseaseRepository;
         _actionSkipRepository = actionSkipRepository;
         _plantPhotoRepository = plantPhotoRepository;
         _staticCacheManager = staticCacheManager;
         _pictureService = pictureService;
         _localizationService = localizationService;
+        _plantProblemService = plantProblemService;
         _dashboardOptions = dashboardOptions.Value;
     }
 
@@ -222,16 +220,16 @@ public class DashboardModelFactory : IDashboardModelFactory
             });
 
         // ── Disease counter ───────────────────────────────────────────────────
-        // Replicates the query of PrepareDiseaseTabInternalAsync
-        // but projects only to a count — no disease name lookup needed.
-        var diseaseRecords = await _plantDiseaseRecordRepository.GetAllAsync(
-            query => query.Where(r => r.OwnerId == context.OwnerId
-                && plantInstanceIds.Contains(r.PlantInstanceId)
-                && (r.Outcome == null || r.Outcome == PlantDiseaseOutcome.Ongoing)),
-            cancellationToken: ct);
+        // Counts active problem schedules due today or overdue, filtered to active plant instances.
+        // Uses ProblemSchedulesCacheKey for cache reuse with PrepareDiseaseTabAsync.
+        var ownerTokenDisease = context.OwnerId.ToString("N");
+        var diseaseSchedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.ProblemSchedulesCacheKey, ownerTokenDisease),
+            () => _plantProblemService.GetUpcomingSchedulesAsync(context.OwnerId, ct));
 
-        model.DiseaseTodayCount = diseaseRecords
-            .Count(r => r.DetectedDate <= context.Today);
+        model.DiseaseTodayCount = diseaseSchedules
+            .Where(s => plantInstanceIds.Contains(s.PlantProblemRecord.PlantInstanceId))
+            .Count(s => s.NextDueDate <= context.Today);
 
         return model;
     }
@@ -1034,8 +1032,16 @@ public class DashboardModelFactory : IDashboardModelFactory
     }
 
     /// <summary>
-    /// Loads active disease records and explicitly splits them into today/upcoming buckets.
+    /// Loads active problem treatment schedules and maps them to <see cref="DashboardActionModel"/> rows,
+    /// grouped by today/overdue and upcoming buckets, for display in the diseases dashboard tab.
     /// </summary>
+    /// <remarks>
+    /// Uses <see cref="DashboardCacheDefaults.ProblemSchedulesCacheKey"/> for cache reuse across
+    /// <see cref="PrepareDiseaseTabAsync"/> and <see cref="PrepareCountersAsync"/>.
+    /// Schedules with <see cref="ScheduleStatus.Completed"/> or <see cref="ScheduleStatus.Cancelled"/> are excluded
+    /// by <see cref="IPlantProblemService.GetUpcomingSchedulesAsync"/>.
+    /// The <see cref="PlantProblemSchedule.NextDueDate"/> is used directly as the action due date.
+    /// </remarks>
     private async Task<DashboardDiseaseTabModel> PrepareDiseaseTabInternalAsync(
         Guid ownerId,
         DateOnly today,
@@ -1046,63 +1052,122 @@ public class DashboardModelFactory : IDashboardModelFactory
         IReadOnlyDictionary<int, Location> locationMap,
         CancellationToken cancellationToken)
     {
-        var tab = new DashboardDiseaseTabModel();
+        // ------------------------------------------------------------------------
+        // PHASE 1: FETCH ACTIVE PROBLEM TREATMENT SCHEDULES (CACHED)
+        // ------------------------------------------------------------------------
+        // GetUpcomingSchedulesAsync already filters to Active status and non-deleted.
+        // We cache the result by owner ID for reuse within the request cycle.
+        // ------------------------------------------------------------------------
+        var ownerToken = ownerId.ToString("N");
+        var schedules = await _staticCacheManager.GetAsync(
+            _staticCacheManager.PrepareKey(DashboardCacheDefaults.ProblemSchedulesCacheKey, ownerToken),
+            () => _plantProblemService.GetUpcomingSchedulesAsync(ownerId, cancellationToken));
 
-        var records = await _plantDiseaseRecordRepository.GetAllAsync(
-            query => query.Where(r => r.OwnerId == ownerId
-                && plantInstanceIds.Contains(r.PlantInstanceId)
-                && (r.Outcome == null || r.Outcome == PlantDiseaseOutcome.Ongoing)),
-            cancellationToken: cancellationToken);
+        // Filter to only active plant instances (in-memory, same pattern as watering/fertilizing)
+        var activeSchedules = schedules
+            .Where(s => plantInstanceIds.Contains(s.PlantProblemRecord.PlantInstanceId))
+            .ToList();
 
-        if (records.Count == 0) return tab;
-
-        var diseaseIds = records.Select(r => r.DiseaseId).Distinct().ToList();
-        var diseases = await _diseaseRepository.GetByIdsAsync(diseaseIds, cancellationToken: cancellationToken);
-        var diseaseMap = diseases.ToDictionary(d => d.Id);
-
-        var activeCases = new List<DashboardDiseaseModel>();
-        foreach (var record in records.OrderBy(r => r.DetectedDate))
+        if (activeSchedules.Count == 0)
         {
-            if (!instanceMap.TryGetValue(record.PlantInstanceId, out var instance)) continue;
+            return new DashboardDiseaseTabModel();
+        }
+
+        // ------------------------------------------------------------------------
+        // PHASE 2: LOAD LOCALIZED UI STRINGS
+        // ------------------------------------------------------------------------
+        var inDaysTemplate = await _localizationService.GetResourceAsync("dashboard.owner.group.inxdays");
+
+        // ------------------------------------------------------------------------
+        // PHASE 3: BUILD ACTION ROWS FROM PROBLEM SCHEDULES
+        // ------------------------------------------------------------------------
+        // Each PlantProblemSchedule maps to one DashboardActionModel with:
+        //   - ActionType = ProblemTreatment
+        //   - DueDate = NextDueDate (already calculated by the service)
+        //   - FrequencyDays = 0 (not applicable — schedules use FrequencyValue/FrequencyUnit)
+        //   - Season = AllYear (problem treatments are not seasonal)
+        //   - ScheduleActionName = ActionName (e.g., "Ψεκασμός με χαλκό")
+        //   - DosageNotes = DosageNotes (optional dosage instructions)
+        // ------------------------------------------------------------------------
+        var problemRows = new List<DashboardActionModel>();
+        foreach (var schedule in activeSchedules)
+        {
+            var plantInstanceId = schedule.PlantProblemRecord.PlantInstanceId;
+            if (!instanceMap.TryGetValue(plantInstanceId, out var instance))
+                continue;
+
+            var dueDate = schedule.NextDueDate;
 
             var spot = spotMap.TryGetValue(instance.GardenSpotId, out var spotValue) ? spotValue : null;
             var locationName = spot != null && locationMap.TryGetValue(spot.LocationId, out var location)
                 ? location.Name
                 : "—";
 
-            activeCases.Add(new DashboardDiseaseModel
+            var dueStatus = dueDate < today
+                ? DashboardDueStatus.Overdue
+                : dueDate == today
+                    ? DashboardDueStatus.Today
+                    : DashboardDueStatus.Upcoming;
+
+            problemRows.Add(new DashboardActionModel
             {
                 PlantInstanceId = instance.Id,
+                GardenSpotId = instance.GardenSpotId,
                 PlantName = plantMap.TryGetValue(instance.PlantId, out var plant) ? plant.ScientificName : "—",
                 Nickname = instance.Nickname,
-                DiseaseName = diseaseMap.TryGetValue(record.DiseaseId, out var disease) ? disease.Name : "—",
-                DiagnosedOn = record.DetectedDate,
                 LocationName = locationName,
                 GardenSpotName = spot?.Name ?? "—",
-                Severity = record.Severity
+                ActionType = DashboardActionType.ProblemTreatment,
+                FrequencyDays = 0, // Not applicable for problem schedules
+                Season = GardenSeason.AllYear,
+                DueDate = dueDate,
+                DueStatus = dueStatus,
+                DeltaDaysFromToday = dueDate.DayNumber - today.DayNumber,
+                ScheduleActionName = schedule.ActionName,
+                DosageNotes = schedule.DosageNotes
             });
         }
 
-        // Keep ActiveCases for backward compatibility with existing views.
-        tab.ActiveCases = activeCases;
-
-        // Explicit disease split for dashboard analytics parity with other tabs.
-        tab.TodayCases = activeCases
-            .Where(c => c.DiagnosedOn <= today)
-            .OrderByDescending(c => c.DiagnosedOn)
-            .ThenBy(c => c.PlantName)
+        // ------------------------------------------------------------------------
+        // PHASE 4: SORT BY DUE STATUS & DATE
+        // ------------------------------------------------------------------------
+        var sortedRows = problemRows
+            .OrderBy(a => a.DueStatus)
+            .ThenBy(a => a.DueDate)
+            .ThenBy(a => a.PlantName)
             .ToList();
 
-        tab.UpcomingCases = activeCases
-            .Where(c => c.DiagnosedOn > today)
-            .OrderBy(c => c.DiagnosedOn)
-            .ThenBy(c => c.PlantName)
+        // ------------------------------------------------------------------------
+        // PHASE 5: SPLIT INTO BUCKETS (same pattern as watering/fertilizing)
+        // ------------------------------------------------------------------------
+        var todayOverdue = sortedRows
+            .Where(a => a.DueStatus == DashboardDueStatus.Overdue || a.DueStatus == DashboardDueStatus.Today)
             .ToList();
 
-        tab.TodayCount = tab.TodayCases.Count;
-        tab.UpcomingCount = tab.UpcomingCases.Count;
+        var upcoming = sortedRows
+            .Where(a => a.DueStatus == DashboardDueStatus.Upcoming)
+            .Where(a => a.DeltaDaysFromToday <= NormalizeHorizonDays(_dashboardOptions.UpcomingHorizonDays))
+            .ToList();
 
-        return tab;
+        // ------------------------------------------------------------------------
+        // PHASE 6: BUILD DISEASE TAB MODEL
+        // ------------------------------------------------------------------------
+        var model = new DashboardDiseaseTabModel
+        {
+            TodayOverdueActions = todayOverdue,
+            TodayOverdueCount = todayOverdue.Count,
+            UpcomingCount = upcoming.Count,
+            UpcomingActionGroups = BuildUpcomingGroups(upcoming, today, inDaysTemplate)
+        };
+
+        // ------------------------------------------------------------------------
+        // PHASE 7: POPULATE PLANT PHOTOS (ASYNC)
+        // ------------------------------------------------------------------------
+        var actionsForPhotos = model.TodayOverdueActions
+            .Concat(model.UpcomingActionGroups.SelectMany(g => g.Actions));
+        await PopulateActionPhotosAsync(ownerId, actionsForPhotos, cancellationToken);
+
+        return model;
     }
 
     /// <summary>

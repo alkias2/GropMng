@@ -2,10 +2,8 @@ using System.Globalization;
 using GropMng.Core.Common.Exceptions;
 using GropMng.Core.Domain.Garden.Care;
 using GropMng.Core.Domain.Garden.Enums;
-using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Garden.Care;
-using GropMng.Core.Interfaces.Services.Garden.Health;
 using GropMng.Core.Interfaces.Services.Garden.Locations;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Core.Interfaces.Services.Localization;
@@ -31,7 +29,6 @@ public class PlantInstanceController : Controller
     private readonly IPlantService _plantService;
     private readonly ILocationService _locationService;
     private readonly IFertilizerService _fertilizerService;
-    private readonly IDiseaseService _diseaseService;
     private readonly IEnumLocalizationHelper _enumLocalizationHelper;
     private readonly ICurrentOwnerProvider _currentOwnerProvider;
     private readonly IPictureService _pictureService;
@@ -41,7 +38,6 @@ public class PlantInstanceController : Controller
     private readonly IFertilizingService _fertilizingService;
     private readonly IPlantPhotoService _plantPhotoService;
     private readonly IPlantNoteService _plantNoteService;
-    private readonly IPlantDiseaseService _plantDiseaseService;
     private readonly IRepottingLogService _repottingLogService;
 
     #endregion
@@ -53,7 +49,6 @@ public class PlantInstanceController : Controller
         IPlantService plantService,
         ILocationService locationService,
         IFertilizerService fertilizerService,
-        IDiseaseService diseaseService,
         IEnumLocalizationHelper enumLocalizationHelper,
         ICurrentOwnerProvider currentOwnerProvider,
         IPictureService pictureService,
@@ -63,14 +58,12 @@ public class PlantInstanceController : Controller
         IFertilizingService fertilizingService,
         IPlantPhotoService plantPhotoService,
         IPlantNoteService plantNoteService,
-        IPlantDiseaseService plantDiseaseService,
         IRepottingLogService repottingLogService)
     {
         _plantInstanceService = plantInstanceService ?? throw new ArgumentNullException(nameof(plantInstanceService));
         _plantService = plantService ?? throw new ArgumentNullException(nameof(plantService));
         _locationService = locationService ?? throw new ArgumentNullException(nameof(locationService));
         _fertilizerService = fertilizerService ?? throw new ArgumentNullException(nameof(fertilizerService));
-        _diseaseService = diseaseService ?? throw new ArgumentNullException(nameof(diseaseService));
         _enumLocalizationHelper = enumLocalizationHelper ?? throw new ArgumentNullException(nameof(enumLocalizationHelper));
         _currentOwnerProvider = currentOwnerProvider ?? throw new ArgumentNullException(nameof(currentOwnerProvider));
         _pictureService = pictureService ?? throw new ArgumentNullException(nameof(pictureService));
@@ -80,7 +73,6 @@ public class PlantInstanceController : Controller
         _fertilizingService = fertilizingService ?? throw new ArgumentNullException(nameof(fertilizingService));
         _plantPhotoService = plantPhotoService ?? throw new ArgumentNullException(nameof(plantPhotoService));
         _plantNoteService = plantNoteService ?? throw new ArgumentNullException(nameof(plantNoteService));
-        _plantDiseaseService = plantDiseaseService ?? throw new ArgumentNullException(nameof(plantDiseaseService));
         _repottingLogService = repottingLogService ?? throw new ArgumentNullException(nameof(repottingLogService));
     }
 
@@ -261,7 +253,6 @@ public class PlantInstanceController : Controller
             HeightCm = instance.HeightCm,
             SpreadCm = instance.SpreadCm,
             HealthStatus = instance.HealthStatus,
-            ActiveDiseaseCount = instance.DiseaseRecords.Count(r => !r.Outcome.HasValue || r.Outcome == PlantDiseaseOutcome.Ongoing),
             IsActive = instance.IsActive,
             Notes = instance.Notes
         };
@@ -611,7 +602,7 @@ public class PlantInstanceController : Controller
             await _wateringService.CreateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
-        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        catch (DomainException ex)
         {
             return Json(new { success = false, message = ex.Message });
         }
@@ -642,7 +633,7 @@ public class PlantInstanceController : Controller
             await _wateringService.UpdateScheduleAsync(id, schedule, cancellationToken);
             return Json(new { success = true });
         }
-        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        catch (DomainException ex)
         {
             return Json(new { success = false, message = ex.Message });
         }
@@ -659,7 +650,7 @@ public class PlantInstanceController : Controller
             await _wateringService.DeleteScheduleAsync(id, scheduleId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
-        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        catch (DomainException ex)
         {
             return Json(new { success = false, message = ex.Message });
         }
@@ -676,7 +667,7 @@ public class PlantInstanceController : Controller
             await _wateringService.DeleteLogAsync(id, logId, ownerId, cancellationToken);
             return Json(new { success = true });
         }
-        catch (GropMng.Core.Common.Exceptions.DomainException ex)
+        catch (DomainException ex)
         {
             return Json(new { success = false, message = ex.Message });
         }
@@ -1162,224 +1153,6 @@ public class PlantInstanceController : Controller
 
         var diameter = circumferenceCm.Value / (decimal)Math.PI;
         return Math.Round(diameter, MidpointRounding.AwayFromZero).ToString(CultureInfo.InvariantCulture);
-    }
-
-    #endregion
-
-    #region Disease Record Actions
-
-    [HttpGet("{id:int}/diseases")]
-    public async Task<IActionResult> DiseaseRecordTab(int id, CancellationToken cancellationToken)
-    {
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-        var instance = await _plantInstanceService.GetPlantInstanceByIdAsync(id, ownerId, includeDetails: false, cancellationToken);
-        if (instance is null)
-            return NotFound();
-
-        var diseasesPaged = await _diseaseService.GetDiseasesAsync(pageIndex: 0, pageSize: int.MaxValue, cancellationToken: cancellationToken);
-        var diseases = diseasesPaged.OrderBy(d => d.Name).ToList();
-        var diseaseMap = diseases.ToDictionary(d => d.Id, d => d.Name);
-
-        var records = await _plantDiseaseService.GetRecordsAsync(id, ownerId, includePhotos: true, cancellationToken);
-        var photoDictionary = new Dictionary<int, IReadOnlyList<DiseasePhotoRowModel>>();
-
-        foreach (var record in records)
-        {
-            var photoRows = new List<DiseasePhotoRowModel>();
-            foreach (var photo in record.Photos.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id))
-            {
-                photoRows.Add(new DiseasePhotoRowModel
-                {
-                    Id = photo.Id,
-                    PictureId = photo.PictureId,
-                    ThumbnailUrl = await _pictureService.GetPictureUrlAsync(photo.PictureId, targetSize: 100),
-                    Notes = photo.Notes,
-                    TakenDate = photo.TakenDate,
-                    DisplayOrder = photo.DisplayOrder
-                });
-            }
-
-            photoDictionary[record.Id] = photoRows;
-        }
-
-        var model = new DiseaseRecordTabModel
-        {
-            PlantInstanceId = id,
-            Records = records.Select(r => new DiseaseRecordRowModel
-            {
-                Id = r.Id,
-                DiseaseId = r.DiseaseId,
-                DiseaseName = diseaseMap.TryGetValue(r.DiseaseId, out var diseaseName) ? diseaseName : "—",
-                DetectedDate = r.DetectedDate,
-                ResolvedDate = r.ResolvedDate,
-                Severity = r.Severity,
-                Outcome = r.Outcome,
-                TreatmentUsed = r.TreatmentUsed,
-                Notes = r.Notes,
-                PhotoCount = photoDictionary.TryGetValue(r.Id, out var photos) ? photos.Count : 0
-            }).ToList(),
-            PhotosByRecordId = photoDictionary,
-            AvailableDiseases = diseases.Select(d => new SelectListItem
-            {
-                Value = d.Id.ToString(),
-                Text = d.Name
-            }).ToList()
-        };
-
-        return PartialView("_DiseaseRecordTab", model);
-    }
-
-    [HttpPost("{id:int}/diseases/create")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseaseRecordCreate(int id, DiseaseRecordModel model, CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            var record = new GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord
-            {
-                OwnerId = ownerId,
-                DiseaseId = model.DiseaseId,
-                DetectedDate = model.DetectedDate,
-                ResolvedDate = model.ResolvedDate,
-                Severity = model.Severity,
-                TreatmentUsed = model.TreatmentUsed,
-                Outcome = model.Outcome,
-                Notes = model.Notes
-            };
-
-            await _plantDiseaseService.CreateRecordAsync(id, record, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost("{id:int}/diseases/{recordId:int}")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseaseRecordUpdate(int id, int recordId, DiseaseRecordModel model, CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            var record = new GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord
-            {
-                Id = recordId,
-                OwnerId = ownerId,
-                DiseaseId = model.DiseaseId,
-                DetectedDate = model.DetectedDate,
-                ResolvedDate = model.ResolvedDate,
-                Severity = model.Severity,
-                TreatmentUsed = model.TreatmentUsed,
-                Outcome = model.Outcome,
-                Notes = model.Notes
-            };
-
-            await _plantDiseaseService.UpdateRecordAsync(id, record, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost("{id:int}/diseases/{recordId:int}/delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseaseRecordDelete(int id, int recordId, CancellationToken cancellationToken)
-    {
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            await _plantDiseaseService.DeleteRecordAsync(id, recordId, ownerId, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost("{id:int}/diseases/{recordId:int}/resolve")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseaseRecordQuickResolve(int id, int recordId, CancellationToken cancellationToken)
-    {
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            var records = await _plantDiseaseService.GetRecordsAsync(id, ownerId, includePhotos: false, cancellationToken);
-            var record = records.FirstOrDefault(r => r.Id == recordId);
-            if (record is null)
-                return Json(new { success = false, message = "Disease record not found." });
-
-            record.Outcome = PlantDiseaseOutcome.Resolved;
-            record.ResolvedDate = DateOnly.FromDateTime(DateTime.Today);
-
-            await _plantDiseaseService.UpdateRecordAsync(id, record, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost("{id:int}/diseases/{recordId:int}/photos/add")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseasePhotoAdd(int id, int recordId, DiseasePhotoModel model, CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-            return Json(new { success = false, message = string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)) });
-
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            var photo = new DiseasePhoto
-            {
-                OwnerId = ownerId,
-                PictureId = model.PictureId,
-                TakenDate = model.TakenDate,
-                Notes = model.Notes,
-                DisplayOrder = model.DisplayOrder
-            };
-
-            await _plantDiseaseService.CreatePhotoAsync(id, recordId, photo, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost("{id:int}/diseases/{recordId:int}/photos/{photoId:int}/delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiseasePhotoDelete(int id, int recordId, int photoId, CancellationToken cancellationToken)
-    {
-        var ownerId = await _currentOwnerProvider.GetCurrentOwnerIdAsync(cancellationToken);
-
-        try
-        {
-            await _plantDiseaseService.DeletePhotoAsync(id, recordId, photoId, ownerId, cancellationToken);
-            return Json(new { success = true });
-        }
-        catch (DomainException ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
     }
 
     #endregion

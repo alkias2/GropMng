@@ -1,0 +1,19 @@
+@{
+    var commonName = ViewBag.CommonName as string ?? "";
+    var description = ViewBag.Description as string ?? "";
+    var treatmentGuidelines = ViewBag.TreatmentGuidelines as string ?? "";
+}
+
+<div class="disease-info-content" data-common-name="@commonName">
+    <div class="mb-2">
+        <strong>@commonName</strong>
+    </div>
+    <div class="mb-2 small">
+        <span class="text-muted">@T("plantProblems.knowledgeInfo"):</span>
+        <div class="mt-1">@Html.Raw(description)</div>
+    </div>
+    <div class="small">
+        <span class="text-muted">Οδηγίες:</span>
+        <div class="mt-1">@Html.Raw(treatmentGuidelines)</div>
+    </div>
+</div>

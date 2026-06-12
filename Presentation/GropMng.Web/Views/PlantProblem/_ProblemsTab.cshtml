@@ -1,0 +1,108 @@
+@model GropMng.Web.Models.Garden.ProblemsTabViewModel
+@{
+    var plantInstanceId = Model.PlantInstanceId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">@T("plantProblems.tab")</h6>
+    <button type="button" class="btn btn-sm btn-primary"
+            id="problem-add-btn-@plantInstanceId">
+        <i class="bx bx-plus me-1"></i>@T("plantProblems.addNew")
+    </button>
+</div>
+
+@if (!Model.Records.Any())
+{
+    <p class="text-muted small" id="problems-empty-@plantInstanceId">@T("plantProblems.empty")</p>
+}
+
+<div id="problems-card-list-@plantInstanceId">
+    @foreach (var record in Model.Records)
+    {
+        <div class="card mb-3 problem-record-card" data-record-id="@record.Id">
+            <div class="card-body pb-2">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <strong>@record.ProblemName</strong>
+                        @if (record.DiseaseKnowledgeId.HasValue)
+                        {
+                            <button type="button" class="badge bg-label-info ms-2 border-0 disease-knowledge-detail-btn"
+                                    data-disease-knowledge-id="@record.DiseaseKnowledgeId.Value"
+                                    title="@T("plantProblems.knowledgeInfo")" style="cursor:pointer;">
+                                <i class="bx bx-book-open me-1"></i>@T("plantProblems.knowledgeInfo")
+                            </button>
+                        }
+                    </div>
+                    <div>
+                        <span class="@record.ProblemStatusBadgeClass me-1">@record.ProblemStatusDisplay</span>
+                        <span class="@record.SeverityBadgeClass">@record.SeverityDisplay</span>
+                    </div>
+                </div>
+
+                <div class="row g-2 small text-muted mb-2">
+                    <div class="col-auto">
+                        <strong>@T("plantProblems.detectedDate"):</strong> @record.DetectedDate.ToString("dd/MM/yyyy")
+                    </div>
+                    <div class="col-auto">
+                        <strong>@T("plantProblems.infoSource"):</strong> @record.InfoSourceDisplay
+                    </div>
+                    @if (record.ResolvedDate.HasValue)
+                    {
+                        <div class="col-auto">
+                            <strong>@T("plantProblems.resolvedDate"):</strong> @record.ResolvedDate.Value.ToString("dd/MM/yyyy")
+                        </div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(record.Notes))
+                {
+                    <p class="text-muted small mb-2">@record.Notes</p>
+                }
+
+                @if (record.Schedules.Any())
+                {
+                    <div class="border-top pt-2 mt-2">
+                        <strong class="small">@T("plantProblems.schedules"):</strong>
+                        <ul class="list-unstyled mb-2 ms-2">
+                            @foreach (var schedule in record.Schedules)
+                            {
+                                <li class="small mb-1">
+                                    <i class="bx bx-time-five me-1"></i>
+                                    @schedule.ActionName —
+                                    @T("plantProblems.every") @schedule.FrequencyValue @schedule.FrequencyUnitDisplay
+                                    — <strong>@T("plantProblems.nextDue"):</strong> @schedule.NextDueDate.ToString("dd/MM/yyyy")
+                                    <span class="@schedule.ScheduleStatusBadgeClass ms-1">@schedule.ScheduleStatusDisplay</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary problem-schedule-edit-btn ms-1"
+                                            data-schedule-id="@schedule.Id"
+                                            title="@T("common.edit")">
+                                        <i class="bx bx-edit-alt"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger problem-schedule-delete-btn"
+                                            data-schedule-id="@schedule.Id"
+                                            title="@T("common.delete")">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <div class="d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary problem-add-schedule-btn"
+                            data-record-id="@record.Id">
+                        <i class="bx bx-calendar-plus me-1"></i>@T("plantProblems.addSchedule")
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary problem-edit-btn"
+                            data-record-id="@record.Id">
+                        <i class="bx bx-edit-alt me-1"></i>@T("common.edit")
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger problem-delete-btn"
+                            data-record-id="@record.Id">
+                        <i class="bx bx-trash me-1"></i>@T("common.delete")
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

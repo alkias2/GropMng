@@ -1,0 +1,92 @@
+@model GropMng.Web.Areas.Admin.Models.DiseaseKnowledgeEditModel
+@using GropMng.Web.Areas.Admin.Models
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@Html.AntiForgeryToken()
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="FromNotificationId" />
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("common.basicinfo")</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <grop-label asp-for="CommonName" />
+                <grop-editor asp-for="CommonName" />
+                <span asp-validation-for="CommonName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <grop-label asp-for="ScientificName" />
+                <grop-editor asp-for="ScientificName" />
+                <span asp-validation-for="ScientificName" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("admin.diseaseKnowledge.description")</h5>
+    </div>
+    <div class="card-body">
+        @Html.EditorFor(x => x.Description, "RichEditor")
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("admin.diseaseKnowledge.treatmentGuidelines")</h5>
+    </div>
+    <div class="card-body">
+        @Html.EditorFor(x => x.TreatmentGuidelines, "RichEditor")
+        <span asp-validation-for="TreatmentGuidelines" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("admin.diseaseKnowledge.plants")</h5>
+    </div>
+    <div class="card-body">
+        <div class="select2-success">
+            <select asp-for="SelectedPlantIds" class="select2 form-select" multiple>
+                @foreach (var item in Model.AvailablePlants) {
+                    if (Model.SelectedPlantIds.Contains(int.Parse(item.Value))) {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <small class="text-muted">@T("admin.diseaseKnowledge.plantsHint")</small>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@T("admin.diseaseKnowledge.photos")</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.ExistingPhotos is { Count: > 0 })
+        {
+            <div class="row g-3 mb-3" id="existing-photos">
+                @foreach (var photo in Model.ExistingPhotos)
+                {
+                    <div class="col-auto photo-item" data-photo-id="@photo.Id">
+                        <img src="@photo.PictureUrl" alt="@photo.Caption" class="img-thumbnail" style="max-width:200px;" />
+                    </div>
+                }
+            </div>
+        }
+        <div class="mb-3">
+            <grop-label asp-for="NewPhotos" />
+            <input type="file" asp-for="NewPhotos" class="form-control" multiple accept="image/*" />
+        </div>
+    </div>
+</div>

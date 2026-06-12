@@ -169,17 +169,26 @@
         <div class="col-sm-4">
             <div class="card">
                 <div class="card-body">
-                    <button type="button" class="d-flex align-items-center justify-content-start gap-3 dashboard-section-btn" data-section="diseases">
-                        <span class="badge bg-label-primary rounded-circle p-2">
-                            <svg aria-hidden="true" class="icon3">
-                                <use href="#gm-icon-otl_bug" />
-                            </svg>
-                        </span>
-                        <div class="content-left">
-                            <h3 id="diseases-count">@Model.Counters.DiseaseTodayCount</h3>
-                            <small>@T("dashboard.owner.tab.diseases")</small>
+                    <div class="d-flex align-items-center justify-content-start gap-3 w-100">
+                        <button type="button" class="d-flex align-items-center dashboard-section-btn gap-3" data-section="diseases">
+                            <span class="badge bg-label-primary rounded-circle p-2">
+                                <svg aria-hidden="true" class="icon3">
+                                    <use href="#gm-icon-otl_bug" />
+                                </svg>
+                            </span>
+                            <div class="content-left">
+                                <h3 id="diseases-count">@Model.Counters.DiseaseTodayCount</h3>
+                                <small>@T("dashboard.owner.tab.diseases")</small>
+                            </div>
+                        </button>
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            <small>@T("dashboard.owner.filter.showupcoming")</small>
+                            <label class="switch switch-primary me-4 pe-2">
+                                <input type="checkbox" class="switch-input dashboard-show-upcoming" data-section="diseases">
+                                <span class="switch-toggle-slider"></span>
+                            </label>
                         </div>
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -443,11 +452,9 @@
                         // Αν το "Show upcoming" toggle ήταν ενεργό πριν το reload,
                         // διατήρησε την κατάσταση του χωρίς να χρειαστεί ο χρήστης
                         // να το ξανακλικάρει
-                        if (section !== 'diseases') {
-                            var checked = $('.dashboard-show-upcoming[data-section="' + section + '"]').is(':checked');
-                            if (checked)
-                                $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
-                        }
+                        var checked = $('.dashboard-show-upcoming[data-section="' + section + '"]').is(':checked');
+                        if (checked)
+                            $panel.find('.upcoming-section[data-section="' + section + '"]').removeClass('d-none');
 
                         syncBulk();
                         initTooltips($panel);

@@ -44,6 +44,8 @@
     <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
     <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    
+    @await RenderSectionAsync("VendorsCss", required: false)
 
     <script src="~/vendor/js/helpers.js"></script>
     <script src="~/vendor/js/template-customizer.js"></script>

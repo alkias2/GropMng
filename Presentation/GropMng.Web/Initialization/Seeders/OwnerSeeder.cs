@@ -141,7 +141,11 @@ internal sealed class OwnerSeeder
             ? "ChangeMe123!"
             : _bootstrapOptions.AdministratorPassword;
 
-        var owner = await _dbContext.Owners.FirstOrDefaultAsync(entity => entity.Email == email, cancellationToken);
+        // Look up by business identifier first to avoid duplicate key violations (UQ_Owner_OwnerId).
+        // The email may have changed across bootstrap configuration updates, but the business ID is stable.
+        var owner = await _dbContext.Owners.FirstOrDefaultAsync(entity => entity.OwnerId == DefaultOwnerBusinessId, cancellationToken)
+                   ?? await _dbContext.Owners.FirstOrDefaultAsync(entity => entity.Email == email, cancellationToken);
+
         if (owner is null)
         {
             var now = DateTime.UtcNow;

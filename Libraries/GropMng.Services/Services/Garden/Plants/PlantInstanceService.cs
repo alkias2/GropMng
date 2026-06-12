@@ -6,7 +6,6 @@ using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Care;
-using GropMng.Core.Interfaces.Services.Garden.Health;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
 
 namespace GropMng.Services.Services.Garden.Plants;
@@ -30,7 +29,6 @@ public class PlantInstanceService : IPlantInstanceService
     private readonly IFertilizingService _fertilizingService;
     private readonly IPlantPhotoService _plantPhotoService;
     private readonly IPlantNoteService _plantNoteService;
-    private readonly IPlantDiseaseService _plantDiseaseService;
 
     #endregion
 
@@ -48,8 +46,7 @@ public class PlantInstanceService : IPlantInstanceService
         IWateringService wateringService,
         IFertilizingService fertilizingService,
         IPlantPhotoService plantPhotoService,
-        IPlantNoteService plantNoteService,
-        IPlantDiseaseService plantDiseaseService)
+        IPlantNoteService plantNoteService)
     {
         _plantInstanceRepository = plantInstanceRepository ?? throw new ArgumentNullException(nameof(plantInstanceRepository));
         _plantRepository = plantRepository ?? throw new ArgumentNullException(nameof(plantRepository));
@@ -63,7 +60,6 @@ public class PlantInstanceService : IPlantInstanceService
         _fertilizingService = fertilizingService ?? throw new ArgumentNullException(nameof(fertilizingService));
         _plantPhotoService = plantPhotoService ?? throw new ArgumentNullException(nameof(plantPhotoService));
         _plantNoteService = plantNoteService ?? throw new ArgumentNullException(nameof(plantNoteService));
-        _plantDiseaseService = plantDiseaseService ?? throw new ArgumentNullException(nameof(plantDiseaseService));
     }
 
     #endregion
@@ -131,7 +127,6 @@ public class PlantInstanceService : IPlantInstanceService
         plantInstance.NotesEntries = (await _plantNoteService.GetNotesAsync(plantInstanceId, ownerId, cancellationToken)).ToList();
         plantInstance.WateringSchedules = (await _wateringService.GetSchedulesAsync(plantInstanceId, ownerId, cancellationToken)).ToList();
         plantInstance.FertilizingSchedules = (await _fertilizingService.GetSchedulesAsync(plantInstanceId, ownerId, cancellationToken)).ToList();
-        plantInstance.DiseaseRecords = (await _plantDiseaseService.GetRecordsAsync(plantInstanceId, ownerId, includePhotos: true, cancellationToken)).ToList();
 
         plantInstance.Container = await GetCurrentContainerAsync(plantInstanceId, ownerId, cancellationToken);
 

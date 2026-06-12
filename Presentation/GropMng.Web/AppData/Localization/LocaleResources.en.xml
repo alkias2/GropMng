@@ -81,6 +81,14 @@
     <Value>General</Value>
   </LocaleResource>
   <LocaleResource>
+    <Name>common.basicinfo</Name>
+    <Value>Basic Information</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>common.backtolist</Name>
+    <Value>Back to List</Value>
+  </LocaleResource>
+  <LocaleResource>
     <Name>common.related</Name>
     <Value>Related</Value>
   </LocaleResource>
@@ -2427,5 +2435,209 @@
   <LocaleResource>
     <Name>mygarden.container.linked.plant</Name>
     <Value>Linked Plant</Value>
+  </LocaleResource>
+
+  <!-- Plant Problems (User-facing) -->
+  <LocaleResource>
+    <Name>plantProblems.tab</Name>
+    <Value>Problems / Diseases</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.empty</Name>
+    <Value>No problems recorded for this plant.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.addNew</Name>
+    <Value>New Problem</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.createTitle</Name>
+    <Value>Record Problem / Disease</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.editTitle</Name>
+    <Value>Edit Problem</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.problemName</Name>
+    <Value>Problem / Disease Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.detectedDate</Name>
+    <Value>Detected Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.resolvedDate</Name>
+    <Value>Resolved Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.severity</Name>
+    <Value>Severity</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.problemStatus</Name>
+    <Value>Status</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.infoSource</Name>
+    <Value>Information Source</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notes</Name>
+    <Value>Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notifyAdmin</Name>
+    <Value>Notify admin to add this to the knowledge base</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.schedules</Name>
+    <Value>Schedules</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.addSchedule</Name>
+    <Value>Treatment Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.every</Name>
+    <Value>every</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.nextDue</Name>
+    <Value>Next due</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.knowledgeInfo</Name>
+    <Value>Information from Knowledge Base</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.deleteConfirm</Name>
+    <Value>Are you sure you want to delete this problem? Related schedules will also be deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.created</Name>
+    <Value>Problem recorded successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.updated</Name>
+    <Value>Changes saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.deleted</Name>
+    <Value>Problem deleted.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>plantProblems.notified</Name>
+    <Value>Problem recorded. Admin was notified for potential addition to the knowledge base.</Value>
+  </LocaleResource>
+
+  <!-- Schedule (User-facing) -->
+  <LocaleResource>
+    <Name>schedule.createTitle</Name>
+    <Value>New Treatment Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.editTitle</Name>
+    <Value>Edit Schedule</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.actionName</Name>
+    <Value>Action</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.frequency</Name>
+    <Value>Frequency</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.dosageNotes</Name>
+    <Value>Dosage / Notes</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.startDate</Name>
+    <Value>Start Date</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.nextDueDate</Name>
+    <Value>Next Due</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.status</Name>
+    <Value>Status</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.saved</Name>
+    <Value>Treatment schedule saved.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>schedule.deleted</Name>
+    <Value>Schedule deleted.</Value>
+  </LocaleResource>
+
+  <!-- Admin DiseaseKnowledge -->
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.title</Name>
+    <Value>Disease Knowledge Base</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.create</Name>
+    <Value>Add Disease Knowledge</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.edit</Name>
+    <Value>Edit Disease Knowledge</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.description</Name>
+    <Value>Description</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.treatmentGuidelines</Name>
+    <Value>Treatment Guidelines</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.plants</Name>
+    <Value>Associated Plants</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.plantsHint</Name>
+    <Value>Select the plant types this disease can affect.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.photos</Name>
+    <Value>Photos</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.created</Name>
+    <Value>Disease knowledge entry created successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.updated</Name>
+    <Value>Disease knowledge entry updated successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.deleted</Name>
+    <Value>Disease knowledge entry deleted successfully.</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.grid.id</Name>
+    <Value>ID</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.commonName</Name>
+    <Value>Common Name</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.diseaseKnowledge.scientificName</Name>
+    <Value>Scientific Name</Value>
+  </LocaleResource>
+
+  <!-- Admin Notifications -->
+  <LocaleResource>
+    <Name>admin.notifications.title</Name>
+    <Value>Admin Notifications</Value>
+  </LocaleResource>
+  <LocaleResource>
+    <Name>admin.notifications.unresolved</Name>
+    <Value>Notification marked as unresolved.</Value>
   </LocaleResource>
 </Language>

@@ -1,0 +1,7 @@
+@model GropMng.Web.Models.Garden.ProblemRecordEditModel
+
+@* Returns only the modal-body content — the modal shell is already in Edit.cshtml *@
+
+@await Html.PartialAsync("_ProblemFormFields", Model)
+
+<input type="hidden" data-plantinstance-id="@Model.PlantInstanceId" />

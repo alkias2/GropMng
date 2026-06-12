@@ -1,0 +1,84 @@
+@{
+    var commonName = ViewBag.CommonName as string ?? "";
+    var scientificName = ViewBag.ScientificName as string ?? "";
+    var description = ViewBag.Description as string ?? "";
+    var treatmentGuidelines = ViewBag.TreatmentGuidelines as string ?? "";
+    var mainPhotoUrl = ViewBag.MainPhotoUrl as string;
+    var extraPhotoUrls = ViewBag.ExtraPhotoUrls as List<string> ?? new List<string>();
+    var linkedPlants = ViewBag.LinkedPlants as List<string> ?? new List<string>();
+}
+
+<div class="modal fade" id="disease-knowledge-detail-modal" tabindex="-1" aria-labelledby="disease-knowledge-detail-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-bottom pb-3">
+                <h5 class="modal-title" id="disease-knowledge-detail-modal-label">
+                    <i class="bx bx-book-open me-1"></i>@T("plantProblems.knowledgeInfo")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-3">
+                @* Main Photo *@
+                <div class="text-center mb-3">
+                    @if (!string.IsNullOrEmpty(mainPhotoUrl))
+                    {
+                        <img src="@mainPhotoUrl" alt="@commonName" class="img-fluid rounded" style="max-height:300px;" />
+                    }
+                    else
+                    {
+                        <div class="bg-label-info rounded d-inline-flex align-items-center justify-content-center" style="width:200px;height:150px;">
+                            <i class="bx bx-image-alt bx-lg text-info"></i>
+                        </div>
+                    }
+                </div>
+
+                @* Title *@
+                <h4 class="mb-1">@commonName</h4>
+                @if (!string.IsNullOrEmpty(scientificName))
+                {
+                    <p class="text-muted fst-italic mb-3">@scientificName</p>
+                }
+
+                @* Description *@
+                <div class="mb-3">
+                    <strong class="small text-muted d-block mb-1">@T("admin.diseaseKnowledge.description")</strong>
+                    <div>@Html.Raw(description)</div>
+                </div>
+
+                @* Treatment Guidelines *@
+                <div class="mb-3">
+                    <strong class="small text-muted d-block mb-1">@T("admin.diseaseKnowledge.treatmentGuidelines")</strong>
+                    <div>@Html.Raw(treatmentGuidelines)</div>
+                </div>
+
+                @* Linked Plants *@
+                @if (linkedPlants.Count > 0)
+                {
+                    <div class="mb-3">
+                        <strong class="small text-muted d-block mb-1">@T("admin.diseaseKnowledge.plants")</strong>
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var plant in linkedPlants)
+                            {
+                                <li class="small"><i class="bx bx-leaf me-1 text-success"></i>@plant</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @* Extra Photos *@
+                @if (extraPhotoUrls.Count > 0)
+                {
+                    <div>
+                        <strong class="small text-muted d-block mb-2">@T("admin.diseaseKnowledge.photos")</strong>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var url in extraPhotoUrls)
+                            {
+                                <img src="@url" alt="@commonName" class="img-fluid rounded" style="max-height:120px;" />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

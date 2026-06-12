@@ -1,0 +1,42 @@
+@model GropMng.Web.Areas.Admin.Models.DiseaseKnowledgeEditModel
+@using GropMng.Web.Framework.TagHelpers.Admin
+@{
+    ViewData["Title"] = T("admin.diseaseKnowledge.edit");
+    GropHtml.SetActiveMenuItemSystemName("DiseaseKnowledge");
+}
+
+@section VendorsCss {
+    <link href="~/vendor/libs/select2/select2.css" rel="stylesheet" />
+}
+
+<grop-admin-page-header
+    title="@T("admin.diseaseKnowledge.edit")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.diseaseKnowledge.title"), Url = Url.Action("List", "DiseaseKnowledge", new { area = "Admin" }) },
+        new() { Text = T("admin.diseaseKnowledge.edit") }
+    })" />
+
+@await Html.PartialAsync("Notifications")
+
+<form asp-action="Edit" asp-controller="DiseaseKnowledge" asp-area="Admin" method="post" enctype="multipart/form-data" id="diseaseKnowledgeForm">
+    @await Html.PartialAsync("_Form", Model)
+
+    <div class="d-flex justify-content-end gap-2 mt-3 mb-5">
+        <button type="submit" class="btn btn-primary" id="btnSave">
+            <i class="bx bx-save me-1"></i> @T("common.save")
+        </button>
+        <a asp-action="List" asp-area="Admin" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> @T("common.backtolist")
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- Vendors JS (select2) as per forms-selects template -->
+    <script src="~/vendor/libs/select2/select2.js"></script>
+    <!-- Page JS -->
+    <script src="~/js/forms-selects.js"></script>
+}

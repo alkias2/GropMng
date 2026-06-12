@@ -1,0 +1,68 @@
+@model GropMng.Web.Models.Garden.ProblemRecordEditModel
+
+<div class="mb-3">
+    <label class="form-label">@T("plantProblems.problemName") <span class="text-danger">*</span></label>
+    <input type="text" class="form-control problem-name-input" autocomplete="off"
+           value="@Model.ProblemName" maxlength="300" />
+    <div class="autocomplete-suggestions d-none position-absolute bg-body border rounded shadow-sm" style="z-index:1060;max-height:200px;overflow-y:auto;"></div>
+    <input type="hidden" class="problem-disease-knowledge-id" value="@(Model.DiseaseKnowledgeId?.ToString() ?? "")" />
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@T("plantProblems.detectedDate") <span class="text-danger">*</span></label>
+    <input type="date" class="form-control problem-detected-date" value="@Model.DetectedDate.ToString("yyyy-MM-dd")" />
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label class="form-label">@T("plantProblems.severity") <span class="text-danger">*</span></label>
+        <select class="form-select problem-severity">
+            @foreach (var option in Model.SeverityOptions)
+            {
+                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">@T("plantProblems.problemStatus") <span class="text-danger">*</span></label>
+        <select class="form-select problem-status">
+            @foreach (var option in Model.ProblemStatusOptions)
+            {
+                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">@T("plantProblems.infoSource") <span class="text-danger">*</span></label>
+        <select class="form-select problem-info-source">
+            @foreach (var option in Model.InfoSourceOptions)
+            {
+                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@T("plantProblems.notes")</label>
+    <textarea class="form-control problem-notes" rows="3" maxlength="2000">@Model.Notes</textarea>
+</div>
+
+@* DiseaseKnowledge Info Panel (hidden by default) *@
+<div class="disease-info-panel d-none card bg-light mb-3">
+    <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong class="small"><i class="bx bx-book-open me-1"></i>@T("plantProblems.knowledgeInfo")</strong>
+            <button type="button" class="btn btn-sm btn-link p-0 disease-info-toggle">
+                <i class="bx bx-chevron-up"></i>
+            </button>
+        </div>
+        <div class="disease-info-content"></div>
+    </div>
+</div>
+
+@* NotifyAdmin checkbox (visible only when no DiseaseKnowledge selected) *@
+<div class="form-check mb-3 notify-admin-wrapper @(Model.DiseaseKnowledgeId.HasValue ? "d-none" : "")">
+    <input class="form-check-input problem-notify-admin" type="checkbox" @(Model.NotifyAdmin ? "checked" : "") />
+    <label class="form-check-label">@T("plantProblems.notifyAdmin")</label>
+</div>

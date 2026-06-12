@@ -4,7 +4,6 @@ using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Interfaces.Repositories;
 using GropMng.Core.Interfaces.Services.Garden.Care;
-using GropMng.Core.Interfaces.Services.Garden.Health;
 using GropMng.Core.Interfaces.Services.Garden.Plants;
 using GropMng.Services.Services.Garden.Plants;
 using Moq;
@@ -81,8 +80,7 @@ public class PlantInstanceServiceTests
             Mock.Of<IWateringService>(),
             Mock.Of<IFertilizingService>(),
             Mock.Of<IPlantPhotoService>(),
-            Mock.Of<IPlantNoteService>(),
-            Mock.Of<IPlantDiseaseService>());
+            Mock.Of<IPlantNoteService>());
 
         var plantInstance = new PlantInstance
         {
@@ -173,8 +171,7 @@ public class PlantInstanceServiceTests
             Mock.Of<IWateringService>(),
             Mock.Of<IFertilizingService>(),
             Mock.Of<IPlantPhotoService>(),
-            Mock.Of<IPlantNoteService>(),
-            Mock.Of<IPlantDiseaseService>());
+            Mock.Of<IPlantNoteService>());
 
         var updatedPlantInstance = new PlantInstance
         {
@@ -263,8 +260,7 @@ public class PlantInstanceServiceTests
             Mock.Of<IWateringService>(),
             Mock.Of<IFertilizingService>(),
             Mock.Of<IPlantPhotoService>(),
-            Mock.Of<IPlantNoteService>(),
-            Mock.Of<IPlantDiseaseService>());
+            Mock.Of<IPlantNoteService>());
 
         var repottingLog = new RepottingLog
         {

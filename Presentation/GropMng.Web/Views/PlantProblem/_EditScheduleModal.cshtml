@@ -1,0 +1,50 @@
+@model GropMng.Web.Models.Garden.ScheduleEditModel
+
+@* Returns only the modal-body content — the modal shell is already in Edit.cshtml *@
+
+<div class="mb-3">
+    <label class="form-label">@T("schedule.actionName") <span class="text-danger">*</span></label>
+    <input type="text" class="form-control schedule-action-name" value="@Model.ActionName" maxlength="300" />
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label class="form-label">@T("schedule.frequency") <span class="text-danger">*</span></label>
+        <input type="number" class="form-control schedule-frequency-value" value="@Model.FrequencyValue" min="1" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">&nbsp;</label>
+        <select class="form-select schedule-frequency-unit">
+            @foreach (var option in Model.FrequencyUnitOptions)
+            {
+                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">@T("schedule.startDate") <span class="text-danger">*</span></label>
+        <input type="date" class="form-control schedule-start-date" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@T("schedule.nextDueDate")</label>
+    <input type="text" class="form-control schedule-next-due-date" readonly
+           value="@(Model.NextDueDate?.ToString("yyyy-MM-dd") ?? "")" />
+    <div class="form-text small text-muted schedule-next-due-hint"></div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@T("schedule.dosageNotes")</label>
+    <textarea class="form-control schedule-dosage-notes" rows="2" maxlength="500">@Model.DosageNotes</textarea>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@T("schedule.status") <span class="text-danger">*</span></label>
+    <select class="form-select schedule-status">
+        @foreach (var option in Model.ScheduleStatusOptions)
+        {
+            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+        }
+    </select>
+</div>

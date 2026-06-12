@@ -19534,6 +19534,39 @@ html:not(.layout-footer-fixed) .content-wrapper {
     max-width: 8.5rem;
   }
 }
+.problem-record-card .card-body {
+  padding: 0.75rem 1rem;
+}
+.problem-record-card .autocomplete-suggestions {
+  width: 100%;
+  z-index: 1060;
+}
+.problem-record-card .autocomplete-item:hover, .problem-record-card .autocomplete-item:focus {
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.disease-info-panel {
+  border-left: 3px solid var(--bs-primary);
+  font-size: 0.875rem;
+}
+.disease-info-panel .disease-info-content {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.disease-info-panel .disease-info-toggle {
+  text-decoration: none;
+  color: var(--bs-body-color);
+}
+
+.schedule-next-due-date {
+  background-color: var(--bs-light) !important;
+  cursor: default;
+}
+
+.schedule-next-due-hint {
+  font-style: italic;
+}
+
 .app-brand {
   display: flex;
   flex-grow: 0;

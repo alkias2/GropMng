@@ -1,0 +1,126 @@
+@model List<GropMng.Web.Areas.Admin.Models.AdminNotificationListModel>
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using GropMng.Web.Areas.Admin.Models
+@{
+    ViewData["Title"] = T("admin.notifications.title");
+    GropHtml.SetActiveMenuItemSystemName("AdminNotifications");
+
+    var pending = Model.Where(n => !n.IsResolved).ToList();
+    var resolved = Model.Where(n => n.IsResolved).ToList();
+}
+
+<grop-admin-page-header
+    title="@T("admin.notifications.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.notifications.title") }
+    })" />
+
+@await Html.PartialAsync("Notifications")
+
+<!-- Pending Notifications -->
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0">Pending (@pending.Count)</h5>
+    </div>
+    <div class="card-datatable table-responsive">
+        <table class="datatables-basic table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Problem</th>
+                    <th>Owner</th>
+                    <th>Plant</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in pending)
+                {
+                    <tr>
+                        <td>
+                            @if (item.DiseaseKnowledgeId.HasValue)
+                            {
+                                <a asp-action="Edit" asp-controller="DiseaseKnowledge" asp-area="Admin" asp-route-id="@item.DiseaseKnowledgeId.Value"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit Knowledge
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Create" asp-controller="DiseaseKnowledge" asp-area="Admin" asp-route-fromNotificationId="@item.Id"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bx bx-plus me-1"></i> Add to Knowledge Base
+                                </a>
+                            }
+                        </td>
+                        <td>@item.ProblemName</td>
+                        <td>@item.OwnerName</td>
+                        <td>@item.PlantInstanceName</td>
+                        <td>@item.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                }
+                @if (!pending.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No pending notifications.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Resolved Notifications -->
+<div class="card">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="card-title mb-0">Resolved (@resolved.Count)</h5>
+    </div>
+    <div class="card-datatable table-responsive">
+        <table class="datatables-basic table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Problem</th>
+                    <th>Owner</th>
+                    <th>Plant</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in resolved)
+                {
+                    <tr class="text-muted">
+                        <td>
+                            @if (item.DiseaseKnowledgeId.HasValue)
+                            {
+                                <a asp-action="Edit" asp-controller="DiseaseKnowledge" asp-area="Admin" asp-route-id="@item.DiseaseKnowledgeId.Value"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit Knowledge
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Create" asp-controller="DiseaseKnowledge" asp-area="Admin" asp-route-fromNotificationId="@item.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-plus me-1"></i> Add to Knowledge Base
+                                </a>
+                            }
+                        </td>
+                        <td>@item.ProblemName</td>
+                        <td>@item.OwnerName</td>
+                        <td>@item.PlantInstanceName</td>
+                        <td>@item.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                }
+                @if (!resolved.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No resolved notifications.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

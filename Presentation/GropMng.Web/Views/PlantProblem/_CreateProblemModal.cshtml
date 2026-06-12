@@ -1,0 +1,12 @@
+@model GropMng.Web.Models.Garden.ProblemRecordEditModel
+
+@* Returns only the modal-body content — the modal shell is already in Edit.cshtml *@
+
+@if (!string.IsNullOrEmpty(Model.PlantInstanceName))
+{
+    <p class="text-muted small mb-3">
+        <strong>@T("plantProblems.tab"):</strong> @Model.PlantInstanceName
+    </p>
+}
+
+@await Html.PartialAsync("_ProblemFormFields", Model)

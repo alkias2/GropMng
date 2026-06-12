@@ -37,23 +37,6 @@ public enum GardenContainerType
     Other
 }
 
-public enum PlantDiseaseType
-{
-    Fungal,
-    Bacterial,
-    Viral,
-    Pest,
-    Deficiency,
-    Physiological,
-    Other
-}
-
-public enum RemedyTreatmentType
-{
-    Preventive,
-    Curative
-}
-
 public enum LengthUnitType
 {
     [EnumMember(Value = "cm")]
@@ -117,22 +100,6 @@ public enum PlantSizeCategory
     Medium,
     Large,
     Mature
-}
-
-public enum PlantDiseaseSeverity
-{
-    Mild,
-    Moderate,
-    Severe,
-    Critical
-}
-
-public enum PlantDiseaseOutcome
-{
-    Resolved,
-    Ongoing,
-    Lost,
-    Unknown
 }
 
 public enum AiQueryScenario
@@ -255,24 +222,41 @@ public enum FertilizerApplicationMethod
     Diluted
 }
 
-public enum PesticideKind
+public enum Severity
 {
-    Fungicide,
-    Insecticide,
-    Herbicide,
-    Acaricide,
-    Bactericide,
-    Biostimulant,
+    Low,
+    Medium,
+    High
+}
+
+public enum ProblemStatus
+{
+    Active,
+    Monitoring,
+    Resolved
+}
+
+public enum InfoSource
+{
+    OwnKnowledge,
+    Agronomist,
+    AITool,
+    Internet,
     Other
 }
 
-public enum PesticideApplicationMethod
+public enum ScheduleFrequencyUnit
 {
-    Spray,
-    Soil,
-    Drench,
-    Granule,
-    Systemic
+    Days,
+    Weeks,
+    Months
+}
+
+public enum ScheduleStatus
+{
+    Active,
+    Completed,
+    Cancelled
 }
 
 public enum SupportedLanguage

@@ -2,7 +2,6 @@ using System.IO;
 using FluentValidation;
 using GropMng.Core.Caching;
 using GropMng.Core.Domain.Garden.Care;
-using GropMng.Core.Domain.Garden.Health;
 using GropMng.Core.Domain.Garden.Locations;
 using GropMng.Core.Domain.Garden.Plants;
 using GropMng.Core.Domain.Garden.Preferences;
@@ -44,11 +43,9 @@ using GropMng.Web.Initialization.Options;
 using GropMng.Web.Initialization.Seeders;
 using GropMng.Web.Framework.UI;
 using GropMng.Web.Areas.Admin.Validators.Logging;
-using GropMng.Web.Areas.Admin.Factories.Disease;
+using GropMng.Web.Areas.Admin.Factories.Logging;
 using GropMng.Web.Areas.Admin.Factories.Fertilizer;
 using GropMng.Web.Areas.Admin.Factories.Localization;
-using GropMng.Web.Areas.Admin.Factories.Logging;
-using GropMng.Web.Areas.Admin.Factories.Pesticide;
 using GropMng.Web.Areas.Admin.Factories.Plant;
 using GropMng.Web.Areas.Admin.Factories.SoilMix;
 using GropMng.Web.Areas.Admin.Factories.Settings;
@@ -250,10 +247,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IConsumer<EntityUpdatedEvent<Fertilizer>>, FertilizerCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityDeletedEvent<Fertilizer>>, FertilizerCacheEventConsumer>();
 
-        services.AddScoped<IConsumer<EntityInsertedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
-        services.AddScoped<IConsumer<EntityUpdatedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
-        services.AddScoped<IConsumer<EntityDeletedEvent<PlantDiseaseRecord>>, PlantDiseaseRecordCacheEventConsumer>();
-
         services.AddScoped<IConsumer<EntityInsertedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityUpdatedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityDeletedEvent<PlantNote>>, PlantNoteCacheEventConsumer>();
@@ -269,10 +262,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IConsumer<EntityInsertedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityUpdatedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityDeletedEvent<SoilIngredient>>, SoilIngredientCacheEventConsumer>();
-
-        services.AddScoped<IConsumer<EntityInsertedEvent<Disease>>, DiseaseCacheEventConsumer>();
-        services.AddScoped<IConsumer<EntityUpdatedEvent<Disease>>, DiseaseCacheEventConsumer>();
-        services.AddScoped<IConsumer<EntityDeletedEvent<Disease>>, DiseaseCacheEventConsumer>();
 
         services.AddScoped<IConsumer<EntityInsertedEvent<Language>>, LanguageCacheEventConsumer>();
         services.AddScoped<IConsumer<EntityUpdatedEvent<Language>>, LanguageCacheEventConsumer>();
@@ -303,13 +292,13 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IWateringService, WateringService>();
         services.AddScoped<IFertilizingService, FertilizingService>();
         services.AddScoped<IRepottingLogService, RepottingLogService>();
-        services.AddScoped<IDiseaseService, DiseaseService>();
         services.AddScoped<IFertilizerService, FertilizerService>();
-        services.AddScoped<IPesticideService, PesticideService>();
         services.AddScoped<ISoilMixService, SoilMixService>();
         services.AddScoped<IPlantPhotoService, PlantPhotoService>();
         services.AddScoped<IPlantNoteService, PlantNoteService>();
-        services.AddScoped<IPlantDiseaseService, PlantDiseaseService>();
+        services.AddScoped<IPlantProblemService, PlantProblemService>();
+        services.AddScoped<IDiseaseKnowledgeService, DiseaseKnowledgeService>();
+        services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 
         services.AddScoped<IAIQueryTemplateService, AIQueryTemplateService>();
 
@@ -334,12 +323,13 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IDashboardModelFactory, DashboardModelFactory>();
         services.AddScoped<IPlantModelFactory, PlantModelFactory>();
         services.AddScoped<IFertilizerModelFactory, FertilizerModelFactory>();
-        services.AddScoped<IPesticideModelFactory, PesticideModelFactory>();
-        services.AddScoped<IDiseaseModelFactory, DiseaseModelFactory>();
         services.AddScoped<ISoilMixModelFactory, SoilMixModelFactory>();
         services.AddScoped<ISettingModelFactory, SettingModelFactory>();
         services.AddScoped<IOwnerModelFactory, OwnerModelFactory>();
         services.AddScoped<IOwnerRoleModelFactory, OwnerRoleModelFactory>();
+        services.AddScoped<Areas.Admin.Factories.IDiseaseKnowledgeModelFactory, Areas.Admin.Factories.DiseaseKnowledgeModelFactory>();
+        services.AddScoped<Areas.Admin.Factories.IAdminNotificationModelFactory, Areas.Admin.Factories.AdminNotificationModelFactory>();
+        services.AddScoped<Web.Factories.Garden.PlantProblemFactory>();
 
         services.AddScoped<IStartupSeeder, StartupSeeder>();
         services.AddScoped<OwnerSeeder>();
@@ -351,7 +341,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<SoilIngredientSeeder>();
         services.AddScoped<PlantCatalogSeeder>();
         services.AddScoped<FertilizerCatalogSeeder>();
-        services.AddScoped<DiseaseCatalogSeeder>();
         services.AddScoped<LocationAndGardenSpotSeeder>();
         services.AddScoped<SoilMixSeeder>();
         services.AddScoped<ContainerSeeder>();
@@ -359,7 +348,6 @@ public static class DependencyInjectionExtensions
         services.AddScoped<PlantPhotoSeeder>();
         services.AddScoped<WateringScheduleSeeder>();
         services.AddScoped<FertilizingScheduleSeeder>();
-        services.AddScoped<PlantDiseaseRecordSeeder>();
         services.AddScoped<RepottingLogSeeder>();
 
         return services;

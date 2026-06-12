@@ -1,0 +1,69 @@
+@model List<GropMng.Web.Areas.Admin.Models.DiseaseKnowledgeListModel>
+@using GropMng.Web.Framework.TagHelpers.Admin
+@using GropMng.Web.Areas.Admin.Models
+@{
+    ViewData["Title"] = T("admin.diseaseKnowledge.title");
+    GropHtml.SetActiveMenuItemSystemName("DiseaseKnowledge");
+
+    var addUrl = Url.Action("Create", "DiseaseKnowledge", new { area = "Admin" })!;
+}
+
+<grop-admin-page-header
+    title="@T("admin.diseaseKnowledge.title")"
+    breadcrumbs="@(new List<AdminBreadcrumbItemModel>
+    {
+        new() { Text = T("common.dashboard"), Url = Url.Action("Dashboard", "Home", new { area = "" }) },
+        new() { Text = T("admin.diseaseKnowledge.title") }
+    })">
+    <grop-header-button href="@addUrl"
+                        text="@T("admin.diseaseKnowledge.create")"
+                        icon="bx bx-plus"
+                        css-class="btn btn-primary" />
+</grop-admin-page-header>
+
+@await Html.PartialAsync("Notifications")
+
+<div class="card">
+    <div class="card-datatable table-responsive">
+        <table class="datatables-basic table" id="diseaseKnowledgeTable">
+            <thead>
+                <tr>
+                    <th>@T("admin.diseaseKnowledge.grid.id")</th>
+                    <th>@T("admin.diseaseKnowledge.commonName")</th>
+                    <th>@T("admin.diseaseKnowledge.scientificName")</th>
+                    <th>@T("admin.diseaseKnowledge.plants")</th>
+                    <th>@T("admin.diseaseKnowledge.photos")</th>
+                    <th>@T("common.created")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.CommonName</td>
+                        <td>@item.ScientificName</td>
+                        <td><span class="badge bg-label-info">@item.LinkedPlantCount</span></td>
+                        <td><span class="badge bg-label-info">@item.PhotoCount</span></td>
+                        <td>@item.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-icon" title="@T("common.edit")">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('@T("common.delete.confirm")')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-icon" title="@T("common.delete")">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -14,7 +14,6 @@ internal sealed class StartupSeeder : IStartupSeeder
     private readonly SoilIngredientSeeder _soilIngredientSeeder;
     private readonly PlantCatalogSeeder _plantCatalogSeeder;
     private readonly FertilizerCatalogSeeder _fertilizerCatalogSeeder;
-    private readonly DiseaseCatalogSeeder _diseaseCatalogSeeder;
     private readonly LocationAndGardenSpotSeeder _locationAndGardenSpotSeeder;
     private readonly SoilMixSeeder _soilMixSeeder;
     private readonly ContainerSeeder _containerSeeder;
@@ -22,7 +21,6 @@ internal sealed class StartupSeeder : IStartupSeeder
     private readonly PlantPhotoSeeder _plantPhotoSeeder;
     private readonly WateringScheduleSeeder _wateringScheduleSeeder;
     private readonly FertilizingScheduleSeeder _fertilizingScheduleSeeder;
-    private readonly PlantDiseaseRecordSeeder _plantDiseaseRecordSeeder;
     private readonly RepottingLogSeeder _repottingLogSeeder;
 
     public StartupSeeder(
@@ -33,7 +31,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         SoilIngredientSeeder soilIngredientSeeder,
         PlantCatalogSeeder plantCatalogSeeder,
         FertilizerCatalogSeeder fertilizerCatalogSeeder,
-        DiseaseCatalogSeeder diseaseCatalogSeeder,
         LocationAndGardenSpotSeeder locationAndGardenSpotSeeder,
         SoilMixSeeder soilMixSeeder,
         ContainerSeeder containerSeeder,
@@ -41,7 +38,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         PlantPhotoSeeder plantPhotoSeeder,
         WateringScheduleSeeder wateringScheduleSeeder,
         FertilizingScheduleSeeder fertilizingScheduleSeeder,
-        PlantDiseaseRecordSeeder plantDiseaseRecordSeeder,
         RepottingLogSeeder repottingLogSeeder)
     {
         _ownerSeeder = ownerSeeder;
@@ -51,7 +47,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         _soilIngredientSeeder = soilIngredientSeeder;
         _plantCatalogSeeder = plantCatalogSeeder;
         _fertilizerCatalogSeeder = fertilizerCatalogSeeder;
-        _diseaseCatalogSeeder = diseaseCatalogSeeder;
         _locationAndGardenSpotSeeder = locationAndGardenSpotSeeder;
         _soilMixSeeder = soilMixSeeder;
         _containerSeeder = containerSeeder;
@@ -59,7 +54,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         _plantPhotoSeeder = plantPhotoSeeder;
         _wateringScheduleSeeder = wateringScheduleSeeder;
         _fertilizingScheduleSeeder = fertilizingScheduleSeeder;
-        _plantDiseaseRecordSeeder = plantDiseaseRecordSeeder;
         _repottingLogSeeder = repottingLogSeeder;
     }
 
@@ -84,8 +78,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         var ingredientIds = await _soilIngredientSeeder.SeedAsync(cancellationToken);
         var plantIds = await _plantCatalogSeeder.SeedAsync(cancellationToken);
         var fertilizerIds = await _fertilizerCatalogSeeder.SeedAsync(cancellationToken);
-        var diseaseIds = await _diseaseCatalogSeeder.SeedAsync(cancellationToken);
-
         // 3. Owner spatial structure
         var locationResult = await _locationAndGardenSpotSeeder.SeedAsync(cancellationToken);
 
@@ -109,7 +101,6 @@ internal sealed class StartupSeeder : IStartupSeeder
         // 8. Care schedules + history (depend on plant instance IDs)
         await _wateringScheduleSeeder.SeedAsync(instanceIds, cancellationToken);
         await _fertilizingScheduleSeeder.SeedAsync(instanceIds, fertilizerIds, cancellationToken);
-        await _plantDiseaseRecordSeeder.SeedAsync(instanceIds, diseaseIds, cancellationToken);
         await _repottingLogSeeder.SeedAsync(instanceIds, cancellationToken);
     }
 }

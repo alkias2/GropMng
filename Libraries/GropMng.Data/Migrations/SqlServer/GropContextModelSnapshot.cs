@@ -627,17 +627,13 @@ namespace GropMng.Data.Migrations.SqlServer
                         });
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.Disease", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.AdminNotification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AffectedParts")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -647,30 +643,93 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<string>("DiseaseType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("Other");
+                    b.Property<int?>("DiseaseKnowledgeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("IsResolved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantInstanceId")
+                        .HasColumnType("int")
+                        .HasColumnName("InstanceId");
+
+                    b.Property<string>("ProblemName")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Notes")
+                    b.Property<DateTime?>("ResolvedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_AdminNotification");
+
+                    b.HasIndex("DiseaseKnowledgeId")
+                        .HasDatabaseName("IX_AdminNotification_DiseaseKnowledgeId");
+
+                    b.HasIndex("IsResolved")
+                        .HasDatabaseName("IX_AdminNotification_IsResolved");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_AdminNotification_OwnerId");
+
+                    b.HasIndex("PlantInstanceId")
+                        .HasDatabaseName("IX_AdminNotification_InstanceId");
+
+                    b.ToTable("AdminNotification", (string)null);
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CommonName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PreventionNotes")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<string>("Symptoms")
+                    b.Property<string>("ScientificName")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("TreatmentGuidelines")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAtUtc")
@@ -679,26 +738,27 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasDefaultValueSql("SYSUTCDATETIME()");
 
                     b.HasKey("Id")
-                        .HasName("PK_Disease");
+                        .HasName("PK_DiseaseKnowledge");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("CommonName")
                         .IsUnique()
-                        .HasDatabaseName("UQ_Disease_Name")
+                        .HasDatabaseName("UQ_DiseaseKnowledge_CommonName")
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("Disease", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Disease_DiseaseType", "[DiseaseType] IN (N'Fungal', N'Bacterial', N'Viral', N'Pest', N'Deficiency', N'Physiological', N'Other')");
-                        });
+                    b.ToTable("DiseaseKnowledge", (string)null);
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseasePhoto", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledgePhoto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Caption")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -707,6 +767,9 @@ namespace GropMng.Data.Migrations.SqlServer
 
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
+
+                    b.Property<int>("DiseaseKnowledgeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DisplayOrder")
                         .ValueGeneratedOnAdd()
@@ -718,48 +781,29 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("PictureId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<int>("PlantDiseaseRecordId")
-                        .HasColumnType("int")
-                        .HasColumnName("RecordId");
-
-                    b.Property<DateOnly>("TakenDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("date")
-                        .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2(7)")
                         .HasDefaultValueSql("SYSUTCDATETIME()");
 
                     b.HasKey("Id")
-                        .HasName("PK_DiseasePhoto");
+                        .HasName("PK_DiseaseKnowledgePhoto");
 
-                    b.HasIndex("OwnerId")
-                        .HasDatabaseName("IX_DiseasePhoto_OwnerId");
+                    b.HasIndex("DiseaseKnowledgeId")
+                        .HasDatabaseName("IX_DiseaseKnowledgePhoto_DiseaseKnowledgeId");
 
                     b.HasIndex("PictureId")
-                        .HasDatabaseName("IX_DiseasePhoto_PictureId");
+                        .HasDatabaseName("IX_DiseaseKnowledgePhoto_PictureId");
 
-                    b.HasIndex("PlantDiseaseRecordId")
-                        .HasDatabaseName("IX_DiseasePhoto_RecordId");
-
-                    b.ToTable("DiseasePhoto", (string)null);
+                    b.ToTable("DiseaseKnowledgePhoto", (string)null);
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseRemedyLink", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledgePlant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -775,34 +819,16 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<int>("DiseaseId")
+                    b.Property<int>("DiseaseKnowledgeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Dosage")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Frequency")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PesticideId")
+                    b.Property<int>("PlantId")
                         .HasColumnType("int");
-
-                    b.Property<string>("TreatmentType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Curative");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -810,101 +836,23 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasDefaultValueSql("SYSUTCDATETIME()");
 
                     b.HasKey("Id")
-                        .HasName("PK_DiseaseRemedyLink");
+                        .HasName("PK_DiseaseKnowledgePlant");
 
-                    b.HasIndex("DiseaseId")
-                        .HasDatabaseName("IX_DiseaseRemedyLink_DiseaseId");
+                    b.HasIndex("DiseaseKnowledgeId")
+                        .HasDatabaseName("IX_DiseaseKnowledgePlant_DiseaseKnowledgeId");
 
-                    b.HasIndex("PesticideId")
-                        .HasDatabaseName("IX_DiseaseRemedyLink_PesticideId");
+                    b.HasIndex("PlantId")
+                        .HasDatabaseName("IX_DiseaseKnowledgePlant_PlantId");
 
-                    b.HasIndex("DiseaseId", "PesticideId", "TreatmentType")
+                    b.HasIndex("DiseaseKnowledgeId", "PlantId")
                         .IsUnique()
-                        .HasDatabaseName("UQ_DiseaseRemedyLink")
+                        .HasDatabaseName("UQ_DiseaseKnowledgePlant")
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("DiseaseRemedyLink", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_DiseaseRemedyLink_TreatmentType", "[TreatmentType] IN (N'Preventive', N'Curative')");
-                        });
+                    b.ToTable("DiseaseKnowledgePlant", (string)null);
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.Pesticide", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActiveIngredient")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("ApplicationMethod")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Brand")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2(7)")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<DateTime?>("DeletedAtUtc")
-                        .HasColumnType("datetime2(7)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsOrganic")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PesticideType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SafetyNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2(7)")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<byte?>("WithholdingDays")
-                        .HasColumnType("tinyint");
-
-                    b.HasKey("Id")
-                        .HasName("PK_Pesticide");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_Pesticide_Name");
-
-                    b.ToTable("Pesticide", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Pesticide_ApplicationMethod", "[ApplicationMethod] IS NULL OR [ApplicationMethod] IN (N'Spray', N'Soil', N'Drench', N'Granule', N'Systemic')");
-
-                            t.HasCheckConstraint("CK_Pesticide_PesticideType", "[PesticideType] IS NULL OR [PesticideType] IN (N'Fungicide', N'Insecticide', N'Herbicide', N'Acaricide', N'Bactericide', N'Biostimulant', N'Other')");
-                        });
-                });
-
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantProblemRecord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -925,8 +873,15 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("date")
                         .HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
 
-                    b.Property<int>("DiseaseId")
+                    b.Property<int?>("DiseaseKnowledgeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("InfoSource")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("OwnKnowledge");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -936,11 +891,10 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Outcome")
+                    b.Property<bool>("NotifyAdmin")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Ongoing");
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
@@ -949,17 +903,27 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasColumnType("int")
                         .HasColumnName("InstanceId");
 
+                    b.Property<string>("ProblemName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("ProblemStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Active");
+
                     b.Property<DateOnly?>("ResolvedDate")
                         .HasColumnType("date");
 
                     b.Property<string>("Severity")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Moderate");
-
-                    b.Property<string>("TreatmentUsed")
-                        .HasColumnType("nvarchar(max)");
+                        .HasDefaultValue("Medium");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -967,24 +931,113 @@ namespace GropMng.Data.Migrations.SqlServer
                         .HasDefaultValueSql("SYSUTCDATETIME()");
 
                     b.HasKey("Id")
-                        .HasName("PK_PlantDiseaseRecord");
+                        .HasName("PK_PlantProblemRecord");
 
-                    b.HasIndex("DiseaseId")
-                        .HasDatabaseName("IX_PlantDiseaseRecord_DiseaseId");
+                    b.HasIndex("DiseaseKnowledgeId")
+                        .HasDatabaseName("IX_PlantProblemRecord_DiseaseKnowledgeId");
 
                     b.HasIndex("OwnerId")
-                        .HasDatabaseName("IX_PlantDiseaseRecord_OwnerId");
+                        .HasDatabaseName("IX_PlantProblemRecord_OwnerId");
 
                     b.HasIndex("PlantInstanceId")
-                        .HasDatabaseName("IX_PlantDiseaseRecord_InstanceId");
+                        .HasDatabaseName("IX_PlantProblemRecord_InstanceId");
 
-                    b.ToTable("PlantDiseaseRecord", null, t =>
+                    b.ToTable("PlantProblemRecord", null, t =>
                         {
-                            t.HasCheckConstraint("CK_PlantDiseaseRecord_Outcome", "[Outcome] IS NULL OR [Outcome] IN (N'Resolved', N'Ongoing', N'Lost', N'Unknown')");
+                            t.HasCheckConstraint("CK_PlantProblemRecord_InfoSource", "[InfoSource] IN (N'OwnKnowledge', N'Agronomist', N'AITool', N'Internet', N'Other')");
 
-                            t.HasCheckConstraint("CK_PlantDiseaseRecord_ResolvedDate", "[ResolvedDate] IS NULL OR [ResolvedDate] >= [DetectedDate]");
+                            t.HasCheckConstraint("CK_PlantProblemRecord_ProblemStatus", "[ProblemStatus] IN (N'Active', N'Monitoring', N'Resolved')");
 
-                            t.HasCheckConstraint("CK_PlantDiseaseRecord_Severity", "[Severity] IS NULL OR [Severity] IN (N'Mild', N'Moderate', N'Severe', N'Critical')");
+                            t.HasCheckConstraint("CK_PlantProblemRecord_Severity", "[Severity] IN (N'Low', N'Medium', N'High')");
+                        });
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantProblemSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("DosageNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FrequencyUnit")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Days");
+
+                    b.Property<int>("FrequencyValue")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(7);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateOnly>("NextDueDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlantProblemRecordId")
+                        .HasColumnType("int")
+                        .HasColumnName("RecordId");
+
+                    b.Property<string>("ScheduleStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Active");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(7)")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("Id")
+                        .HasName("PK_PlantProblemSchedule");
+
+                    b.HasIndex("NextDueDate")
+                        .HasDatabaseName("IX_PlantProblemSchedule_NextDueDate");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("IX_PlantProblemSchedule_OwnerId");
+
+                    b.HasIndex("PlantProblemRecordId")
+                        .HasDatabaseName("IX_PlantProblemSchedule_RecordId");
+
+                    b.ToTable("PlantProblemSchedule", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PlantProblemSchedule_FrequencyUnit", "[FrequencyUnit] IN (N'Days', N'Weeks', N'Months')");
+
+                            t.HasCheckConstraint("CK_PlantProblemSchedule_FrequencyValue", "[FrequencyValue] > 0");
+
+                            t.HasCheckConstraint("CK_PlantProblemSchedule_ScheduleStatus", "[ScheduleStatus] IN (N'Active', N'Completed', N'Cancelled')");
                         });
                 });
 
@@ -2421,74 +2474,115 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("PlantInstance");
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseasePhoto", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.AdminNotification", b =>
                 {
-                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                    b.HasOne("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", "DiseaseKnowledge")
+                        .WithMany()
+                        .HasForeignKey("DiseaseKnowledgeId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_AdminNotification_DiseaseKnowledge");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
                         .HasPrincipalKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_DiseasePhoto_Owner");
-
-                    b.HasOne("GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord", "PlantDiseaseRecord")
-                        .WithMany("Photos")
-                        .HasForeignKey("PlantDiseaseRecordId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DiseasePhoto_PlantDiseaseRecord");
-
-                    b.Navigation("PlantDiseaseRecord");
-                });
-
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseRemedyLink", b =>
-                {
-                    b.HasOne("GropMng.Core.Domain.Garden.Health.Disease", "Disease")
-                        .WithMany("RemedyLinks")
-                        .HasForeignKey("DiseaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DiseaseRemedyLink_Disease");
-
-                    b.HasOne("GropMng.Core.Domain.Garden.Health.Pesticide", "Pesticide")
-                        .WithMany("RemedyLinks")
-                        .HasForeignKey("PesticideId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_DiseaseRemedyLink_Pesticide");
-
-                    b.Navigation("Disease");
-
-                    b.Navigation("Pesticide");
-                });
-
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord", b =>
-                {
-                    b.HasOne("GropMng.Core.Domain.Garden.Health.Disease", "Disease")
-                        .WithMany("PlantDiseaseRecords")
-                        .HasForeignKey("DiseaseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_PlantDiseaseRecord_Disease");
-
-                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .HasPrincipalKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_PlantDiseaseRecord_Owner");
+                        .HasConstraintName("FK_AdminNotification_Owner");
 
                     b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
-                        .WithMany("DiseaseRecords")
+                        .WithMany()
                         .HasForeignKey("PlantInstanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_PlantDiseaseRecord_PlantInstance");
+                        .HasConstraintName("FK_AdminNotification_PlantInstance");
 
-                    b.Navigation("Disease");
+                    b.Navigation("DiseaseKnowledge");
+
+                    b.Navigation("Owner");
 
                     b.Navigation("PlantInstance");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledgePhoto", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", "DiseaseKnowledge")
+                        .WithMany("Photos")
+                        .HasForeignKey("DiseaseKnowledgeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_DiseaseKnowledgePhoto_DiseaseKnowledge");
+
+                    b.Navigation("DiseaseKnowledge");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledgePlant", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", "DiseaseKnowledge")
+                        .WithMany("PlantLinks")
+                        .HasForeignKey("DiseaseKnowledgeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_DiseaseKnowledgePlant_DiseaseKnowledge");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_DiseaseKnowledgePlant_Plant");
+
+                    b.Navigation("DiseaseKnowledge");
+
+                    b.Navigation("Plant");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantProblemRecord", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", "DiseaseKnowledge")
+                        .WithMany()
+                        .HasForeignKey("DiseaseKnowledgeId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_PlantProblemRecord_DiseaseKnowledge");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_PlantProblemRecord_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Plants.PlantInstance", "PlantInstance")
+                        .WithMany("ProblemRecords")
+                        .HasForeignKey("PlantInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PlantProblemRecord_PlantInstance");
+
+                    b.Navigation("DiseaseKnowledge");
+
+                    b.Navigation("PlantInstance");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantProblemSchedule", b =>
+                {
+                    b.HasOne("GropMng.Core.Domain.Garden.Owners.Owner", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .HasPrincipalKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_PlantProblemSchedule_Owner");
+
+                    b.HasOne("GropMng.Core.Domain.Garden.Health.PlantProblemRecord", "PlantProblemRecord")
+                        .WithMany("Schedules")
+                        .HasForeignKey("PlantProblemRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PlantProblemSchedule_PlantProblemRecord");
+
+                    b.Navigation("PlantProblemRecord");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Locations.GardenSpot", b =>
@@ -2709,21 +2803,16 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("FertilizingSchedules");
                 });
 
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.Disease", b =>
-                {
-                    b.Navigation("PlantDiseaseRecords");
-
-                    b.Navigation("RemedyLinks");
-                });
-
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.Pesticide", b =>
-                {
-                    b.Navigation("RemedyLinks");
-                });
-
-            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantDiseaseRecord", b =>
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.DiseaseKnowledge", b =>
                 {
                     b.Navigation("Photos");
+
+                    b.Navigation("PlantLinks");
+                });
+
+            modelBuilder.Entity("GropMng.Core.Domain.Garden.Health.PlantProblemRecord", b =>
+                {
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("GropMng.Core.Domain.Garden.Locations.GardenSpot", b =>
@@ -2750,8 +2839,6 @@ namespace GropMng.Data.Migrations.SqlServer
                 {
                     b.Navigation("Container");
 
-                    b.Navigation("DiseaseRecords");
-
                     b.Navigation("FertilizingLogs");
 
                     b.Navigation("FertilizingSchedules");
@@ -2759,6 +2846,8 @@ namespace GropMng.Data.Migrations.SqlServer
                     b.Navigation("NotesEntries");
 
                     b.Navigation("Photos");
+
+                    b.Navigation("ProblemRecords");
 
                     b.Navigation("RepottingLogs");
 

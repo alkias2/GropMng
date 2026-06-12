@@ -25,11 +25,12 @@ public partial class GropContext
     public DbSet<FertilizingSchedule> FertilizingSchedules => Set<FertilizingSchedule>();
     public DbSet<PlantPhoto> PlantPhotos => Set<PlantPhoto>();
     public DbSet<PlantNote> PlantNotes => Set<PlantNote>();
-    public DbSet<Disease> Diseases => Set<Disease>();
-    public DbSet<Pesticide> Pesticides => Set<Pesticide>();
-    public DbSet<DiseaseRemedyLink> DiseaseRemedyLinks => Set<DiseaseRemedyLink>();
-    public DbSet<PlantDiseaseRecord> PlantDiseaseRecords => Set<PlantDiseaseRecord>();
-    public DbSet<DiseasePhoto> DiseasePhotos => Set<DiseasePhoto>();
+    public DbSet<DiseaseKnowledge> DiseaseKnowledges => Set<DiseaseKnowledge>();
+    public DbSet<DiseaseKnowledgePhoto> DiseaseKnowledgePhotos => Set<DiseaseKnowledgePhoto>();
+    public DbSet<DiseaseKnowledgePlant> DiseaseKnowledgePlants => Set<DiseaseKnowledgePlant>();
+    public DbSet<PlantProblemRecord> PlantProblemRecords => Set<PlantProblemRecord>();
+    public DbSet<PlantProblemSchedule> PlantProblemSchedules => Set<PlantProblemSchedule>();
+    public DbSet<AdminNotification> AdminNotifications => Set<AdminNotification>();
     public DbSet<AIQueryTemplate> AIQueryTemplates => Set<AIQueryTemplate>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<SoilIngredient> SoilIngredients => Set<SoilIngredient>();
@@ -52,11 +53,12 @@ public partial class GropContext
         ConfigureFertilizingSchedule(modelBuilder.Entity<FertilizingSchedule>());
         ConfigurePlantPhoto(modelBuilder.Entity<PlantPhoto>());
         ConfigurePlantNote(modelBuilder.Entity<PlantNote>());
-        ConfigureDisease(modelBuilder.Entity<Disease>());
-        ConfigurePesticide(modelBuilder.Entity<Pesticide>());
-        ConfigureDiseaseRemedyLink(modelBuilder.Entity<DiseaseRemedyLink>());
-        ConfigurePlantDiseaseRecord(modelBuilder.Entity<PlantDiseaseRecord>());
-        ConfigureDiseasePhoto(modelBuilder.Entity<DiseasePhoto>());
+        ConfigureDiseaseKnowledge(modelBuilder.Entity<DiseaseKnowledge>());
+        ConfigureDiseaseKnowledgePhoto(modelBuilder.Entity<DiseaseKnowledgePhoto>());
+        ConfigureDiseaseKnowledgePlant(modelBuilder.Entity<DiseaseKnowledgePlant>());
+        ConfigurePlantProblemRecord(modelBuilder.Entity<PlantProblemRecord>());
+        ConfigurePlantProblemSchedule(modelBuilder.Entity<PlantProblemSchedule>());
+        ConfigureAdminNotification(modelBuilder.Entity<AdminNotification>());
         ConfigureAiQueryTemplate(modelBuilder.Entity<AIQueryTemplate>());
         ConfigureUserPreference(modelBuilder.Entity<UserPreference>());
         ConfigureSoilIngredient(modelBuilder.Entity<SoilIngredient>());
@@ -292,6 +294,194 @@ public partial class GropContext
             .HasConstraintName("FK_PlantInstance_Owner");
     }
 
+    private static void ConfigureDiseaseKnowledge(EntityTypeBuilder<DiseaseKnowledge> entity)
+    {
+        entity.ToTable("DiseaseKnowledge");
+        entity.HasKey(e => e.Id).HasName("PK_DiseaseKnowledge");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.CommonName).HasMaxLength(300).IsRequired();
+        entity.Property(e => e.ScientificName).HasMaxLength(300);
+        entity.Property(e => e.Description).IsRequired();
+        entity.Property(e => e.TreatmentGuidelines).IsRequired();
+
+        entity.HasIndex(e => e.CommonName)
+            .IsUnique()
+            .HasDatabaseName("UQ_DiseaseKnowledge_CommonName")
+            .HasFilter("[IsDeleted] = 0");
+    }
+
+    private static void ConfigureDiseaseKnowledgePhoto(EntityTypeBuilder<DiseaseKnowledgePhoto> entity)
+    {
+        entity.ToTable("DiseaseKnowledgePhoto");
+        entity.HasKey(e => e.Id).HasName("PK_DiseaseKnowledgePhoto");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.PictureId).HasDefaultValue(0);
+        entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+        entity.Property(e => e.Caption).HasMaxLength(500);
+
+        entity.HasIndex(e => e.DiseaseKnowledgeId).HasDatabaseName("IX_DiseaseKnowledgePhoto_DiseaseKnowledgeId");
+        entity.HasIndex(e => e.PictureId).HasDatabaseName("IX_DiseaseKnowledgePhoto_PictureId");
+
+        entity.HasOne(e => e.DiseaseKnowledge)
+            .WithMany(e => e.Photos)
+            .HasForeignKey(e => e.DiseaseKnowledgeId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_DiseaseKnowledgePhoto_DiseaseKnowledge");
+    }
+
+    private static void ConfigureDiseaseKnowledgePlant(EntityTypeBuilder<DiseaseKnowledgePlant> entity)
+    {
+        entity.ToTable("DiseaseKnowledgePlant");
+        entity.HasKey(e => e.Id).HasName("PK_DiseaseKnowledgePlant");
+        ConfigureAuditableEntity(entity);
+
+        entity.HasIndex(e => e.DiseaseKnowledgeId).HasDatabaseName("IX_DiseaseKnowledgePlant_DiseaseKnowledgeId");
+        entity.HasIndex(e => e.PlantId).HasDatabaseName("IX_DiseaseKnowledgePlant_PlantId");
+        entity.HasIndex(e => new { e.DiseaseKnowledgeId, e.PlantId })
+            .IsUnique()
+            .HasDatabaseName("UQ_DiseaseKnowledgePlant")
+            .HasFilter("[IsDeleted] = 0");
+
+        entity.HasOne(e => e.DiseaseKnowledge)
+            .WithMany(e => e.PlantLinks)
+            .HasForeignKey(e => e.DiseaseKnowledgeId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_DiseaseKnowledgePlant_DiseaseKnowledge");
+
+        entity.HasOne(e => e.Plant)
+            .WithMany()
+            .HasForeignKey(e => e.PlantId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_DiseaseKnowledgePlant_Plant");
+    }
+
+    private static void ConfigurePlantProblemRecord(EntityTypeBuilder<PlantProblemRecord> entity)
+    {
+        entity.ToTable("PlantProblemRecord", tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_PlantProblemRecord_Severity", BuildEnumConstraintSql<Severity>("Severity"));
+            tableBuilder.HasCheckConstraint("CK_PlantProblemRecord_ProblemStatus", BuildEnumConstraintSql<ProblemStatus>("ProblemStatus"));
+            tableBuilder.HasCheckConstraint("CK_PlantProblemRecord_InfoSource", BuildEnumConstraintSql<InfoSource>("InfoSource"));
+        });
+
+        entity.HasKey(e => e.Id).HasName("PK_PlantProblemRecord");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.DiseaseKnowledgeId).IsRequired(false);
+        entity.Property(e => e.ProblemName).HasMaxLength(300).IsRequired();
+        entity.Property(e => e.DetectedDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
+entity.Property(e => e.Severity).HasMaxLength(20).HasStorageEnumConversion().HasDefaultValue(Severity.Medium).HasSentinel(Severity.Low);
+        entity.Property(e => e.ProblemStatus).HasMaxLength(20).HasStorageEnumConversion().HasDefaultValue(ProblemStatus.Active);
+        entity.Property(e => e.InfoSource).HasMaxLength(30).HasStorageEnumConversion().HasDefaultValue(InfoSource.OwnKnowledge);
+        entity.Property(e => e.Notes);
+        entity.Property(e => e.ResolvedDate).HasColumnType("date");
+        entity.Property(e => e.NotifyAdmin).HasDefaultValue(false);
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_PlantProblemRecord_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_PlantProblemRecord_InstanceId");
+        entity.HasIndex(e => e.DiseaseKnowledgeId).HasDatabaseName("IX_PlantProblemRecord_DiseaseKnowledgeId");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany(e => e.ProblemRecords)
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_PlantProblemRecord_PlantInstance");
+
+        entity.HasOne(e => e.DiseaseKnowledge)
+            .WithMany()
+            .HasForeignKey(e => e.DiseaseKnowledgeId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .HasConstraintName("FK_PlantProblemRecord_DiseaseKnowledge");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantProblemRecord_Owner");
+    }
+
+    private static void ConfigurePlantProblemSchedule(EntityTypeBuilder<PlantProblemSchedule> entity)
+    {
+        entity.ToTable("PlantProblemSchedule", tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_PlantProblemSchedule_FrequencyUnit", BuildEnumConstraintSql<ScheduleFrequencyUnit>("FrequencyUnit"));
+            tableBuilder.HasCheckConstraint("CK_PlantProblemSchedule_ScheduleStatus", BuildEnumConstraintSql<ScheduleStatus>("ScheduleStatus"));
+            tableBuilder.HasCheckConstraint("CK_PlantProblemSchedule_FrequencyValue", "[FrequencyValue] > 0");
+        });
+
+        entity.HasKey(e => e.Id).HasName("PK_PlantProblemSchedule");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantProblemRecordId).HasColumnName("RecordId");
+        entity.Property(e => e.ActionName).HasMaxLength(300).IsRequired();
+        entity.Property(e => e.FrequencyValue).HasDefaultValue(7);
+        entity.Property(e => e.FrequencyUnit).HasMaxLength(20).HasStorageEnumConversion().HasDefaultValue(ScheduleFrequencyUnit.Days);
+        entity.Property(e => e.DosageNotes).HasMaxLength(500);
+        entity.Property(e => e.StartDate).HasColumnType("date").IsRequired();
+        entity.Property(e => e.NextDueDate).HasColumnType("date").IsRequired();
+        entity.Property(e => e.ScheduleStatus).HasMaxLength(20).HasStorageEnumConversion().HasDefaultValue(ScheduleStatus.Active);
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_PlantProblemSchedule_OwnerId");
+        entity.HasIndex(e => e.PlantProblemRecordId).HasDatabaseName("IX_PlantProblemSchedule_RecordId");
+        entity.HasIndex(e => e.NextDueDate).HasDatabaseName("IX_PlantProblemSchedule_NextDueDate");
+
+        entity.HasOne(e => e.PlantProblemRecord)
+            .WithMany(e => e.Schedules)
+            .HasForeignKey(e => e.PlantProblemRecordId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_PlantProblemSchedule_PlantProblemRecord");
+
+        entity.HasOne<Owner>()
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_PlantProblemSchedule_Owner");
+    }
+
+    private static void ConfigureAdminNotification(EntityTypeBuilder<AdminNotification> entity)
+    {
+        entity.ToTable("AdminNotification");
+        entity.HasKey(e => e.Id).HasName("PK_AdminNotification");
+        ConfigureAuditableEntity(entity);
+
+        entity.Property(e => e.OwnerId).IsRequired();
+        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
+        entity.Property(e => e.ProblemName).HasMaxLength(300).IsRequired();
+        entity.Property(e => e.IsResolved).HasDefaultValue(false);
+        entity.Property(e => e.ResolvedAtUtc).HasColumnType("datetime2(7)");
+
+        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_AdminNotification_OwnerId");
+        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_AdminNotification_InstanceId");
+        entity.HasIndex(e => e.IsResolved).HasDatabaseName("IX_AdminNotification_IsResolved");
+        entity.HasIndex(e => e.DiseaseKnowledgeId).HasDatabaseName("IX_AdminNotification_DiseaseKnowledgeId");
+
+        entity.HasOne(e => e.Owner)
+            .WithMany()
+            .HasForeignKey(e => e.OwnerId)
+            .HasPrincipalKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_AdminNotification_Owner");
+
+        entity.HasOne(e => e.PlantInstance)
+            .WithMany()
+            .HasForeignKey(e => e.PlantInstanceId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_AdminNotification_PlantInstance");
+
+        entity.HasOne(e => e.DiseaseKnowledge)
+            .WithMany()
+            .HasForeignKey(e => e.DiseaseKnowledgeId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .HasConstraintName("FK_AdminNotification_DiseaseKnowledge");
+    }
+
     private static void ConfigureWateringSchedule(EntityTypeBuilder<WateringSchedule> entity)
     {
         entity.ToTable("WateringSchedule", tableBuilder =>
@@ -458,163 +648,6 @@ public partial class GropContext
             .HasPrincipalKey(e => e.OwnerId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_PlantNote_Owner");
-    }
-
-    private static void ConfigureDisease(EntityTypeBuilder<Disease> entity)
-    {
-        entity.ToTable("Disease", tableBuilder =>
-        {
-            tableBuilder.HasCheckConstraint("CK_Disease_DiseaseType", BuildEnumConstraintSql<PlantDiseaseType>("DiseaseType"));
-        });
-
-        entity.HasKey(e => e.Id).HasName("PK_Disease");
-        ConfigureAuditableEntity(entity);
-
-        entity.Property(e => e.Name).HasMaxLength(300).IsRequired();
-        entity.Property(e => e.DiseaseType).HasMaxLength(50).HasStorageEnumConversion().HasDefaultValue(PlantDiseaseType.Other).HasSentinel(PlantDiseaseType.Other);
-        entity.Property(e => e.Symptoms);
-        entity.Property(e => e.PreventionNotes);
-        entity.Property(e => e.AffectedParts).HasMaxLength(200);
-        entity.Property(e => e.Notes);
-
-        entity.HasIndex(e => e.Name)
-            .IsUnique()
-            .HasDatabaseName("UQ_Disease_Name")
-            .HasFilter("[IsDeleted] = 0");
-    }
-
-    private static void ConfigurePesticide(EntityTypeBuilder<Pesticide> entity)
-    {
-        entity.ToTable("Pesticide", tableBuilder =>
-        {
-            tableBuilder.HasCheckConstraint("CK_Pesticide_PesticideType", BuildEnumConstraintSql<PesticideKind>("PesticideType", isNullable: true));
-            tableBuilder.HasCheckConstraint("CK_Pesticide_ApplicationMethod", BuildEnumConstraintSql<PesticideApplicationMethod>("ApplicationMethod", isNullable: true));
-        });
-
-        entity.HasKey(e => e.Id).HasName("PK_Pesticide");
-        ConfigureAuditableEntity(entity);
-
-        entity.Property(e => e.Name).HasMaxLength(300).IsRequired();
-        entity.Property(e => e.Brand).HasMaxLength(200);
-        entity.Property(e => e.ActiveIngredient).HasMaxLength(300);
-        entity.Property(e => e.PesticideType).HasMaxLength(50).HasNullableStorageEnumConversion();
-        entity.Property(e => e.ApplicationMethod).HasMaxLength(50).HasNullableStorageEnumConversion();
-        entity.Property(e => e.IsOrganic).HasDefaultValue(false);
-        entity.Property(e => e.SafetyNotes);
-        entity.Property(e => e.Notes);
-
-        entity.HasIndex(e => e.Name).HasDatabaseName("IX_Pesticide_Name");
-    }
-
-    private static void ConfigureDiseaseRemedyLink(EntityTypeBuilder<DiseaseRemedyLink> entity)
-    {
-        entity.ToTable("DiseaseRemedyLink", tableBuilder =>
-        {
-            tableBuilder.HasCheckConstraint("CK_DiseaseRemedyLink_TreatmentType", BuildEnumConstraintSql<RemedyTreatmentType>("TreatmentType"));
-        });
-
-        entity.HasKey(e => e.Id).HasName("PK_DiseaseRemedyLink");
-        ConfigureAuditableEntity(entity);
-
-        entity.Property(e => e.TreatmentType).HasMaxLength(20).HasStorageEnumConversion().HasDefaultValue(RemedyTreatmentType.Curative).HasSentinel(RemedyTreatmentType.Curative);
-        entity.Property(e => e.Dosage).HasMaxLength(200);
-        entity.Property(e => e.Frequency).HasMaxLength(200);
-        entity.Property(e => e.Notes);
-
-        entity.HasIndex(e => e.DiseaseId).HasDatabaseName("IX_DiseaseRemedyLink_DiseaseId");
-        entity.HasIndex(e => e.PesticideId).HasDatabaseName("IX_DiseaseRemedyLink_PesticideId");
-        entity.HasIndex(e => new { e.DiseaseId, e.PesticideId, e.TreatmentType })
-            .IsUnique()
-            .HasDatabaseName("UQ_DiseaseRemedyLink")
-            .HasFilter("[IsDeleted] = 0");
-
-        entity.HasOne(e => e.Disease)
-            .WithMany(e => e.RemedyLinks)
-            .HasForeignKey(e => e.DiseaseId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_DiseaseRemedyLink_Disease");
-
-        entity.HasOne(e => e.Pesticide)
-            .WithMany(e => e.RemedyLinks)
-            .HasForeignKey(e => e.PesticideId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_DiseaseRemedyLink_Pesticide");
-    }
-
-    private static void ConfigurePlantDiseaseRecord(EntityTypeBuilder<PlantDiseaseRecord> entity)
-    {
-        entity.ToTable("PlantDiseaseRecord", tableBuilder =>
-        {
-            tableBuilder.HasCheckConstraint("CK_PlantDiseaseRecord_Severity", BuildEnumConstraintSql<PlantDiseaseSeverity>("Severity", isNullable: true));
-            tableBuilder.HasCheckConstraint("CK_PlantDiseaseRecord_Outcome", BuildEnumConstraintSql<PlantDiseaseOutcome>("Outcome", isNullable: true));
-            tableBuilder.HasCheckConstraint("CK_PlantDiseaseRecord_ResolvedDate", "[ResolvedDate] IS NULL OR [ResolvedDate] >= [DetectedDate]");
-        });
-
-        entity.HasKey(e => e.Id).HasName("PK_PlantDiseaseRecord");
-        ConfigureAuditableEntity(entity);
-
-        entity.Property(e => e.OwnerId).IsRequired();
-        entity.Property(e => e.PlantInstanceId).HasColumnName("InstanceId");
-        entity.Property(e => e.DetectedDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-        entity.Property(e => e.ResolvedDate).HasColumnType("date");
-        entity.Property(e => e.Severity).HasMaxLength(20).HasNullableStorageEnumConversion().HasDefaultValue(PlantDiseaseSeverity.Moderate);
-        entity.Property(e => e.TreatmentUsed);
-        entity.Property(e => e.Outcome).HasMaxLength(20).HasNullableStorageEnumConversion().HasDefaultValue(PlantDiseaseOutcome.Ongoing);
-        entity.Property(e => e.Notes);
-
-        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_PlantDiseaseRecord_OwnerId");
-        entity.HasIndex(e => e.PlantInstanceId).HasDatabaseName("IX_PlantDiseaseRecord_InstanceId");
-        entity.HasIndex(e => e.DiseaseId).HasDatabaseName("IX_PlantDiseaseRecord_DiseaseId");
-
-        entity.HasOne(e => e.PlantInstance)
-            .WithMany(e => e.DiseaseRecords)
-            .HasForeignKey(e => e.PlantInstanceId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_PlantDiseaseRecord_PlantInstance");
-
-        entity.HasOne(e => e.Disease)
-            .WithMany(e => e.PlantDiseaseRecords)
-            .HasForeignKey(e => e.DiseaseId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_PlantDiseaseRecord_Disease");
-
-        entity.HasOne<Owner>()
-            .WithMany()
-            .HasForeignKey(e => e.OwnerId)
-            .HasPrincipalKey(e => e.OwnerId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_PlantDiseaseRecord_Owner");
-    }
-
-    private static void ConfigureDiseasePhoto(EntityTypeBuilder<DiseasePhoto> entity)
-    {
-        entity.ToTable("DiseasePhoto");
-        entity.HasKey(e => e.Id).HasName("PK_DiseasePhoto");
-        ConfigureAuditableEntity(entity);
-
-        entity.Property(e => e.OwnerId).IsRequired();
-        entity.Property(e => e.PlantDiseaseRecordId).HasColumnName("RecordId");
-        entity.Property(e => e.PictureId).HasDefaultValue(0);
-        entity.Property(e => e.TakenDate).HasColumnType("date").HasDefaultValueSql("CAST(SYSUTCDATETIME() AS date)");
-        entity.Property(e => e.Notes).HasMaxLength(500);
-        entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
-
-        entity.HasIndex(e => e.OwnerId).HasDatabaseName("IX_DiseasePhoto_OwnerId");
-        entity.HasIndex(e => e.PlantDiseaseRecordId).HasDatabaseName("IX_DiseasePhoto_RecordId");
-        entity.HasIndex(e => e.PictureId).HasDatabaseName("IX_DiseasePhoto_PictureId");
-
-        entity.HasOne(e => e.PlantDiseaseRecord)
-            .WithMany(e => e.Photos)
-            .HasForeignKey(e => e.PlantDiseaseRecordId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_DiseasePhoto_PlantDiseaseRecord");
-
-        entity.HasOne<Owner>()
-            .WithMany()
-            .HasForeignKey(e => e.OwnerId)
-            .HasPrincipalKey(e => e.OwnerId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_DiseasePhoto_Owner");
     }
 
     private static void ConfigureAiQueryTemplate(EntityTypeBuilder<AIQueryTemplate> entity)
@@ -905,4 +938,3 @@ internal static class EnumPropertyBuilderExtensions
             storageValue => string.IsNullOrWhiteSpace(storageValue) ? null : EnumStorageValueExtensions.FromStorageValue<TEnum>(storageValue));
     }
 }
-

@@ -22,9 +22,9 @@ else
     <div class="upcoming-section d-none" data-section="watering">
         @foreach (var group in Model.UpcomingActionGroups)
         {
-            <div class="d-flex align-items-center justify-content-between mt-4 mb-2">
-                <h6 class="mb-0">@group.GroupLabel</h6>
-                <small class="text-muted">@group.Actions.Count</small>
+            <div class="d-flex align-items-center justify-content-start gap-2 mt-4 mb-2">
+                <h4 class="mb-0">@group.GroupLabel</h4>
+                <h4 class="text-success mb-0">@group.Actions.Count</h4>
             </div>
             <div class="row row-cols-1 row-cols-md-3 g-4 mb-5" data-dashboard-group="upcoming" data-group-days="@group.DeltaDaysFromToday">
                 @foreach (var action in group.Actions)

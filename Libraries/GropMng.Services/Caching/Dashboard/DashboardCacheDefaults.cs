@@ -1,6 +1,7 @@
 using GropMng.Core.Caching;
 using GropMng.Services.Caching.Garden;
 using GropMng.Services.Caching.System;
+using GropMng.Services.Caching;
 
 namespace GropMng.Services.Caching.Dashboard;
 
@@ -26,6 +27,8 @@ public static class DashboardCacheDefaults
     public static string WateringLogsPrefix => GropCacheDefaults.DashboardPrefix + "watering-logs.";
 
     public static string FertilizingLogsPrefix => GropCacheDefaults.DashboardPrefix + "fertilizing-logs.";
+
+    public static string ProblemSchedulesPrefix => GropCacheDefaults.DashboardPrefix + "problem-schedules.";
 
     public static string ActiveSkipsPrefix => GropCacheDefaults.DashboardPrefix + "active-skips.";
 
@@ -117,5 +120,14 @@ public static class DashboardCacheDefaults
             ActionSkipCacheDefaults.Prefix)
         {
             CacheTime = 1
+        };
+
+    public static GropCacheKey ProblemSchedulesCacheKey =>
+        new("Grop.dashboard.owner.problem-schedules.v1.{0}",
+            GropCacheDefaults.DashboardPrefix,
+            ProblemSchedulesPrefix,
+            ProblemCacheDefaults.ProblemSchedulePrefix)
+        {
+            CacheTime = 2
         };
 }

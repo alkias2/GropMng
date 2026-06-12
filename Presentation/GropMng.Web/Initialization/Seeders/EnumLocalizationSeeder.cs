@@ -105,7 +105,26 @@ internal sealed class EnumLocalizationSeeder
             ["Enums.GropMng.Core.Domain.Logging.LogLevel.Information"] = "Πληροφορία",
             ["Enums.GropMng.Core.Domain.Logging.LogLevel.Warning"] = "Προειδοποίηση",
             ["Enums.GropMng.Core.Domain.Logging.LogLevel.Error"] = "Σφάλμα",
-            ["Enums.GropMng.Core.Domain.Logging.LogLevel.Critical"] = "Κρίσιμο"
+            ["Enums.GropMng.Core.Domain.Logging.LogLevel.Critical"] = "Κρίσιμο",
+
+            // New Disease Management enums (from PlantProblem feature)
+            ["Enums.GropMng.Core.Domain.Garden.Enums.Severity.Low"] = "Χαμηλή",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.Severity.Medium"] = "Μέτρια",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.Severity.High"] = "Υψηλή",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ProblemStatus.Active"] = "Ενεργό",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ProblemStatus.Monitoring"] = "Παρακολούθηση",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ProblemStatus.Resolved"] = "Επιλύθηκε",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.InfoSource.OwnKnowledge"] = "Δική μου γνώση",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.InfoSource.Agronomist"] = "Γεωπόνος",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.InfoSource.AITool"] = "Εργαλείο ΑΙ",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.InfoSource.Internet"] = "Διαδίκτυο",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.InfoSource.Other"] = "Άλλο",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleFrequencyUnit.Days"] = "Ημέρες",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleFrequencyUnit.Weeks"] = "Εβδομάδες",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleFrequencyUnit.Months"] = "Μήνες",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleStatus.Active"] = "Ενεργό",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleStatus.Completed"] = "Ολοκληρώθηκε",
+            ["Enums.GropMng.Core.Domain.Garden.Enums.ScheduleStatus.Cancelled"] = "Ακυρώθηκε"
         };
     }
 }

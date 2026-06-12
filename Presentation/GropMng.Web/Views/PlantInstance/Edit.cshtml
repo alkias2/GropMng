@@ -53,16 +53,12 @@
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link @(activeTab == "diseases" ? "active" : "")"
-                id="tab-diseases-btn" data-bs-toggle="tab" data-bs-target="#tab-diseases"
-                type="button" role="tab" aria-controls="tab-diseases"
-                aria-selected="@(activeTab == "diseases" ? "true" : "false")"
-                data-lazy-url="@Url.Action("DiseaseRecordTab", "PlantInstance", new { id = Model.Id })">
-            @T("mygarden.plantinstance.tab.diseases")
-            @if (Model.ActiveDiseaseCount > 0)
-            {
-                <span class="badge rounded-pill bg-danger ms-1">@Model.ActiveDiseaseCount</span>
-            }
+        <button class="nav-link @(activeTab == "problems" ? "active" : "")"
+                id="tab-problems-btn" data-bs-toggle="tab" data-bs-target="#tab-problems"
+                type="button" role="tab" aria-controls="tab-problems"
+                aria-selected="@(activeTab == "problems" ? "true" : "false")"
+                data-lazy-url="@Url.Action("ProblemsTab", "PlantProblem", new { plantInstanceId = Model.Id })">
+            @T("plantProblems.tab")
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -116,9 +112,9 @@
         </div>
     </div>
 
-    @* Tab: Diseases — lazy-loaded via AJAX *@
-    <div class="tab-pane fade @(activeTab == "diseases" ? "show active" : "")"
-         id="tab-diseases" role="tabpanel" aria-labelledby="tab-diseases-btn">
+    @* Tab: Problems — lazy-loaded via AJAX *@
+    <div class="tab-pane fade @(activeTab == "problems" ? "show active" : "")"
+         id="tab-problems" role="tabpanel" aria-labelledby="tab-problems-btn">
         <div class="tab-lazy-placeholder text-center py-4">
             <span class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
         </div>
@@ -142,6 +138,69 @@
 
 @* ── Watering Schedule Modal ─────────────────────────────────────── *@
 @await Html.PartialAsync("_WateringScheduleForm", Model.Id)
+
+@* ── Problem Record Modal (shell — body loaded via AJAX) ──────────── *@
+@{
+    var problemModalId = $"problem-create-modal-{Model.Id}";
+    var scheduleModalShellId = $"schedule-create-modal-0";
+}
+<div id="@problemModalId" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="@(problemModalId)-title"
+                    data-title-add="@T("plantProblems.createTitle")"
+                    data-title-edit="@T("plantProblems.editTitle")">
+                    @T("plantProblems.createTitle")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @* AJAX-loaded content goes here *@
+                <div class="text-center py-4">
+                    <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                </div>
+            </div>
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="@(problemModalId)-record-id" value="0" />
+            <input type="hidden" id="@(problemModalId)-plantinstance-id" value="@Model.Id" />
+            <div id="@(problemModalId)-error" class="text-danger small px-3 pb-2 d-none"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(problemModalId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ── Schedule Modal (shell — body loaded via AJAX) ───────────────── *@
+<div id="@scheduleModalShellId" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="@(scheduleModalShellId)-title"
+                    data-title-add="@T("schedule.createTitle")"
+                    data-title-edit="@T("schedule.editTitle")">
+                    @T("schedule.createTitle")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-4">
+                    <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                </div>
+            </div>
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="@(scheduleModalShellId)-schedule-id" value="0" />
+            <input type="hidden" id="@(scheduleModalShellId)-problem-record-id" value="0" />
+            <div id="@(scheduleModalShellId)-error" class="text-danger small px-3 pb-2 d-none"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">@T("common.cancel")</button>
+                <button type="button" class="btn btn-primary btn-sm" id="@(scheduleModalShellId)-save-btn">@T("common.save")</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
@@ -952,15 +1011,15 @@
         }());
     </script>
 
-    <!-- Plant Disease Management: disease records tab, add/edit modal, photo upload per record -->
+    <!-- Plant Problem Management: problems tab, create/edit modal with autocomplete, schedule modals -->
+    <script src="~/js-custom/plant-problem-autocomplete.js" asp-append-version="true"></script>
+    <script src="~/js-custom/plant-problem-schedule.js" asp-append-version="true"></script>
     <script>
-        var GropPlantDiseases = (function () {
+        var GropPlantProblems = (function () {
             'use strict';
 
             var _cfg = null;
             var _tabLoaded = false;
-            var _modalEl = null;
-            var _modal = null;
 
             function getAntiForgeryToken() {
                 var input = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -969,18 +1028,6 @@
 
             function buildUrlWithId(template, id) {
                 return template.replace(/\/0(\/|$)/, '/' + id + '$1');
-            }
-
-            function buildUrlWithTwoIds(template, firstId, secondId) {
-                var url = template.replace(/\/0(\/|$)/, '/' + firstId + '$1');
-                return url.replace(/\/0(\/|$)/, '/' + secondId + '$1');
-            }
-
-            function todayIso() {
-                var now = new Date();
-                var month = String(now.getMonth() + 1).padStart(2, '0');
-                var day = String(now.getDate()).padStart(2, '0');
-                return now.getFullYear() + '-' + month + '-' + day;
             }
 
             function showToast(message, isError) {
@@ -1007,339 +1054,309 @@
                 var spinner = placeholder ? placeholder.querySelector('.spinner-border') : null;
                 if (spinner) spinner.classList.remove('d-none');
 
-                fetch(_cfg.tabUrl, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(function (r) { return r.text(); })
-                .then(function (html) {
-                    _cfg.tabPane.innerHTML = html;
-                    _tabLoaded = true;
-                    if (typeof window.gropInitFlatpickrInputs === 'function') {
-                        window.gropInitFlatpickrInputs(_cfg.tabPane);
-                    }
-                    if (typeof window.gropInitQuillEditors === 'function') {
-                        window.gropInitQuillEditors(_cfg.tabPane);
-                    }
-                    bindTabEvents();
-                    bindUploadWidgets();
-                })
-                .catch(function () {
-                    if (placeholder) placeholder.innerHTML = '<span class="text-danger small">' + _cfg.msgLoadError + '</span>';
-                });
+                fetch(_cfg.tabUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        _cfg.tabPane.innerHTML = html;
+                        _tabLoaded = true;
+                        bindTabEvents();
+                        // Activate disease knowledge detail badges after tab content loads
+                        if (typeof window.GropPlantProblemAutocomplete !== 'undefined'
+                            && typeof window.GropPlantProblemAutocomplete.initDetailBadges === 'function') {
+                            window.GropPlantProblemAutocomplete.initDetailBadges(_cfg.tabPane);
+                        }
+                    })
+                    .catch(function () {
+                        if (placeholder) placeholder.innerHTML = '<span class="text-danger small">' + (_cfg.msgLoadError || 'Error loading') + '</span>';
+                    });
             }
 
             function bindTabEvents() {
                 var pane = _cfg.tabPane;
 
-                var addBtn = pane.querySelector('[id^="disease-record-add-btn-"]');
+                // Add new problem button
+                var addBtn = pane.querySelector('[id^="problem-add-btn-"]');
                 if (addBtn) {
-                    addBtn.addEventListener('click', function () { openModal(0, null); });
+                    addBtn.addEventListener('click', function () { openProblemModal(0); });
                 }
 
+                // Edit / delete / add-schedule buttons on problem cards
                 pane.addEventListener('click', function (e) {
-                    var editBtn = e.target.closest('.disease-record-edit-btn');
+                    var editBtn = e.target.closest('.problem-edit-btn');
                     if (editBtn) {
-                        openModal(parseInt(editBtn.dataset.recordId, 10), editBtn.dataset);
+                        openProblemModal(parseInt(editBtn.dataset.recordId, 10));
                         return;
                     }
 
-                    var deleteBtn = e.target.closest('.disease-record-delete-btn');
+                    var deleteBtn = e.target.closest('.problem-delete-btn');
                     if (deleteBtn) {
-                        confirmDelete(parseInt(deleteBtn.dataset.recordId, 10));
+                        confirmDeleteProblem(parseInt(deleteBtn.dataset.recordId, 10));
                         return;
                     }
 
-                    var resolveBtn = e.target.closest('.disease-record-resolve-btn');
-                    if (resolveBtn) {
-                        quickResolve(parseInt(resolveBtn.dataset.recordId, 10));
+                    var addScheduleBtn = e.target.closest('.problem-add-schedule-btn');
+                    if (addScheduleBtn) {
+                        openScheduleModal(parseInt(addScheduleBtn.dataset.recordId, 10), 0);
                         return;
                     }
 
-                    var addPhotoBtn = e.target.closest('.disease-photo-add-btn');
-                    if (addPhotoBtn) {
-                        addPhoto(parseInt(addPhotoBtn.dataset.recordId, 10));
+                    var editScheduleBtn = e.target.closest('.problem-schedule-edit-btn');
+                    if (editScheduleBtn) {
+                        openScheduleModal(0, parseInt(editScheduleBtn.dataset.scheduleId, 10));
                         return;
                     }
 
-                    var deletePhotoBtn = e.target.closest('.disease-photo-delete-btn');
-                    if (deletePhotoBtn) {
-                        deletePhoto(parseInt(deletePhotoBtn.dataset.recordId, 10), parseInt(deletePhotoBtn.dataset.photoId, 10));
+                    var deleteScheduleBtn = e.target.closest('.problem-schedule-delete-btn');
+                    if (deleteScheduleBtn) {
+                        confirmDeleteSchedule(parseInt(deleteScheduleBtn.dataset.scheduleId, 10));
                     }
                 });
             }
 
-            function bindUploadWidgets() {
-                var wrappers = _cfg.tabPane.querySelectorAll('[id^="disease-photo-upload-"]');
-                wrappers.forEach(function (wrapper) {
-                    var uploadId = wrapper.id;
-                    var fileInput = document.getElementById(uploadId + '-file');
-                    var preview = document.getElementById(uploadId + '-preview');
-                    var placeholder = document.getElementById(uploadId + '-placeholder');
-                    var hidden = document.getElementById(uploadId + '-hidden');
-                    var statusEl = document.getElementById(uploadId + '-status');
+            // ── Problem Modal ──────────────────────────────────────────────────────
 
-                    if (!fileInput || !hidden) return;
+            function openProblemModal(problemId) {
+                var url = problemId === 0
+                    ? _cfg.createModalUrl
+                    : buildUrlWithId(_cfg.editModalUrlTemplate, problemId);
 
-                    fileInput.addEventListener('change', function () {
-                        var file = this.files[0];
-                        if (!file) return;
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        var modalEl = document.getElementById(_cfg.problemModalId);
+                        if (!modalEl) return;
+                        modalEl.querySelector('.modal-body').innerHTML = html;
+                        modalEl.querySelector('#' + _cfg.problemModalId + '-record-id').value = problemId;
+                        modalEl.querySelector('#' + _cfg.problemModalId + '-error').classList.add('d-none');
 
-                        statusEl.textContent = _cfg.msgUploading;
-                        fileInput.disabled = true;
+                        var titleEl = modalEl.querySelector('#' + _cfg.problemModalId + '-title');
+                        if (titleEl) {
+                            titleEl.textContent = problemId === 0
+                                ? (titleEl.dataset.titleAdd || _cfg.titleAddProblem)
+                                : (titleEl.dataset.titleEdit || _cfg.titleEditProblem);
+                        }
 
-                        var formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('qqfilename', file.name);
-                        formData.append('entityType', 'plantinstance');
+                        // Initialize autocomplete on the modal body
+                        if (typeof window.GropPlantProblemAutocomplete !== 'undefined') {
+                            window.GropPlantProblemAutocomplete.init(modalEl.querySelector('.modal-body'), {
+                                searchUrl: _cfg.diseaseSearchUrl,
+                                infoPanelUrl: _cfg.diseaseInfoPanelUrl
+                            });
+                        }
 
-                        fetch(_cfg.uploadUrl, {
-                            method: 'POST',
-                            body: formData,
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        })
-                        .then(function (r) { return r.json(); })
-                        .then(function (json) {
-                            if (json.success) {
-                                hidden.value = json.pictureId;
-                                preview.src = json.imageUrl;
-                                preview.classList.remove('d-none');
-                                if (placeholder) placeholder.classList.add('d-none');
-                                statusEl.textContent = '';
-                            } else {
-                                statusEl.textContent = json.message || _cfg.msgUploadError;
-                            }
-                        })
-                        .catch(function () {
-                            statusEl.textContent = _cfg.msgUploadError;
-                        })
-                        .finally(function () {
-                            fileInput.disabled = false;
-                            fileInput.value = '';
-                        });
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    })
+                    .catch(function () {
+                        showToast(_cfg.msgNetworkError || 'Network error', true);
                     });
-                });
             }
 
-            function openModal(recordId, data) {
-                _modalEl = document.getElementById(_cfg.modalId);
-                if (!_modalEl) return;
+            function saveProblem() {
+                var modalEl = document.getElementById(_cfg.problemModalId);
+                if (!modalEl) return;
 
-                _modal = bootstrap.Modal.getOrCreateInstance(_modalEl);
+                var recordId = parseInt(modalEl.querySelector('#' + _cfg.problemModalId + '-record-id').value, 10);
+                var body = modalEl.querySelector('.modal-body');
+                var errorEl = modalEl.querySelector('#' + _cfg.problemModalId + '-error');
 
-                _modalEl.querySelector('#' + _cfg.modalId + '-error').classList.add('d-none');
-                _modalEl.querySelector('#' + _cfg.modalId + '-record-id').value = recordId;
+                var problemName = body.querySelector('.problem-name-input').value.trim();
+                var diseaseKnowledgeId = body.querySelector('.problem-disease-knowledge-id').value || null;
+                var detectedDate = body.querySelector('.problem-detected-date').value;
+                var severity = body.querySelector('.problem-severity').value;
+                var problemStatus = body.querySelector('.problem-status').value;
+                var infoSource = body.querySelector('.problem-info-source').value;
+                var notes = body.querySelector('.problem-notes').value;
+                var notifyAdmin = body.querySelector('.problem-notify-admin')?.checked || false;
+                var plantInstanceId = document.getElementById(_cfg.problemModalId + '-plantinstance-id').value;
 
-                var titleEl = _modalEl.querySelector('#' + _cfg.modalId + '-title');
-                if (titleEl) {
-                    var addTitle = titleEl.getAttribute('data-title-add') || _cfg.titleAdd;
-                    var editTitle = titleEl.getAttribute('data-title-edit') || _cfg.titleEdit;
-                    titleEl.textContent = recordId === 0 ? addTitle : editTitle;
-                }
-
-                _modalEl.querySelector('#' + _cfg.modalId + '-diseaseid').value = (data && data.diseaseid) || '';
-
-                var detectedInput = _modalEl.querySelector('#' + _cfg.modalId + '-detected');
-                var detectedValue = (data && data.detected) || todayIso();
-                detectedInput.value = detectedValue;
-                if (detectedInput._flatpickr) {
-                    detectedInput._flatpickr.setDate(detectedValue, true, 'Y-m-d');
-                }
-
-                var resolvedInput = _modalEl.querySelector('#' + _cfg.modalId + '-resolved');
-                var resolvedValue = (data && data.resolved) || '';
-                resolvedInput.value = resolvedValue;
-                if (resolvedInput._flatpickr) {
-                    resolvedInput._flatpickr.setDate(resolvedValue || null, true, 'Y-m-d');
-                }
-
-                _modalEl.querySelector('#' + _cfg.modalId + '-severity').value = (data && data.severity) || 'Moderate';
-                _modalEl.querySelector('#' + _cfg.modalId + '-outcome').value = (data && data.outcome) || 'Ongoing';
-                _modalEl.querySelector('#' + _cfg.modalId + '-treatment').value = (data && data.treatment) || '';
-
-                var notesInput = _modalEl.querySelector('#' + _cfg.modalId + '-notes');
-                var notesValue = (data && data.notes) || '';
-                notesInput.value = notesValue;
-                if (notesInput._gropQuill) {
-                    notesInput._gropQuill.root.innerHTML = notesValue;
-                }
-
-                _modal.show();
-            }
-
-            function saveModal() {
-                var recordId = parseInt(_modalEl.querySelector('#' + _cfg.modalId + '-record-id').value, 10);
-                var diseaseId = _modalEl.querySelector('#' + _cfg.modalId + '-diseaseid').value;
-                var detected = _modalEl.querySelector('#' + _cfg.modalId + '-detected').value;
-                var resolved = _modalEl.querySelector('#' + _cfg.modalId + '-resolved').value;
-                var severity = _modalEl.querySelector('#' + _cfg.modalId + '-severity').value;
-                var outcome = _modalEl.querySelector('#' + _cfg.modalId + '-outcome').value;
-                var treatment = _modalEl.querySelector('#' + _cfg.modalId + '-treatment').value;
-                var notes = _modalEl.querySelector('#' + _cfg.modalId + '-notes').value;
-                var errorEl = _modalEl.querySelector('#' + _cfg.modalId + '-error');
-
-                if (!diseaseId || !detected) {
-                    errorEl.textContent = _cfg.validationRequired;
+                if (!problemName || !detectedDate) {
+                    errorEl.textContent = _cfg.validationRequired || 'Required fields missing';
                     errorEl.classList.remove('d-none');
                     return;
                 }
 
                 var url = recordId === 0
-                    ? _cfg.createUrl
-                    : buildUrlWithId(_cfg.updateUrlTemplate, recordId);
+                    ? _cfg.createProblemUrl
+                    : buildUrlWithId(_cfg.updateProblemUrlTemplate, recordId);
 
                 var formData = new FormData();
                 formData.append('__RequestVerificationToken', getAntiForgeryToken());
-                formData.append('DiseaseId', diseaseId);
-                formData.append('DetectedDate', detected);
-                if (resolved) formData.append('ResolvedDate', resolved);
-                if (severity) formData.append('Severity', severity);
-                if (outcome) formData.append('Outcome', outcome);
-                if (treatment) formData.append('TreatmentUsed', treatment);
+                formData.append('PlantInstanceId', plantInstanceId);
+                formData.append('ProblemName', problemName);
+                if (diseaseKnowledgeId) formData.append('DiseaseKnowledgeId', diseaseKnowledgeId);
+                formData.append('DetectedDate', detectedDate);
+                formData.append('Severity', severity);
+                formData.append('ProblemStatus', problemStatus);
+                formData.append('InfoSource', infoSource);
                 if (notes) formData.append('Notes', notes);
+                formData.append('NotifyAdmin', notifyAdmin ? 'true' : 'false');
 
                 fetch(url, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (result) {
-                    if (result.success) {
-                        _modal.hide();
-                        showToast(_cfg.msgSaveSuccess, false);
-                        reloadTabContent();
-                    } else {
-                        errorEl.textContent = result.message || _cfg.msgSaveError;
+                    .then(function (r) { return r.json(); })
+                    .then(function (result) {
+                        if (result.success) {
+                            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                            showToast(result.message || _cfg.msgSaveSuccess, false);
+                            reloadTabContent();
+                        } else {
+                            errorEl.textContent = result.message || _cfg.msgSaveError;
+                            errorEl.classList.remove('d-none');
+                        }
+                    })
+                    .catch(function () {
+                        errorEl.textContent = _cfg.msgNetworkError;
                         errorEl.classList.remove('d-none');
-                    }
-                })
-                .catch(function () {
-                    errorEl.textContent = _cfg.msgNetworkError;
-                    errorEl.classList.remove('d-none');
-                });
+                    });
             }
 
-            function confirmDelete(recordId) {
+            function confirmDeleteProblem(recordId) {
+                var msg = _cfg.deleteConfirm || 'Are you sure?';
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: _cfg.deleteConfirm,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                            confirmButtonText: _cfg.confirmButtonText
-                    }).then(function (r) {
-                        if (r.isConfirmed) deleteRecord(recordId);
-                    });
-                } else if (window.confirm(_cfg.deleteConfirm)) {
-                    deleteRecord(recordId);
+                    Swal.fire({ title: msg, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'OK' })
+                        .then(function (r) { if (r.isConfirmed) deleteProblem(recordId); });
+                } else if (window.confirm(msg)) {
+                    deleteProblem(recordId);
                 }
             }
 
-            function deleteRecord(recordId) {
-                var url = buildUrlWithId(_cfg.deleteUrlTemplate, recordId);
+            function deleteProblem(recordId) {
+                var url = buildUrlWithId(_cfg.deleteProblemUrlTemplate, recordId);
                 var formData = new FormData();
                 formData.append('__RequestVerificationToken', getAntiForgeryToken());
 
                 fetch(url, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (result) {
-                    if (result.success) {
-                        showToast(_cfg.msgDeleteSuccess, false);
-                        reloadTabContent();
-                    } else {
-                        showToast(result.message || _cfg.msgDeleteError, true);
-                    }
-                })
-                .catch(function () {
-                    showToast(_cfg.msgNetworkError, true);
-                });
+                    .then(function (r) { return r.json(); })
+                    .then(function (result) {
+                        if (result.success) {
+                            showToast(result.message || _cfg.msgDeleteSuccess, false);
+                            reloadTabContent();
+                        } else {
+                            showToast(result.message || _cfg.msgDeleteError, true);
+                        }
+                    })
+                    .catch(function () { showToast(_cfg.msgNetworkError, true); });
             }
 
-            function quickResolve(recordId) {
-                var url = buildUrlWithId(_cfg.quickResolveUrlTemplate, recordId);
-                var formData = new FormData();
-                formData.append('__RequestVerificationToken', getAntiForgeryToken());
+            // ── Schedule Modal ─────────────────────────────────────────────────────
 
-                fetch(url, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (result) {
-                    if (result.success) {
-                        showToast(_cfg.msgResolveSuccess, false);
-                        reloadTabContent();
-                    } else {
-                        showToast(result.message || _cfg.msgSaveError, true);
-                    }
-                })
-                .catch(function () {
-                    showToast(_cfg.msgNetworkError, true);
-                });
+            function openScheduleModal(problemId, scheduleId) {
+                var url;
+                if (scheduleId === 0) {
+                    url = buildUrlWithId(_cfg.createScheduleModalUrlTemplate, problemId);
+                } else {
+                    url = buildUrlWithId(_cfg.editScheduleModalUrlTemplate, scheduleId);
+                }
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        var modalEl = document.getElementById(_cfg.scheduleModalId);
+                        if (!modalEl) return;
+                        modalEl.querySelector('.modal-body').innerHTML = html;
+                        modalEl.querySelector('#' + _cfg.scheduleModalId + '-schedule-id').value = scheduleId;
+                        modalEl.querySelector('#' + _cfg.scheduleModalId + '-problem-record-id').value = problemId;
+                        modalEl.querySelector('#' + _cfg.scheduleModalId + '-error').classList.add('d-none');
+
+                        var titleEl = modalEl.querySelector('#' + _cfg.scheduleModalId + '-title');
+                        if (titleEl) {
+                            titleEl.textContent = scheduleId === 0
+                                ? (titleEl.dataset.titleAdd || _cfg.titleAddSchedule)
+                                : (titleEl.dataset.titleEdit || _cfg.titleEditSchedule);
+                        }
+
+                        // Initialize schedule auto-calculation
+                        if (typeof window.GropPlantProblemSchedule !== 'undefined') {
+                            window.GropPlantProblemSchedule.init(modalEl.querySelector('.modal-body'));
+                        }
+
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    })
+                    .catch(function () {
+                        showToast(_cfg.msgNetworkError || 'Network error', true);
+                    });
             }
 
-            function addPhoto(recordId) {
-                var uploadId = 'disease-photo-upload-' + recordId;
-                var hidden = document.getElementById(uploadId + '-hidden');
-                var notes = document.getElementById(uploadId + '-notes');
-                var takenDate = document.getElementById(uploadId + '-takendate');
-                var displayOrder = document.getElementById(uploadId + '-displayorder');
+            function saveSchedule() {
+                var modalEl = document.getElementById(_cfg.scheduleModalId);
+                if (!modalEl) return;
 
-                if (!hidden || parseInt(hidden.value, 10) <= 0) {
-                    showToast(_cfg.msgPhotoRequired, true);
+                var scheduleId = parseInt(modalEl.querySelector('#' + _cfg.scheduleModalId + '-schedule-id').value, 10);
+                var body = modalEl.querySelector('.modal-body');
+                var errorEl = modalEl.querySelector('#' + _cfg.scheduleModalId + '-error');
+
+                var problemRecordId = document.getElementById(_cfg.scheduleModalId + '-problem-record-id').value;
+
+                var actionName = body.querySelector('.schedule-action-name').value.trim();
+                var frequencyValue = body.querySelector('.schedule-frequency-value').value;
+                var frequencyUnit = body.querySelector('.schedule-frequency-unit').value;
+                var dosageNotes = body.querySelector('.schedule-dosage-notes').value;
+                var startDate = body.querySelector('.schedule-start-date').value;
+                var scheduleStatus = body.querySelector('.schedule-status').value;
+
+                if (!actionName || !frequencyValue || !startDate) {
+                    errorEl.textContent = _cfg.validationRequired || 'Required fields missing';
+                    errorEl.classList.remove('d-none');
                     return;
                 }
 
+                var url = scheduleId === 0
+                    ? _cfg.createScheduleUrl
+                    : buildUrlWithId(_cfg.updateScheduleUrlTemplate, scheduleId);
+
                 var formData = new FormData();
                 formData.append('__RequestVerificationToken', getAntiForgeryToken());
-                formData.append('PictureId', hidden.value);
-                formData.append('TakenDate', takenDate ? takenDate.value : todayIso());
-                formData.append('DisplayOrder', displayOrder ? displayOrder.value : '0');
-                if (notes && notes.value) formData.append('Notes', notes.value);
+                formData.append('PlantProblemRecordId', problemRecordId);
+                formData.append('ActionName', actionName);
+                formData.append('FrequencyValue', frequencyValue);
+                formData.append('FrequencyUnit', frequencyUnit);
+                if (dosageNotes) formData.append('DosageNotes', dosageNotes);
+                formData.append('StartDate', startDate);
+                formData.append('ScheduleStatus', scheduleStatus);
 
-                var url = buildUrlWithId(_cfg.addPhotoUrlTemplate, recordId);
                 fetch(url, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (result) {
-                    if (result.success) {
-                        showToast(_cfg.msgPhotoAddSuccess, false);
-                        reloadTabContent();
-                    } else {
-                        showToast(result.message || _cfg.msgSaveError, true);
-                    }
-                })
-                .catch(function () {
-                    showToast(_cfg.msgNetworkError, true);
-                });
+                    .then(function (r) { return r.json(); })
+                    .then(function (result) {
+                        if (result.success) {
+                            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                            showToast(result.message || _cfg.msgScheduleSaved, false);
+                            reloadTabContent();
+                        } else {
+                            errorEl.textContent = result.message || _cfg.msgSaveError;
+                            errorEl.classList.remove('d-none');
+                        }
+                    })
+                    .catch(function () {
+                        errorEl.textContent = _cfg.msgNetworkError;
+                        errorEl.classList.remove('d-none');
+                    });
             }
 
-            function deletePhoto(recordId, photoId) {
+            function confirmDeleteSchedule(scheduleId) {
+                var msg = _cfg.deleteScheduleConfirm || 'Delete this schedule?';
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: _cfg.deletePhotoConfirm,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                            confirmButtonText: _cfg.confirmButtonText
-                    }).then(function (r) {
-                        if (r.isConfirmed) doDeletePhoto(recordId, photoId);
-                    });
-                } else if (window.confirm(_cfg.deletePhotoConfirm)) {
-                    doDeletePhoto(recordId, photoId);
+                    Swal.fire({ title: msg, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'OK' })
+                        .then(function (r) { if (r.isConfirmed) deleteSchedule(scheduleId); });
+                } else if (window.confirm(msg)) {
+                    deleteSchedule(scheduleId);
                 }
             }
 
-            function doDeletePhoto(recordId, photoId) {
-                var url = buildUrlWithTwoIds(_cfg.deletePhotoUrlTemplate, recordId, photoId);
+            function deleteSchedule(scheduleId) {
+                var url = buildUrlWithId(_cfg.deleteScheduleUrlTemplate, scheduleId);
                 var formData = new FormData();
                 formData.append('__RequestVerificationToken', getAntiForgeryToken());
 
                 fetch(url, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (result) {
-                    if (result.success) {
-                        showToast(_cfg.msgPhotoDeleteSuccess, false);
-                        reloadTabContent();
-                    } else {
-                        showToast(result.message || _cfg.msgDeleteError, true);
-                    }
-                })
-                .catch(function () {
-                    showToast(_cfg.msgNetworkError, true);
-                });
+                    .then(function (r) { return r.json(); })
+                    .then(function (result) {
+                        if (result.success) {
+                            showToast(result.message || _cfg.msgDeleteSuccess, false);
+                            reloadTabContent();
+                        } else {
+                            showToast(result.message || _cfg.msgDeleteError, true);
+                        }
+                    })
+                    .catch(function () { showToast(_cfg.msgNetworkError, true); });
             }
 
             function reloadTabContent() {
@@ -1355,8 +1372,12 @@
                 _cfg = cfg;
 
                 document.addEventListener('click', function (e) {
-                    if (e.target && e.target.id === _cfg.modalId + '-save-btn') {
-                        saveModal();
+                    if (e.target && e.target.id === _cfg.problemModalId + '-save-btn') {
+                        saveProblem();
+                        return;
+                    }
+                    if (e.target && e.target.id === _cfg.scheduleModalId + '-save-btn') {
+                        saveSchedule();
                     }
                 });
 
@@ -1366,7 +1387,7 @@
                     });
                 }
 
-                if (_cfg.activeTab === 'diseases') {
+                if (_cfg.activeTab === 'problems') {
                     loadTabContent();
                 }
             }
@@ -2083,38 +2104,40 @@
                         confirmButtonText : '@T("common.ok")'
         });
 
-        GropPlantDiseases.init({
-            plantInstanceId       : @Model.Id,
-            tabBtn                : document.getElementById('tab-diseases-btn'),
-            tabPane               : document.getElementById('tab-diseases'),
-            tabUrl                : '@Url.Action("DiseaseRecordTab", "PlantInstance", new { id = Model.Id })',
-            createUrl             : '@Url.Action("DiseaseRecordCreate", "PlantInstance", new { id = Model.Id })',
-            updateUrlTemplate     : '@Url.Action("DiseaseRecordUpdate", "PlantInstance", new { id = Model.Id, recordId = 0 })',
-            deleteUrlTemplate     : '@Url.Action("DiseaseRecordDelete", "PlantInstance", new { id = Model.Id, recordId = 0 })',
-            quickResolveUrlTemplate : '@Url.Action("DiseaseRecordQuickResolve", "PlantInstance", new { id = Model.Id, recordId = 0 })',
-            addPhotoUrlTemplate   : '@Url.Action("DiseasePhotoAdd", "PlantInstance", new { id = Model.Id, recordId = 0 })',
-            deletePhotoUrlTemplate: '@Url.Action("DiseasePhotoDelete", "PlantInstance", new { id = Model.Id, recordId = 0, photoId = 0 })',
-            uploadUrl             : '@Url.Action("AsyncUpload", "Picture")',
-            modalId               : 'disease-record-modal-@Model.Id',
-            activeTab             : '@activeTab',
-            titleAdd              : '@T("mygarden.disease.record.add")',
-            titleEdit             : '@T("mygarden.disease.record.edit")',
-            validationRequired    : '@T("mygarden.disease.record.validation.required")',
-            deleteConfirm         : '@T("mygarden.disease.record.delete.confirm")',
-            deletePhotoConfirm    : '@T("mygarden.disease.photo.delete.confirm")',
-            msgSaveSuccess        : '@T("mygarden.disease.record.notifications.save.success")',
-            msgSaveError          : '@T("mygarden.disease.record.notifications.save.error")',
-            msgDeleteSuccess      : '@T("mygarden.disease.record.notifications.delete.success")',
-            msgDeleteError        : '@T("mygarden.disease.record.notifications.delete.error")',
-            msgResolveSuccess     : '@T("mygarden.disease.record.notifications.resolve.success")',
-            msgPhotoRequired      : '@T("mygarden.disease.photo.validation.required")',
-            msgPhotoAddSuccess    : '@T("mygarden.disease.photo.notifications.add.success")',
-            msgPhotoDeleteSuccess : '@T("mygarden.disease.photo.notifications.delete.success")',
-                        msgLoadError          : '@T("mygarden.disease.record.notifications.load.error")',
-            msgUploading          : '@T("admin.picture.status.uploading")',
-            msgUploadError        : '@T("admin.picture.status.error")',
-                        msgNetworkError       : '@T("common.networkerror")',
-                        confirmButtonText     : '@T("common.ok")'
+        GropPlantProblems.init({
+            plantInstanceId           : @Model.Id,
+            tabBtn                    : document.getElementById('tab-problems-btn'),
+            tabPane                   : document.getElementById('tab-problems'),
+            tabUrl                    : '@Url.Action("ProblemsTab", "PlantProblem", new { plantInstanceId = Model.Id })',
+            createModalUrl            : '@Url.Action("GetCreateModal", "PlantProblem", new { plantInstanceId = Model.Id })',
+            editModalUrlTemplate      : '@Url.Action("GetEditModal", "PlantProblem", new { id = 0 })',
+            createProblemUrl          : '@Url.Action("Create", "PlantProblem")',
+            updateProblemUrlTemplate  : '@Url.Action("Edit", "PlantProblem", new { id = 0 })',
+            deleteProblemUrlTemplate  : '@Url.Action("Delete", "PlantProblem", new { id = 0 })',
+            createScheduleModalUrlTemplate : '@Url.Action("GetCreateScheduleModal", "PlantProblem", new { problemId = 0 })',
+            editScheduleModalUrlTemplate   : '@Url.Action("GetEditScheduleModal", "PlantProblem", new { id = 0 })',
+            createScheduleUrl         : '@Url.Action("AddSchedule", "PlantProblem")',
+            updateScheduleUrlTemplate : '@Url.Action("EditSchedule", "PlantProblem", new { id = 0 })',
+            deleteScheduleUrlTemplate : '@Url.Action("DeleteSchedule", "PlantProblem", new { id = 0 })',
+            diseaseSearchUrl          : '@Url.Action("Search", "DiseaseKnowledge")',
+            diseaseInfoPanelUrl       : '@Url.Action("InfoPanel", "DiseaseKnowledge", new { id = 0 })'.replace(/\/0$/, ''),
+            problemModalId            : 'problem-create-modal-@Model.Id',
+            scheduleModalId           : 'schedule-create-modal-0',
+            activeTab                 : '@activeTab',
+            titleAddProblem           : '@T("plantProblems.createTitle")',
+            titleEditProblem          : '@T("plantProblems.editTitle")',
+            titleAddSchedule          : '@T("schedule.createTitle")',
+            titleEditSchedule         : '@T("schedule.editTitle")',
+            validationRequired        : '@T("mygarden.disease.record.validation.required")',
+            deleteConfirm             : '@T("plantProblems.deleteConfirm")',
+            deleteScheduleConfirm     : '@T("mygarden.fertilizing.schedule.delete.confirm")',
+            msgSaveSuccess            : '@T("plantProblems.created")',
+            msgSaveError              : '@T("mygarden.disease.record.notifications.save.error")',
+            msgDeleteSuccess          : '@T("plantProblems.deleted")',
+            msgDeleteError            : '@T("mygarden.disease.record.notifications.delete.error")',
+            msgScheduleSaved          : '@T("schedule.saved")',
+            msgLoadError              : '@T("mygarden.disease.record.notifications.load.error")',
+            msgNetworkError           : '@T("common.networkerror")'
         });
 
         GropPlantContainer.init({
